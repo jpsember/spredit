@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/home/jogamp/jogl/build/jar/jogl-all.jar"/>
+	<classpathentry kind="lib" path="/Users/home/jogamp/jogl/build/jar/jogl-all-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="/Users/home/jogamp/gluegen/build/gluegen-rt.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
