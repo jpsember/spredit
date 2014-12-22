@@ -1,65 +1,51 @@
 package joglexample;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
+
+import myjogl.GLPanel;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Timer;
+import java.util.TimerTask;
 
-/**
- * A minimal program that draws with JOGL in a Swing JFrame using the AWT
- * GLCanvas.
- * 
- * @author Wade Walker
- */
 public class Main {
 
-	public static void main(String[] args) {
-		GLProfile glprofile = GLProfile.getDefault();
-		javax.media.opengl.GLCapabilities glcapabilities = new javax.media.opengl.GLCapabilities(
-				glprofile);
+  private static class OurGLPanel extends GLPanel {
+    @Override
+    public void render() {
+      if (sizeHasChanged()) {
+        OneTriangle.setup(getSize());
+      }
+      OneTriangle.render(getSize());
+    }
+  }
 
-		final GLCanvas glcanvas = new GLCanvas(glcapabilities);
+  public static void main(String[] args) {
 
-		glcanvas.addGLEventListener(new GLEventListener() {
+    OurGLPanel panel = new OurGLPanel();
 
-			@Override
-			public void reshape(GLAutoDrawable glautodrawable, int x, int y,
-					int width, int height) {
-				OneTriangle.setup(glautodrawable.getGL().getGL2(), width,
-						height);
-			}
+    final JFrame jframe = new JFrame("One Triangle Swing GLCanvas");
+    jframe.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent windowevent) {
+        jframe.dispose();
+        System.exit(0);
+      }
+    });
 
-			@Override
-			public void init(GLAutoDrawable glautodrawable) {
-			}
+    jframe.getContentPane().add(panel.getComponent(), BorderLayout.CENTER);
+    jframe.setSize(640, 480);
+    jframe.setVisible(true);
 
-			@Override
-			public void dispose(GLAutoDrawable glautodrawable) {
-			}
+    // Close frame automatically after several seconds
+    new Timer().schedule(new TimerTask() {
+      @Override
+      public void run() {
+        jframe
+            .dispatchEvent(new WindowEvent(jframe, WindowEvent.WINDOW_CLOSING));
+      }
+    }, 30 * 1000);
 
-			@Override
-			public void display(GLAutoDrawable glautodrawable) {
-				OneTriangle.render(glautodrawable.getGL().getGL2(),
-						glautodrawable.getSurfaceWidth(),
-						glautodrawable.getSurfaceHeight());
-			}
-		});
-
-		final JFrame jframe = new JFrame("One Triangle Swing GLCanvas");
-		jframe.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent windowevent) {
-				jframe.dispose();
-				System.exit(0);
-			}
-		});
-
-		jframe.getContentPane().add(glcanvas, BorderLayout.CENTER);
-		jframe.setSize(640, 480);
-		jframe.setVisible(true);
-	}
+  }
 }
