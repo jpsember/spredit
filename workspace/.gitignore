@@ -44,15 +44,3 @@ proguard/
 unit_test_reports
 
 
-
-
-# For the moment, omit other projects
-apputil
-base
-images
-myopengl
-scanning
-spredit
-streams
-tex
-

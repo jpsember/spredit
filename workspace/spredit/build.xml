@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="spredit" default="all" basedir=".">
+
+	<property name="PROJ" value="${ant.project.name}" />
+	<property name="BIN" value="/usr/local/bin" />
+
+	<target name="all" depends="jar" />
+
+	<patternset id="tojar">
+		<include name="**" />
+		<exclude name="**/.DS_Store" />
+		<exclude name="**/Z_*" />
+		<exclude name="**/java.policy.applet" />
+	</patternset>
+
+	<target name="jar">
+		<jar destfile="${BIN}/${PROJ}.jar">
+
+
+			<manifest>
+				<attribute name="Main-Class" value="${PROJ}.SprMain" />
+			</manifest>
+
+			<fileset dir="bin">
+				<patternset refid="tojar" />
+			</fileset>
+
+			<fileset dir="../base/bin">
+				<patternset refid="tojar" />
+			</fileset>
+			<fileset dir="../apputil/bin">
+				<patternset refid="tojar" />
+			</fileset>
+			<fileset dir="../scanning/bin">
+				<patternset refid="tojar" />
+			</fileset>
+			<fileset dir="../images/bin">
+				<patternset refid="tojar" />
+			</fileset>
+			<fileset dir="../tex/bin">
+				<patternset refid="tojar" />
+			</fileset>
+			<fileset dir="../streams/bin">
+				<patternset refid="tojar" />
+			</fileset>
+			<fileset dir="../myopengl/bin">
+				<patternset refid="tojar" />
+			</fileset>
+		 
+			<!-- this includes the lwjgl.jar file found in the myopgl lib folder. -->
+			<zipgroupfileset dir="../myopengl/lib" includes="lwjgl.jar" />
+ 
+			<!-- 
+			<zipgroupfileset dir="../extern-libs/bin" includes="commons-cli-1.2.jar" />
+-->
+
+		</jar>
+
+		<copy file="${BIN}/_RUNJAR_" tofile="${BIN}/${PROJ}" />
+		<chmod file="${BIN}/${PROJ}" perm="+x" />
+	</target>
+
+</project>

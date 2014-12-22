@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="scanning" default="all" basedir=".">
+
+	<property name="PROJ" value="${ant.project.name}" />
+	<property name="HOME" value="${user.home}" />
+	<property name="BIN" value="${HOME}/bin" />
+
+	<target name="all" depends="dfa" />
+
+	<target name="dfa">
+		<exec executable="${BIN}/makedfa">
+			<arg line="resources/basic  src/${PROJ}/basic.dfa  -j src ${PROJ}.IBasic" />
+		</exec>
+	</target>
+
+</project>
