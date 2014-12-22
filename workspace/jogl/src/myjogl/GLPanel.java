@@ -93,14 +93,10 @@ public class GLPanel {
   }
 
   public float zoomFactor() {
-    warning("setting zoom to 2.5");
-    zoomFactor = 2.5f;
     return zoomFactor;
   }
 
   public Point getFocus() {
-    warning("setting focus to test values");
-    mFocus.setTo(200, 120);
     return mFocus;
   }
 

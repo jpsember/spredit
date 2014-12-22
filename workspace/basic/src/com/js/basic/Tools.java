@@ -497,7 +497,8 @@ public final class Tools {
 	}
 
 	public static String d(double f) {
-		return d(f, 5, 3);
+    int fractionalDigits = 3 + 4;
+    return d(f, 2 + fractionalDigits, fractionalDigits);
 	}
 
 	/**

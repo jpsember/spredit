@@ -66,8 +66,55 @@ public class Matrix {
     return m;
   }
 
-  // public Point apply(float x, float y) {
-  // return apply(x, y, null);
-  // }
+  public static Matrix multiply(Matrix m1, Matrix m2, Matrix dest) {
+    if (dest == null)
+      dest = new Matrix();
+
+    float na = m1.a * m2.a + m1.c * m2.b + m1.tx * 0;
+    float nc = m1.a * m2.c + m1.c * m2.d + m1.tx * 0;
+    float ntx = m1.a * m2.tx + m1.c * m2.ty + m1.tx * 1;
+
+    float nb = m1.b * m2.a + m1.d * m2.b + m1.ty * 0;
+    float nd = m1.b * m2.c + m1.d * m2.d + m1.ty * 0;
+    float nty = m1.b * m2.tx + m1.d * m2.ty + m1.ty * 1;
+
+    dest.a = na;
+    dest.b = nb;
+    dest.c = nc;
+    dest.d = nd;
+    dest.tx = ntx;
+    dest.ty = nty;
+
+    return dest;
+  }
+
+  public Matrix invert(Matrix dest) {
+    if (dest == null)
+      dest = new Matrix();
+
+    MyMath.testForZero(d);
+    float e = 1 / d;
+    float h = c * e;
+    float g = b * h;
+    float ag = a - g;
+    MyMath.testForZero(ag);
+    float f = 1 / ag;
+    float j = h * ty - tx;
+
+    float na = f;
+    float nc = -h * f;
+    float ntx = f * j;
+    float nb = -b * e * f;
+    float nd = e * (1 + g * f);
+    float nty = e * (-ty - b * f * j);
+    dest.a = na;
+    dest.c = nc;
+    dest.tx = ntx;
+    dest.b = nb;
+    dest.d = nd;
+    dest.ty = nty;
+
+    return dest;
+  }
 
 }

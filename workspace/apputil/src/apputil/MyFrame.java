@@ -3,6 +3,8 @@ package apputil;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.Timer;
+
 import javax.swing.*;
 import static com.js.basic.Tools.*;
 
@@ -11,24 +13,8 @@ import com.js.geometry.Rect;
 public class MyFrame extends JFrame {
   private static final boolean db = false;
 
-  //  public void makeNonResizable() {
-  //    f.setResizable(false);
-  //  }
-
-  //  public void setTitle(String title) {
-  //    f.setTitle(title);
-  //  }
-  //private boolean listenable;
-
   private String persistId2;
   private boolean boundsDefined;
-
-  //  public void packIfNecessary() {
-  //    if (!boundsDefined) {
-  //      pack();
-  //    }
-  //    boundsDefined = true;
-  //  }
 
   @Override
   public void setVisible(boolean f) {
@@ -43,18 +29,6 @@ public class MyFrame extends JFrame {
 
         if (!restoreBounds())
           pack();
-//        
-//        if (!boundsDefined) {
-//          if (db)
-//            pr("  attempting to restore bounds");
-//
-//          restoreBounds();
-//        }
-//        if (!boundsDefined) {
-//          if (db)
-//            pr(" bounds weren't defined, packing");
-//          pack();
-//        }
         if (db)
           pr("calling super.setVisible");
 
@@ -64,102 +38,57 @@ public class MyFrame extends JFrame {
       super.setVisible(f);
   }
 
-  //  @Override
-  //  public void pack() {
-  //    
-  //    if (!boundsDefined)
-  //  }
-
   private boolean restoreBounds() {
     final boolean db = false;
-    if (db)
-      pr("restoreBounds id=" + persistId2+" defined="+boundsDefined);
-if (!boundsDefined) {
+    if (!boundsDefined) {
       Rect r = (Rect) frameInfo.get(persistId2);
-
-    if (db)
-      pr(" read " + persistId2 + ":" + r);
-    if (r != null) {
+      if (r != null) {
         setBounds(new Rectangle((int) r.x, (int) r.y, (int) r.width,
             (int) r.height));
-      boundsDefined = true;
+        boundsDefined = true;
+      }
     }
-}
-return boundsDefined;
+    return boundsDefined;
   }
 
   public MyFrame(String persistId) {
-    // f = new JFrame();
     this.persistId2 = persistId;
     // set min width to accomodate title
     setMinimumSize(new Dimension(300, 1));
 
-    if (db)
-      pr("MyFrame construct, id=" + persistId2);
-
-    //    IRect r = (IRect) frameInfo.get(persistId2);
-    //
-    //    //    if (true) {
-    //    //      warn("setting r null");
-    //    //      r = null;
-    //    //    }
-    //
-    //    if (db)
-    //      pr(" read " + persistId2 + ":" + r);
-    //    if (r != null) {
-    //      setBounds(new Rectangle(r.x, r.y, r.width, r.height));
-    //      boundsDefined = true;
-    //    }
-
-    if (db)
-      pr(" adding component listener");
-
     if (persistId != null)
       addComponentListener(new ComponentListener() {
-       // private static final boolean db = false;
 
         @Override
         public void componentHidden(ComponentEvent arg0) {
-          if (db)
-            pr(" component hidden: " + MyFrame.this);
-
         }
 
         @Override
         public void componentMoved(ComponentEvent ev) {
-          if (db)
-            pr(" component moved: " + MyFrame.this + "\n"
- + stackTrace(15));
-          if (db)
-            pr("  visible=" + isVisible() + " valid=" + isValid()
-            // + " listenable=" + listenable
-            );
-
-          //          if (!listenable) {
-          //            if (db)
-          //              pr(" ignoring, not listenable");
-          //            return;
-          //          }
-
           Rect r = new Rect(getBounds());
-          if (db)
-            pr(" storing " + persistId2 + ":" + r);
-
           frameInfo.put(persistId2, r);
         }
 
         @Override
         public void componentResized(ComponentEvent arg0) {
-          if (db)
-            pr(" resized: " + this);
         }
 
         @Override
         public void componentShown(ComponentEvent arg0) {
-          if (db)
-            pr(" component shown: " + MyFrame.this);
         }
       });
+
+    if (true) {
+      warning("will close frame after ~ 1 minute");
+      // Close frame automatically after several seconds
+      new Timer().schedule(new TimerTask() {
+        @Override
+        public void run() {
+          MyFrame.this.dispatchEvent(new WindowEvent(MyFrame.this,
+              WindowEvent.WINDOW_CLOSING));
+        }
+      }, 60 * 1000);
+    }
   }
 
   public String toString() {
@@ -184,18 +113,7 @@ return boundsDefined;
   }
   public void setContents(Component c) {
     getContentPane().add(c);
-    warning("not sure if pack required here");
-    //pack();
   }
-  //  public void show() {
-  //    packIfNecessary();
-  //    setVisible(true);
-  //    listenable = true;
-  //  }
-  //  public void hide() {
-  //    listenable = false;
-  //    setVisible(false);
-  //  }
 
   private static Map frameInfo = new HashMap();
 
@@ -208,6 +126,7 @@ return boundsDefined;
       frameInfo.put(id, bounds);
     }
   }
+
   private static void writeFrameInfo(DefBuilder sb) {
     sb.append("FRAMES");
     Iterator it = frameInfo.keySet().iterator();
@@ -238,9 +157,5 @@ return boundsDefined;
       }
     }
   };
-  //  public JFrame frame() {
-  //    return f;
-  //  }
-  //  private JFrame f;
 
 }
