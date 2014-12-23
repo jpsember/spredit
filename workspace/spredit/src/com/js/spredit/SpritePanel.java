@@ -29,7 +29,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
   @Override
   public Point viewToWorld(IPoint viewPt) {
-    Point out = mCameraMatrixInverse.apply(viewPt.x, viewPt.y, null);
+    Point out = mViewToWorldMatrix.apply(viewPt.x, viewPt.y, null);
     return out;
   }
 
@@ -72,10 +72,15 @@ public class SpritePanel extends GLPanel implements IEditorView {
       GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, modelViewMatrix);
     }
 
-    Matrix cameraMatrix = new Matrix();
-    Matrix.multiply(projectionMatrix, modelViewMatrix, cameraMatrix);
-    cameraMatrix.invert(mCameraMatrixInverse);
+    Matrix worldToNDCMatrix = new Matrix();
+    Matrix.multiply(projectionMatrix, modelViewMatrix, worldToNDCMatrix);
     {
+      // TODO: clarify the different coordinate spaces:
+      // world, view, model, NDC; possibly eliminate requirement to calculate
+      // inverse
+
+      Matrix NDCToWorldMatrix = worldToNDCMatrix.invert(null);
+
       // construct matrix to convert from window coordinates to
       // normalized device coordinates (UIView to NDC).
 
@@ -99,7 +104,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
       c.d = -2f / size.y;
       c.ty = (2f * viewCenter_.y) / size.y;
 
-      Matrix.multiply(mCameraMatrixInverse, c, mCameraMatrixInverse);
+      Matrix.multiply(NDCToWorldMatrix, c, mViewToWorldMatrix);
     }
     gl2.glMatrixMode(GL2.GL_MODELVIEW);
   }
@@ -136,12 +141,11 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (image == null)
       return;
 
-    spriteInfo.plotTexture(spriteInfo.centerPoint());
+    spriteInfo.plotTexture(spriteInfo.centerPoint(), this);
 
     if (mShowClip.isSelected()) {
       setRenderColor(hlClip ? RED : BLUE);
       lineWidth(10f / zoomFactor());
-
       drawFrame(spriteInfo.cropRect());
     }
 
@@ -153,13 +157,14 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
       lineWidth(3.2f / zoomFactor());
       setRenderColor(704);
-      // setColor(bgndColor());
+
       float W = 20 / zoomFactor();
 
       drawLine(-W, 0, W, 0);
       drawLine(0, -W, 0, W);
       lineWidth(1.2f / zoomFactor());
       setRenderColor(hlCP ? YELLOW : BLACK);
+
       drawLine(-W, 0, W, 0);
       drawLine(0, -W, 0, W);
       gl2.glPopMatrix();
@@ -172,10 +177,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
   }
 
   /*
-   * Render states. Used to avoid making unnecessary OGL state calls. Modelled
-   * after the GameView.cpp class.
+   * Render states; used to avoid making unnecessary OGL state calls
    */
-
   public static final int RENDER_UNDEFINED = 0, RENDER_RGB = 1,
       RENDER_SPRITE = 2, RENDER_TOTAL = 3;
 
@@ -189,11 +192,10 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
       switch (renderState) {
 
-      case RENDER_SPRITE: {
+      case RENDER_SPRITE:
         mytexturesOn();
         gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-      }
         break;
 
       case RENDER_RGB:
@@ -215,8 +217,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
   }
 
-  /**
-*/
   public void mytexturesOn() {
     if (!textureMode) {
       gl2.glEnable(GL2.GL_TEXTURE_2D);
@@ -224,8 +224,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
   }
 
-  /**
-*/
   public void mytexturesOff() {
     if (textureMode) {
       gl2.glDisable(GL2.GL_TEXTURE_2D);
@@ -243,8 +241,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
   public void drawRect(float x, float y, float w, float h) {
     drawLine(x, y, x + w, y);
-    if (false)
-      return;
     drawLine(x, y + h, x + w, y + h);
     drawLine(x, y, x, y + h);
     drawLine(x + w, y, x + w, y + h);
@@ -276,7 +272,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
           + " nPts=" + nPts);
     nPts = MyMath.clamp(nPts, 6, 50);
 
-    // int nPts = 6;
     Point prev = null;
     float angle = 0;
     for (int i = 0; i <= nPts; i++) {
@@ -292,18 +287,13 @@ public class SpritePanel extends GLPanel implements IEditorView {
     drawCircle(new Point(x, y), radius);
   }
 
-  private FloatBuffer rectVertBuffer = BufferUtils.createFloatBuffer(4 * 2); // a
-                                                                             // single
-                                                                             // quad
-
-  private FloatBuffer trisVertBuffer;
-
   public void fillRect(Rect r) {
     fillRect(r.x, r.y, r.width, r.height);
   }
 
   public void fillRect(float x, float y, float w, float h) {
     setRenderState(RENDER_RGB);
+    FloatBuffer rectVertBuffer = BufferUtils.createFloatBuffer(4 * 2);
 
     FloatBuffer v = rectVertBuffer;
     v.rewind();
@@ -316,19 +306,16 @@ public class SpritePanel extends GLPanel implements IEditorView {
     v.put(x);
     v.put(y + h);
     v.rewind();
-
-    // glEnableClientState(GL_VERTEX_ARRAY);
     gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v); // only 2 coords per vertex
     gl2.glDrawArrays(GL2.GL_QUADS, 0, 4);
-    // glDisableClientState(GL_VERTEX_ARRAY);
   }
 
   private int trisBufferCap;
 
   public void fillTriangles(Point[] tris) {
+    FloatBuffer trisVertBuffer = null;
+
     setRenderState(RENDER_RGB);
-    // float x, float y, float w, float h) {
-    // texturesOff();
 
     if (trisVertBuffer == null || trisBufferCap < tris.length) {
       trisVertBuffer = BufferUtils.createFloatBuffer(2 * tris.length);
@@ -343,10 +330,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
       v.put(pt.y);
     }
     v.rewind();
-    // glEnableClientState(GL_VERTEX_ARRAY);
     gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v); // only 2 coords per vertex
     gl2.glDrawArrays(GL2.GL_TRIANGLES, 0, tris.length);
-    // glDisableClientState(GL_VERTEX_ARRAY);
   }
 
   public void drawLine(float x1, float y1, float x2, float y2) {
@@ -414,26 +399,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     // turn off backspace culling
     gl2.glDisable(GL2.GL_CULL_FACE);
 
-    if (false) {
-      warning("doing test code");
-      gl2.glClearColor(0, 0, 0, 0);
-      gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
-      gl2.glMatrixMode(GL2.GL_PROJECTION);
-      gl2.glLoadIdentity();
-      gl2.glOrthof(-1f, 1f, -1f, 1f, -1f, 1f);
-      gl2.glMatrixMode(GL2.GL_MODELVIEW);
-      gl2.glLoadIdentity();
-      // glTranslatef(0, 0, -2);
-      gl2.glBegin(GL2.GL_POLYGON);
-      gl2.glColor3f(1.0f, 0.2f, 0.2f);
-      gl2.glVertex3f(0.25f, 0.25f, 0.0f);
-      gl2.glVertex3f(0.75f, 0.25f, 0.0f);
-      gl2.glVertex3f(0.75f, 0.75f, 0.0f);
-      gl2.glVertex3f(0.25f, 0.75f, 0.0f);
-      gl2.glEnd();
-      gl2.glFlush();
-    }
-
     activeTexture = 0;
     textureMode = false;
   }
@@ -446,7 +411,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     TextureLoader.processDeleteList();
   }
 
-  private static int textureFor(Atlas a) {
+  private int textureFor(Atlas a) {
     final boolean db = false;
 
     if (atlasTextures == null)
@@ -532,91 +497,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     Matrix tfm = Matrix.getTranslate(new Point(x, y));
     plotSprite(texHandle, textureSize, sprite, tfm);
-
-    // final boolean db = false; //sprite.id().equals("WOW");
-    //
-    // texturesOn();
-    // selectTexture(texHandle);
-    //
-    // if (db)
-    // pr("plotSprite texHandle#" + texHandle + ":" + sprite + " at "
-    // + new IPoint2(x, y));
-    //
-    // err();
-    // glPushMatrix();
-    // glTranslatef(x, y, 0);
-    //
-    // IRect imgRect = new IRect(sprite.bounds());
-    // FlRect aRect = new FlRect(imgRect);
-    //
-    // if (db)
-    // pr("imgRect=" + imgRect + "\n  aRect=" + aRect + "\n compression="
-    // + sprite.compressionFactor() + "\n sprite.trans="
-    // + sprite.translate());
-    //
-    // aRect.scale(sprite.compressionFactor());
-    // if (db)
-    // pr(" after compression=" + aRect);
-    //
-    // IPoint2 tr = sprite.translate();
-    // aRect.translate(tr.x, tr.y);
-    // if (db)
-    // pr(" after translation=" + aRect);
-    //
-    // ASSERT(TextureLoader.ceilingPower2(textureSize.x) == textureSize.x
-    // && TextureLoader.ceilingPower2(textureSize.y) == textureSize.y);
-    //
-    // float sx = 1f / textureSize.x;
-    // float sy = 1f / textureSize.y;
-    // aRect.x *= sx;
-    // aRect.y *= sy;
-    // aRect.width *= sx;
-    // aRect.height *= sy;
-    //
-    // if (db)
-    // pr("texture rect= " + aRect);
-    //
-    // FloatBuffer v = BufferUtils.createFloatBuffer(2 * 4);
-    // FloatBuffer t = BufferUtils.createFloatBuffer(2 * 4);
-    //
-    // v.put(imgRect.x);
-    // v.put(imgRect.y);
-    // v.put(imgRect.endX());
-    // v.put(imgRect.y);
-    // v.put(imgRect.endX());
-    // v.put(imgRect.endY());
-    // v.put(imgRect.x);
-    // v.put(imgRect.endY());
-    //
-    // v.rewind();
-    //
-    // t.put(aRect.x);
-    // t.put(aRect.y);
-    // t.put(aRect.endX());
-    // t.put(aRect.y);
-    // t.put(aRect.endX());
-    // t.put(aRect.endY());
-    // t.put(aRect.x);
-    // t.put(aRect.endY());
-    //
-    // t.rewind();
-    //
-    // glEnableClientState(GL_VERTEX_ARRAY);
-    // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    //
-    // glVertexPointer(2, 0, v);
-    // err();
-    // glTexCoordPointer(2, 0, t);
-    // err();
-    //
-    // glDrawArrays(GL_QUADS, 0, 4);
-    // err();
-    //
-    // glDisableClientState(GL_VERTEX_ARRAY);
-    // glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    // err();
-    //
-    // glPopMatrix();
   }
 
   /**
@@ -635,35 +515,18 @@ public class SpritePanel extends GLPanel implements IEditorView {
   public void plotSprite(int texHandle, IPoint textureSize, Sprite sprite,
       Matrix tfm) {
 
-    final boolean db = false; // sprite.id().equals("WOW");
-
     setRenderState(RENDER_SPRITE);
-    // texturesOn();
     selectTexture(texHandle);
 
-    if (db)
-      pr("plotSprite texHandle#" + texHandle + ":" + sprite);
-
     err();
-    // glPushMatrix();
-    // glTranslatef(x, y, 0);
 
     Rect imgRect = new Rect(sprite.bounds());
     Rect aRect = new Rect(imgRect);
 
-    if (db)
-      pr("imgRect=" + imgRect + "\n  aRect=" + aRect + "\n compression="
-          + sprite.compressionFactor() + "\n sprite.trans="
-          + sprite.translate());
-
     aRect.scale(sprite.compressionFactor());
-    if (db)
-      pr(" after compression=" + aRect);
 
     Point tr = sprite.translate();
     aRect.translate(tr.x, tr.y);
-    if (db)
-      pr(" after translation=" + aRect);
 
     ASSERT(TextureLoader.ceilingPower2(textureSize.x) == textureSize.x
         && TextureLoader.ceilingPower2(textureSize.y) == textureSize.y);
@@ -711,9 +574,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     t.rewind();
 
-    // glEnableClientState(GL_VERTEX_ARRAY);
-    // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
     gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v);
     err();
     gl2.glTexCoordPointer(2, GL2.GL_FLOAT, 0, t);
@@ -722,11 +582,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     gl2.glDrawArrays(GL2.GL_QUADS, 0, 4);
     err();
 
-    // glDisableClientState(GL_VERTEX_ARRAY);
-    // glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     err();
-
-    // glPopMatrix();
   }
 
   public void plotString(String str, Point pt) {
@@ -794,12 +650,9 @@ public class SpritePanel extends GLPanel implements IEditorView {
     mShowClip = showClip;
   }
 
-  private static Atlas currentFont;
-
-  // our OpenGL state
-  private static int activeTexture; // id of last selected texture, or 0 if none
-  private static boolean textureMode; // true if GL_TEXTURE_2D enabled
-
+  private Atlas currentFont;
+  private int activeTexture; // id of last selected texture, or 0 if none
+  private boolean textureMode; // true if GL_TEXTURE_2D enabled
   private boolean sFocusValid;
   private Point sFocus;
   private SpriteInfo spriteInfo;
@@ -807,12 +660,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
   private JCheckBox mShowClip;
   private boolean hlClip, hlCP;
   private float lineWidth = 1;
-  private Matrix mCameraMatrixInverse = new Matrix();
-
+  private Matrix mViewToWorldMatrix = new Matrix();
   private int renderState;
-
   private int currentColorId;
-
-  private static Map atlasTextures;
-
+  private Map atlasTextures;
 }

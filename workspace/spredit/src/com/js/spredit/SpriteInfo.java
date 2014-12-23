@@ -677,7 +677,7 @@ public class SpriteInfo {
     return sprite.id();
   }
 
-  public void plotTexture(Point location) {
+  public void plotTexture(Point location, SpritePanel panel) {
     final boolean db = false;
 
     if (imgTextureId == 0 && img(IMG_WORK) != null) {
@@ -701,9 +701,7 @@ public class SpriteInfo {
       pr("plotTexture " + this + " clip=" + this.cropRect + " cp="
           + this.centerPoint + " compcp=" + compressedCenterPoint());
 
-    unimp("plot sprite");
-    // GLPanel.plotSprite(imgTextureId, imgTextureSize, s,
-    // location.x,location.y);
+    panel.plotSprite(imgTextureId, imgTextureSize, s, location.x, location.y);
   }
 
   /**
