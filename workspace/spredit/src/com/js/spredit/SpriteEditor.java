@@ -7,25 +7,15 @@ import com.js.geometry.*;
 import static com.js.basic.Tools.*;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-//import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.*;
 import java.io.*;
-import java.nio.FloatBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.glu.GLU;
 import javax.swing.*;
 
-import myopengl.*;
 import tex.*;
 import apputil.*;
-import myjogl.*;
 
 public class SpriteEditor {
 

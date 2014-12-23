@@ -11,7 +11,6 @@ import static com.js.basic.Tools.*;
 import com.js.geometry.Rect;
 
 public class MyFrame extends JFrame {
-  private static final boolean db = false;
 
   private String persistId2;
   private boolean boundsDefined;
@@ -39,7 +38,6 @@ public class MyFrame extends JFrame {
   }
 
   private boolean restoreBounds() {
-    final boolean db = false;
     if (!boundsDefined) {
       Rect r = (Rect) frameInfo.get(persistId2);
       if (r != null) {

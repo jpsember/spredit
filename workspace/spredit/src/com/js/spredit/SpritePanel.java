@@ -1,10 +1,6 @@
 package com.js.spredit;
 
-import static com.js.basic.Tools.ASSERT;
-import static com.js.basic.Tools.d;
-import static com.js.basic.Tools.pr;
-import static com.js.basic.Tools.stackTrace;
-import static com.js.basic.Tools.warning;
+import static com.js.basic.Tools.*;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -17,8 +13,6 @@ import javax.swing.JCheckBox;
 
 import myjogl.GLPanel;
 import myopengl.BufferUtils;
-import myopengl.FlMatrix44;
-import myopengl.FlPoint4;
 import myopengl.GLTools;
 import myopengl.TextureLoader;
 import tex.Atlas;
@@ -29,32 +23,14 @@ import apputil.IEditorView;
 import apputil.MouseOper;
 import apputil.MyMenuBar;
 
-import com.js.geometry.IPoint;
-import com.js.geometry.Matrix;
-import com.js.geometry.MyMath;
-import com.js.geometry.Point;
-import com.js.geometry.Rect;
+import com.js.geometry.*;
 
 public class SpritePanel extends GLPanel implements IEditorView {
 
-  private static final boolean NEWMAT = false;
-
   @Override
   public Point viewToWorld(IPoint viewPt) {
-
-    if (NEWMAT) {
-      Point out = mCameraMatrixInverse.apply(viewPt.x, viewPt.y, null);
-      pr("viewToWorld " + viewPt + " is " + out);
-      return out;
-    } else {
-      FlPoint4 in = new FlPoint4(viewPt.x, viewPt.y, 0);
-      FlPoint4 out = new FlPoint4();
-
-      cameraMatrixInverse_.apply(in, out);
-      pr("viewToWorld " + viewPt + " is " + out);
-
-      return new Point(out.x, out.y);
-    }
+    Point out = mCameraMatrixInverse.apply(viewPt.x, viewPt.y, null);
+    return out;
   }
 
   public SpritePanel() {
@@ -69,212 +45,67 @@ public class SpritePanel extends GLPanel implements IEditorView {
     gl2.glViewport(0, 0, size.x, size.y);
   }
 
-  // private void prepareProjection() {
-  // gl2.glMatrixMode(GL2.GL_PROJECTION);
-  // gl2.glLoadIdentity();
-  //
-  // // coordinate system origin at lower left with width and height same as
-  // // the window
-  // GLU glu = new GLU();
-  // glu.gluOrtho2D(0.0f, size.x, 0.0f, size.y);
-  //
-  // gl2.glMatrixMode(GL2.GL_MODELVIEW);
-  // gl2.glLoadIdentity();
-  // }
-  //
-
   private void prepareProjection() {
-    final boolean db = true;
 
-    { // fix texture coordinate problem, so (0,0) is lower left of png
+    { // Set texture matrix so (0,0) is in lower left of image
       gl2.glMatrixMode(GL2.GL_TEXTURE);
       gl2.glLoadIdentity();
       gl2.glTranslatef(0, -1, 0);
       gl2.glScalef(1, -1, 1);
     }
 
-    if (NEWMAT) {
+    IPoint size = getSize();
+    float zoom = zoomFactor();
+    Point focus = getFocus();
 
-      {
-        float zoom = zoomFactor();
-        IPoint size = getSize();
-        mProjectionMatrix.a = (2 * zoom) / size.x;
-        mProjectionMatrix.d = (2 * zoom) / size.y;
-        GLTools.storeMatrix(gl2, GL2.GL_PROJECTION, mProjectionMatrix, true);
-        pr("just stored matrix:\n"
-            + GLTools.readMatrix(gl2, GL2.GL_PROJECTION_MATRIX));
-      }
-
-      {
-        Point focus = getFocus();
-        mModelViewMatrix.tx = -focus.x;
-        mModelViewMatrix.ty = -focus.y;
-        GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, mModelViewMatrix, false);
-      }
-
-      Matrix.multiply(mProjectionMatrix, mModelViewMatrix, mCameraMatrix);
-      if (db)
-        pr(" cameraMatrix=\n" + mCameraMatrix);
-
-      mCameraMatrix.invert(mCameraMatrixInverse);
-
-      if (db)
-        pr(" cameraMatrixInverse=\n" + mCameraMatrixInverse);
-
-      {
-        // construct matrix to convert from window coordinates to
-        // normalized device coordinates (UIView to NDC).
-
-        /*
-         * This converts UIView coordinates to NDC as follows:
-         * 
-         * NDCx = (Vx - Cx) * 2 / W NDCy = (Vy - Cy) * 2 / H NDCz = -1 NDCw = 1
-         * 
-         * where
-         * 
-         * Vx,Vy = UIView coordinates Cx,Cy = Trans.viewCenter_, the center of
-         * the OpenGL view (in UIView coordinates) W,H = size of OpenGL view
-         */
-
-        IPoint currentSize = getSize();
-
-        IPoint viewCenter_ = new IPoint(currentSize.x / 2, currentSize.y / 2);
-
-        Matrix c = new Matrix();
-        c.a = 2f / currentSize.x;
-        c.tx = (-2f * viewCenter_.x) / currentSize.x;
-
-        c.d = -2f / currentSize.y;
-        c.ty = (2f * viewCenter_.y) / currentSize.y;
-
-        Matrix.multiply(mCameraMatrixInverse, c, mCameraMatrixInverse);
-
-        if (db)
-          pr(" view->NDC=\n" + c + " cameraMatrixInverse=\n"
-              + mCameraMatrixInverse);
-
-      }
-
-    } else {
-      IPoint currentSize = getSize();
-
-      gl2.glMatrixMode(GL2.GL_PROJECTION);
-      gl2.glLoadIdentity();
-
-      {
-        float s = .5f / zoomFactor();
-        gl2.glOrtho(-currentSize.x * s, currentSize.x * s, -currentSize.y * s,
-            currentSize.y * s, -1, 1);
-
-        pr("zoom " + zoomFactor() + " curr size " + currentSize);
-
-        pr("constructed projection matrix:\n"
-            + GLTools.readMatrix(gl2, GL2.GL_PROJECTION_MATRIX));
-      }
-
-      // now that projection has been set up,
-      // switch to model/view matrix
-      gl2.glMatrixMode(GL2.GL_MODELVIEW);
-      gl2.glLoadIdentity();
-
-      Point focus = getFocus();
-      // translate so focus is at origin
-      gl2.glTranslatef(-focus.x, -focus.y, 0);
-
-      pr("constructed modelview matrix:\n"
-          + GLTools.readMatrix(gl2, GL2.GL_MODELVIEW_MATRIX));
-
-      // store modelview matrix for retrieval by prepareModel()
-
-      FloatBuffer params = BufferUtils.createFloatBuffer(16);
-
-      params.position(0);
-
-      // standard modelview matrix
-      FlMatrix44 modelMatrix_ = new FlMatrix44();
-      gl2.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, params);
-      params.get(modelMatrix_.c);
-      if (db)
-        pr("view size " + currentSize);
-      if (db)
-        pr("focus " + focus);
-      if (db)
-        pr("zoom " + d(zoomFactor()));
-
-      // initialize camera matrix and its inverse, for picking operations
-      {
-
-        // FlMatrix44 mat = new FlMatrix44();
-        params.position(0);
-        gl2.glGetFloatv(GL2.GL_PROJECTION_MATRIX, params);
-        float[] c = FlMatrix44.buildArray();
-
-        params.get(c);
-        if (db)
-          pr(" projection_matrix=\n" + new FlMatrix44(c));
-
-        FlMatrix44 cameraMatrix_ = new FlMatrix44();
-        FlMatrix44.multiply(c, modelMatrix_.c, cameraMatrix_.c);
-        if (db)
-          pr(" cameraMatrix=\n" + cameraMatrix_);
-
-        cameraMatrixInverse_ = new FlMatrix44();
-        FlMatrix44.invert(cameraMatrix_.c, cameraMatrixInverse_.c);
-        if (db)
-          pr(" cameraMatrixInverse=\n" + cameraMatrixInverse_);
-
-        // construct matrix to convert from window coordinates to
-        // normalized device coordinates (UIView to NDC).
-
-        /*
-         * This converts UIView coordinates to NDC as follows:
-         * 
-         * NDCx = (Vx - Cx) * 2 / W NDCy = (Vy - Cy) * 2 / H NDCz = -1 NDCw = 1
-         * 
-         * where
-         * 
-         * Vx,Vy = UIView coordinates Cx,Cy = Trans.viewCenter_, the center of
-         * the OpenGL view (in UIView coordinates) W,H = size of OpenGL view
-         */
-
-        IPoint viewCenter_ = new IPoint(currentSize.x / 2, currentSize.y / 2);
-
-        c[0 + 4 * 0] = 2f / currentSize.x;
-        c[0 + 4 * 1] = 0;
-        c[0 + 4 * 2] = 0;
-        c[0 + 4 * 3] = (-2f * viewCenter_.x) / currentSize.x;
-
-        c[1 + 4 * 0] = 0;
-        c[1 + 4 * 1] = -2f / currentSize.y;
-        c[1 + 4 * 2] = 0;
-        c[1 + 4 * 3] = (2f * viewCenter_.y) / currentSize.y;
-
-        c[2 + 4 * 0] = 0;
-        c[2 + 4 * 1] = 0;
-        c[2 + 4 * 2] = 0;
-        c[2 + 4 * 3] = -1;
-
-        c[3 + 4 * 0] = 0;
-        c[3 + 4 * 1] = 0;
-        c[3 + 4 * 2] = 0;
-        c[3 + 4 * 3] = 1;
-
-        FlMatrix44.multiply(cameraMatrixInverse_.c, c, cameraMatrixInverse_.c);
-        pr(" view->NDC:\n" + d(c) + " cameraInverse now:\n"
-            + d(cameraMatrixInverse_));
-
-      }
+    Matrix projectionMatrix = new Matrix();
+    {
+      projectionMatrix.a = (2 * zoom) / size.x;
+      projectionMatrix.d = (2 * zoom) / size.y;
+      GLTools.storeMatrix(gl2, GL2.GL_PROJECTION, projectionMatrix);
     }
 
-    // turn off backspace culling in parallel mode
-    gl2.glDisable(GL2.GL_CULL_FACE);
+    Matrix modelViewMatrix = new Matrix();
+    {
+      modelViewMatrix.tx = -focus.x;
+      modelViewMatrix.ty = -focus.y;
+      GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, modelViewMatrix);
+    }
 
+    Matrix cameraMatrix = new Matrix();
+    Matrix.multiply(projectionMatrix, modelViewMatrix, cameraMatrix);
+    cameraMatrix.invert(mCameraMatrixInverse);
+    {
+      // construct matrix to convert from window coordinates to
+      // normalized device coordinates (UIView to NDC).
+
+      /*
+       * This converts UIView coordinates to NDC as follows:
+       * 
+       * NDCx = (Vx - Cx) * 2 / W NDCy = (Vy - Cy) * 2 / H NDCz = -1 NDCw = 1
+       * 
+       * where
+       * 
+       * Vx,Vy = UIView coordinates Cx,Cy = Trans.viewCenter_, the center of the
+       * OpenGL view (in UIView coordinates) W,H = size of OpenGL view
+       */
+
+      IPoint viewCenter_ = new IPoint(size.x / 2, size.y / 2);
+
+      Matrix c = new Matrix();
+      c.a = 2f / size.x;
+      c.tx = (-2f * viewCenter_.x) / size.x;
+
+      c.d = -2f / size.y;
+      c.ty = (2f * viewCenter_.y) / size.y;
+
+      Matrix.multiply(mCameraMatrixInverse, c, mCameraMatrixInverse);
+    }
+    gl2.glMatrixMode(GL2.GL_MODELVIEW);
   }
 
   @Override
   public void render() {
-
-    // setZoom(SpriteEditor.zoomFactor);
 
     do {
       if (sFocusValid)
@@ -290,12 +121,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
     } while (false);
     setFocus(sFocus);
 
-    if (sizeHasChanged()) {
-      prepareViewport();
-    }
-    prepareProjection();
-
     paintStart();
+    prepareProjection();
     paintContents();
     paintEnd();
   }
@@ -406,11 +233,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
   }
 
-  private FloatBuffer lineVertBuffer = BufferUtils.createFloatBuffer(6 * 3); // strip
-                                                                             // of
-                                                                             // 4
-                                                                             // triangles
-
   public void drawLine(Point pt1, Point pt2) {
     drawLine(pt1.x, pt1.y, pt2.x, pt2.y);
   }
@@ -421,6 +243,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
   public void drawRect(float x, float y, float w, float h) {
     drawLine(x, y, x + w, y);
+    if (false)
+      return;
     drawLine(x, y + h, x + w, y + h);
     drawLine(x, y, x, y + h);
     drawLine(x + w, y, x + w, y + h);
@@ -527,74 +351,25 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
   public void drawLine(float x1, float y1, float x2, float y2) {
     setRenderState(RENDER_RGB);
-    // texturesOff();
-    // float x1, y1, x2, y2;
-    if (x1 > x2) {
-      float tmp = x1;
-      float tmp2 = y1;
-      x1 = x2;
-      y1 = y2;
-      x2 = tmp;
-      y2 = tmp2;
-    }
 
     float s = lineWidth * .5f;
 
-    if (lineVertBuffer == null)
-      lineVertBuffer = BufferUtils.createFloatBuffer(6 * 2); // strip of 4
-                                                             // triangles
-
-    FloatBuffer v = lineVertBuffer;
-    v.rewind();
-    if (y2 >= y1) {
-
-      // -----------------------
-      v.put(x1 - s);
-      v.put(y1 - s);
-
-      v.put(x1 + s);
-      v.put(y1 - s);
-
-      v.put(x1 - s);
-      v.put(y1 + s);
-
-      // -----------------------
-      v.put(x2 + s);
-      v.put(y2 - s);
-
-      v.put(x2 - s);
-      v.put(y2 + s);
-
-      v.put(x2 + s);
-      v.put(y2 + s);
-    } else {
-
-      // -----------------------
-      v.put(x1 - s);
-      v.put(y1 + s);
-
-      v.put(x1 - s);
-      v.put(y1 - s);
-
-      v.put(x1 + s);
-      v.put(y1 + s);
-
-      // -----------------------
-      v.put(x2 - s);
-      v.put(y2 - s);
-
-      v.put(x2 + s);
-      v.put(y2 + s);
-
-      v.put(x2 + s);
-      v.put(y2 - s);
+    // Calculate the unit vector rotated 90 degrees from ray p1->p2
+    float dist = MyMath.distanceBetween(new Point(x1, y1), new Point(x2, y2));
+    float nx = 0;
+    float ny = s;
+    if (dist > 0) {
+      float r = s / dist;
+      ny = (x2 - x1) * r;
+      nx = -(y2 - y1) * r;
     }
 
-    // glEnableClientState(GL_VERTEX_ARRAY);
-    v.rewind();
-
-    gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v); // only 2 coords per vertex
-    gl2.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, 6); // 6 vertices total
+    gl2.glBegin(GL2.GL_TRIANGLE_STRIP);
+    gl2.glVertex3f(x1 - nx, y1 - ny, 0);
+    gl2.glVertex3f(x2 - nx, y2 - ny, 0);
+    gl2.glVertex3f(x1 + nx, y1 + ny, 0);
+    gl2.glVertex3f(x2 + nx, y2 + ny, 0);
+    gl2.glEnd();
   }
 
   public static final int BLACK = 776;// Palette.indexOf(MyColors.BLACK);
@@ -614,44 +389,53 @@ public class SpritePanel extends GLPanel implements IEditorView {
   // public static final float[] GREEN = { 0, 1, 0 };
 
   private void paintStart() {
-
-    // initialize OGL state
-    if (!glInitialized) {
-      // set REPLACE mode, to ignore color
-      gl2.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
-      gl2.glShadeModel(GL2.GL_FLAT); // not sure this is necessary
-
-      // textures are disabled
-      gl2.glDisable(GL2.GL_TEXTURE_2D);
-
-      gl2.glEnable(GL2.GL_BLEND);
-      gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-
-      // glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-      // GL_NEAREST); //LINEAR);
-
-      // initialize our state
-      activeTexture = 0;
-      textureMode = false;
-
-      glInitialized = true;
-    }
-
     // clear to background color
-    // From AWTGLCanvas:
-    // "Default pixel format is minimum 8 bits depth, and no alpha nor stencil."
-    // Hence, alpha is not used here.
-    Color c = Color.gray; // Palette.get(bgndColorIndex());
-    // pr("clearing to bgnd color "+c+" (index="+bgndColorIndex()+")");
+    Color c = Color.gray;
 
-    final float TOFLOAT = 1 / 255.0f;
-
+    float TOFLOAT = 1 / 255.0f;
     gl2.glClearColor(c.getRed() * TOFLOAT, c.getGreen() * TOFLOAT, c.getBlue()
-        * TOFLOAT, 1); // TOc.bgndColor[0], bgndColor[1],
-                       // bgndColor[2], 1);
+        * TOFLOAT, 1);
     gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
 
-    // prepareProjection();
+    if (sizeHasChanged()) {
+      prepareViewport();
+    }
+
+    // set REPLACE mode, to ignore color
+    gl2.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
+    gl2.glShadeModel(GL2.GL_FLAT); // not sure this is necessary
+
+    // textures are disabled
+    gl2.glDisable(GL2.GL_TEXTURE_2D);
+
+    gl2.glEnable(GL2.GL_BLEND);
+    gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+
+    // turn off backspace culling
+    gl2.glDisable(GL2.GL_CULL_FACE);
+
+    if (false) {
+      warning("doing test code");
+      gl2.glClearColor(0, 0, 0, 0);
+      gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+      gl2.glMatrixMode(GL2.GL_PROJECTION);
+      gl2.glLoadIdentity();
+      gl2.glOrthof(-1f, 1f, -1f, 1f, -1f, 1f);
+      gl2.glMatrixMode(GL2.GL_MODELVIEW);
+      gl2.glLoadIdentity();
+      // glTranslatef(0, 0, -2);
+      gl2.glBegin(GL2.GL_POLYGON);
+      gl2.glColor3f(1.0f, 0.2f, 0.2f);
+      gl2.glVertex3f(0.25f, 0.25f, 0.0f);
+      gl2.glVertex3f(0.75f, 0.25f, 0.0f);
+      gl2.glVertex3f(0.75f, 0.75f, 0.0f);
+      gl2.glVertex3f(0.25f, 0.75f, 0.0f);
+      gl2.glEnd();
+      gl2.glFlush();
+    }
+
+    activeTexture = 0;
+    textureMode = false;
   }
 
   /**
@@ -721,8 +505,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     plotSprite(texHandle, atlas.imageSize(), sprite, tfm); // x, y);
     return sprite;
   }
-
-  // public static final int COLORS = 0, TEXTURES = 1, BOTH = 2;
 
   public void selectTexture(int texHandle) {
     if (activeTexture != texHandle) {
@@ -960,14 +742,9 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (currentFont == null)
       throw new IllegalStateException();
 
-    // setRenderState(RENDER_SPRITE);
-    // texturesOn();
-
     for (int i = 0; i < str.length(); i++) {
       char c = str.charAt(i);
       int si = fontCharToSprite(c);
-      // Sprite spr = currentFont.sprite(fontCharToSprite(c));
-      // IRect r = fontCharRect(c);
       Sprite spr = plotSprite(currentFont, si, x, y);
       x += spr.bounds().width;
     }
@@ -976,8 +753,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
   public void setFont(Atlas font) {
     if (currentFont != font) {
       currentFont = font;
-      // IRect r = fontCharRect('M');
-      // fontCharSep = -Math.round(r.width * .1f);
     }
   }
 
@@ -1022,7 +797,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
   private static Atlas currentFont;
 
   // our OpenGL state
-  private static int activeTexture; // id of last selected texture, or 0 if
+  private static int activeTexture; // id of last selected texture, or 0 if none
   private static boolean textureMode; // true if GL_TEXTURE_2D enabled
 
   private boolean sFocusValid;
@@ -1032,15 +807,10 @@ public class SpritePanel extends GLPanel implements IEditorView {
   private JCheckBox mShowClip;
   private boolean hlClip, hlCP;
   private float lineWidth = 1;
-  private Matrix mProjectionMatrix = new Matrix();
-  private Matrix mCameraMatrix = new Matrix();
   private Matrix mCameraMatrixInverse = new Matrix();
-  private Matrix mModelViewMatrix = new Matrix();
 
-  private FlMatrix44 cameraMatrixInverse_;
   private int renderState;
 
-  private boolean glInitialized;
   private int currentColorId;
 
   private static Map atlasTextures;

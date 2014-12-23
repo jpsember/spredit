@@ -11,7 +11,7 @@ import javax.media.opengl.awt.GLCanvas;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
-import static com.js.basic.Tools.*;
+//import static com.js.basic.Tools.*;
 
 /**
  * Wrapper class for GLCanvas
