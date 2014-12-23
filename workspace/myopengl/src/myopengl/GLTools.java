@@ -36,12 +36,6 @@ public class GLTools {
     c[13] = matrix.ty;
     c[15] = 1;
 
-    if (matrixNumber == GL2.GL_PROJECTION) {
-      // We want to always return a constant value for z-coordinates
-      c[10] = 0;
-      c[14] = 0.3f;
-    }
-
     gl2.glMatrixMode(matrixNumber);
     gl2.glLoadMatrixf(c, 0);
   }

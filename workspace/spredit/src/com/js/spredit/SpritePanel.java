@@ -29,8 +29,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
   @Override
   public Point viewToWorld(IPoint viewPt) {
-    Point out = mViewToWorldMatrix.apply(viewPt.x, viewPt.y, null);
-    return out;
+    return mViewToWorldMatrix.apply(new Point(viewPt));
   }
 
   public SpritePanel() {
@@ -47,65 +46,54 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
   private void prepareProjection() {
 
-    { // Set texture matrix so (0,0) is in lower left of image
-      gl2.glMatrixMode(GL2.GL_TEXTURE);
-      gl2.glLoadIdentity();
-      gl2.glTranslatef(0, -1, 0);
-      gl2.glScalef(1, -1, 1);
-    }
-
     IPoint size = getSize();
     float zoom = zoomFactor();
-    Point focus = getFocus();
 
-    Matrix projectionMatrix = new Matrix();
+    // Calculate the origin from the focus and the view size
+    // We want the (possibly zoomed) sprite pixel at sFocus to appear in the
+    // center of the view.
+    //
+    setOrigin(new Point(sFocus.x - size.x / (2 * zoom), sFocus.y - size.y
+        / (2 * zoom)));
+
     {
-      projectionMatrix.a = (2 * zoom) / size.x;
-      projectionMatrix.d = (2 * zoom) / size.y;
+      Matrix translate = Matrix.getTranslate(-getOrigin().x, -getOrigin().y);
+      Matrix scale = Matrix.getScale(zoom);
+      // We want translating to be applied first, so have it be the LAST
+      // multiplicand
+      Matrix worldToViewport = Matrix.multiply(scale, translate);
+
+      // Calculate view -> world matrix, for picking operations
+      // Note that View space is the same as Viewport space, except that the
+      // origin is in the top left, not the bottom left
+      Matrix viewportToView = Matrix.getFlipVertically(size.y);
+      Matrix worldToView = Matrix.multiply(viewportToView, worldToViewport);
+      worldToView.invert(mViewToWorldMatrix);
+
+      // Construct viewport -> NDC matrix. For a description of the
+      // calculations, see (ignoring the z component):
+      //
+      // https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man3/glOrtho.3.html
+      //
+      Matrix viewportToNDC = new Matrix();
+      viewportToNDC.a = 2.0f / size.x;
+      viewportToNDC.d = 2.0f / size.y;
+      viewportToNDC.tx = -1.0f;
+      viewportToNDC.ty = -1.0f;
+
+      // The OpenGL projection matrix is world -> NDC:
+      Matrix projectionMatrix = Matrix.multiply(viewportToNDC, worldToViewport);
+
       GLTools.storeMatrix(gl2, GL2.GL_PROJECTION, projectionMatrix);
     }
 
-    Matrix modelViewMatrix = new Matrix();
-    {
-      modelViewMatrix.tx = -focus.x;
-      modelViewMatrix.ty = -focus.y;
-      GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, modelViewMatrix);
-    }
+    // Our OpenGL ModelView matrix is just the identity matrix
+    GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, new Matrix());
 
-    Matrix worldToNDCMatrix = new Matrix();
-    Matrix.multiply(projectionMatrix, modelViewMatrix, worldToNDCMatrix);
-    {
-      // TODO: clarify the different coordinate spaces:
-      // world, view, model, NDC; possibly eliminate requirement to calculate
-      // inverse
+    // Set texture matrix so (0,0) is in lower left of image
+    GLTools.storeMatrix(gl2, GL2.GL_TEXTURE, Matrix.getFlipVertically(1));
 
-      Matrix NDCToWorldMatrix = worldToNDCMatrix.invert(null);
-
-      // construct matrix to convert from window coordinates to
-      // normalized device coordinates (UIView to NDC).
-
-      /*
-       * This converts UIView coordinates to NDC as follows:
-       * 
-       * NDCx = (Vx - Cx) * 2 / W NDCy = (Vy - Cy) * 2 / H NDCz = -1 NDCw = 1
-       * 
-       * where
-       * 
-       * Vx,Vy = UIView coordinates Cx,Cy = Trans.viewCenter_, the center of the
-       * OpenGL view (in UIView coordinates) W,H = size of OpenGL view
-       */
-
-      IPoint viewCenter_ = new IPoint(size.x / 2, size.y / 2);
-
-      Matrix c = new Matrix();
-      c.a = 2f / size.x;
-      c.tx = (-2f * viewCenter_.x) / size.x;
-
-      c.d = -2f / size.y;
-      c.ty = (2f * viewCenter_.y) / size.y;
-
-      Matrix.multiply(NDCToWorldMatrix, c, mViewToWorldMatrix);
-    }
+    // ...leave with GL_MODELVIEW as the active matrix
     gl2.glMatrixMode(GL2.GL_MODELVIEW);
   }
 
@@ -124,7 +112,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
       sFocus.setTo(spriteInfo.workImageSize().x / 2,
           spriteInfo.workImageSize().y / 2);
     } while (false);
-    setFocus(sFocus);
 
     paintStart();
     prepareProjection();

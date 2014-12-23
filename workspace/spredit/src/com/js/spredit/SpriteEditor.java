@@ -851,7 +851,7 @@ public class SpriteEditor {
       do {
         if (!right() || ev.isControlDown() || ev.isShiftDown())
           break;
-        startFocus = new Point(spritePanel.getFocus());
+        startOrigin = new Point(spritePanel.getOrigin());
         f = true;
       } while (false);
       return f;
@@ -867,12 +867,12 @@ public class SpriteEditor {
       trans.y = -trans.y;
 
       trans.applyScale(1 / spritePanel.getZoom());
-      trans.add(startFocus);
-      spritePanel.setFocus(trans);
+      trans.add(startOrigin);
+      spritePanel.setOrigin(trans);
       repaint();
     }
 
-    private Point startFocus;
+    private Point startOrigin;
   }
 
   private static class MoveClipOper extends MouseOper {

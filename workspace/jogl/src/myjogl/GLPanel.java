@@ -96,12 +96,12 @@ public class GLPanel {
     return zoomFactor;
   }
 
-  public Point getFocus() {
-    return mFocus;
+  public Point getOrigin() {
+    return mOrigin;
   }
 
   private float zoomFactor = 1;
-  private Point mFocus = new Point();
+  private Point mOrigin = new Point();
 
   public void setZoom(float zoom) {
     zoomFactor = zoom;
@@ -111,8 +111,8 @@ public class GLPanel {
     return zoomFactor;
   }
 
-  public void setFocus(Point focus) {
-    mFocus.setTo(focus);
+  public void setOrigin(Point origin) {
+    mOrigin.setTo(origin);
   }
 
   private GLCanvas mCanvas;

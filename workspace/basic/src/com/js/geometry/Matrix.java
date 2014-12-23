@@ -1,6 +1,6 @@
 package com.js.geometry;
 
-import com.js.basic.Tools;
+import static com.js.basic.Tools.*;
 
 /**
  * Matrix for 2D affine transformations; modelled after iOS CGAffineTransform
@@ -27,19 +27,19 @@ public class Matrix {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("[");
-    sb.append(Tools.d(a));
-    sb.append(Tools.d(c));
-    sb.append(Tools.d(0.0f));
+    sb.append(d(a));
+    sb.append(d(c));
+    sb.append(d(tx));
     sb.append("]\n");
     sb.append("[");
-    sb.append(Tools.d(b));
-    sb.append(Tools.d(d));
-    sb.append(Tools.d(0.0f));
+    sb.append(d(b));
+    sb.append(d(d));
+    sb.append(d(ty));
     sb.append("]\n");
     sb.append("[");
-    sb.append(Tools.d(0.0f));
-    sb.append(Tools.d(0.0f));
-    sb.append(Tools.d(1.0f));
+    sb.append(d(0.0f));
+    sb.append(d(0.0f));
+    sb.append(d(1.0f));
     sb.append("]\n");
     return sb.toString();
   }
@@ -59,13 +59,45 @@ public class Matrix {
     return destination;
   }
 
+  public Point apply(Point source, Point destination) {
+    return apply(source.x, source.y, destination);
+  }
+
+  public Point apply(Point source) {
+    return apply(source, null);
+  }
+
   public static Matrix getTranslate(Point translate) {
+    return getTranslate(translate.x, translate.y);
+  }
+
+  public static Matrix getTranslate(float tx, float ty) {
     Matrix m = new Matrix();
-    m.tx = translate.x;
-    m.ty = translate.y;
+    m.tx = tx;
+    m.ty = ty;
     return m;
   }
 
+  public static Matrix getScale(float scaleFactor) {
+    Matrix m = new Matrix();
+    m.a = scaleFactor;
+    m.d = scaleFactor;
+    return m;
+  }
+
+  /**
+   * Multiply two matrices. Note that if v is a vector, and T1 and T2 are
+   * matrices, then to construct a matrix T3 such that T3[v] = T2[T1[v]], then
+   * T3 = T2 * T1 (not T1 * T2). In other words, the order matters; matrix
+   * multiplication is not commutative.
+   * 
+   * @param m1
+   * @param m2
+   * @param dest
+   *          where to store result; if null, constructs new one; can also be
+   *          either m1 or m2
+   * @return result
+   */
   public static Matrix multiply(Matrix m1, Matrix m2, Matrix dest) {
     if (dest == null)
       dest = new Matrix();
@@ -86,6 +118,10 @@ public class Matrix {
     dest.ty = nty;
 
     return dest;
+  }
+
+  public static Matrix multiply(Matrix m1, Matrix m2) {
+    return multiply(m1, m2, null);
   }
 
   public Matrix invert(Matrix dest) {
@@ -115,6 +151,20 @@ public class Matrix {
     dest.ty = nty;
 
     return dest;
+  }
+
+  /**
+   * Get a matrix that flips a view's origin between top left and bottom left
+   * 
+   * @param height
+   *          height of view; 0 to just negate the y component with no further
+   *          adjustment
+   */
+  public static Matrix getFlipVertically(float height) {
+    Matrix m = new Matrix();
+    m.d = -1;
+    m.ty = height;
+    return m;
   }
 
 }
