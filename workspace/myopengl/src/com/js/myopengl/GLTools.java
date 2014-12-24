@@ -1,26 +1,25 @@
 package com.js.myopengl;
 
-import javax.media.opengl.GL2;
-
 import com.js.geometry.Matrix;
-
 import static com.js.basic.Tools.*;
+import javax.media.opengl.GL2;
+import static javax.media.opengl.GL2.*;
 
 public class GLTools {
 
   /**
    * Store (2D) matrix as OpenGL matrix
    * 
-   * @param gl2
+   * @param gl
    * @param matrixNumber
    *          GL_PROJECTION, GL_MODELVIEW
    * @param Matrix
    *          the 2D matrix to store
    */
-  public static void storeMatrix(GL2 gl2, int matrixNumber, Matrix matrix) {
+  public static void storeMatrix(GL2 gl, int matrixNumber, Matrix matrix) {
 
-    ASSERT(matrixNumber == GL2.GL_PROJECTION
-        || matrixNumber == GL2.GL_MODELVIEW || matrixNumber == GL2.GL_TEXTURE);
+    ASSERT(matrixNumber == GL_PROJECTION || matrixNumber == GL_MODELVIEW
+        || matrixNumber == GL_TEXTURE);
 
     float[] c = new float[16];
 
@@ -36,21 +35,21 @@ public class GLTools {
     c[13] = matrix.ty;
     c[15] = 1;
 
-    gl2.glMatrixMode(matrixNumber);
-    gl2.glLoadMatrixf(c, 0);
+    gl.glMatrixMode(matrixNumber);
+    gl.glLoadMatrixf(c, 0);
   }
 
   /**
    * Read OpenGL matrix into (2D) Matrix
    * 
-   * @param gl2
+   * @param gl
    * @param matrixNumber
    *          GL_PROJECTION, GL_MODELVIEW
    * @return Matrix
    */
-  public static Matrix readMatrix(GL2 gl2, int matrixNumber) {
+  public static Matrix readMatrix(GL2 gl, int matrixNumber) {
 
-    float[] c = readMatrix44Array(gl2, matrixNumber);
+    float[] c = readMatrix44Array(gl, matrixNumber);
 
     Matrix m = new Matrix();
     m.a = c[0];
@@ -66,8 +65,8 @@ public class GLTools {
     return m;
   }
 
-  public static String readMatrix44(GL2 gl2, int matrixNumber) {
-    return dumpMatrix(readMatrix44Array(gl2, matrixNumber));
+  public static String readMatrix44(GL2 gl, int matrixNumber) {
+    return dumpMatrix(readMatrix44Array(gl, matrixNumber));
   }
 
   /**
@@ -98,20 +97,20 @@ public class GLTools {
    *          GL_PROJECTION, GL_MODELVIEW
    * @return array of 16 matrix coefficients, in column-major order
    */
-  private static float[] readMatrix44Array(GL2 gl2, int matrixNumber) {
+  private static float[] readMatrix44Array(GL2 gl, int matrixNumber) {
     int matrixArg = -1;
     switch (matrixNumber) {
-    case GL2.GL_PROJECTION:
-      matrixArg = GL2.GL_PROJECTION_MATRIX;
+    case GL_PROJECTION:
+      matrixArg = GL_PROJECTION_MATRIX;
       break;
-    case GL2.GL_MODELVIEW:
-      matrixArg = GL2.GL_MODELVIEW_MATRIX;
+    case GL_MODELVIEW:
+      matrixArg = GL_MODELVIEW_MATRIX;
       break;
     default:
       die("bad argument");
     }
     float[] c = new float[16];
-    gl2.glGetFloatv(matrixArg, c, 0);
+    gl.glGetFloatv(matrixArg, c, 0);
     return c;
   }
 

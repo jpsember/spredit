@@ -20,13 +20,13 @@ public class TextureLoader {
    * 
    * @return A new texture ID
    */
-  public static int createTextureID(GL2 gl2) {
+  public static int createTextureID(GL2 gl) {
     final boolean db = false;
     if (db)
       pr("createTextureID");
 
     IntBuffer textures = BufferUtils.createIntBuffer(1);
-    gl2.glGenTextures(1, textures);
+    gl.glGenTextures(1, textures);
     if (db)
       pr(" glGenTextures returned " + textures + ": " + textures.get(0));
     return textures.get(0);
@@ -40,7 +40,7 @@ public class TextureLoader {
     return k;
   }
 
-  public static int getTexture(GL2 gl2, BufferedImage img, IPoint destImgSize) {
+  public static int getTexture(GL2 gl, BufferedImage img, IPoint destImgSize) {
 
     final boolean db = false;
     if (db)
@@ -105,13 +105,13 @@ public class TextureLoader {
     if (db)
       pr("creating texture ID");
 
-    int textureID = createTextureID(gl2);
+    int textureID = createTextureID(gl);
 
     // bind this texture
-    gl2.glBindTexture(GL_TEXTURE_2D, textureID);
+    gl.glBindTexture(GL_TEXTURE_2D, textureID);
 
     // produce a texture from the byte buffer
-    gl2.glTexImage2D(//
+    gl.glTexImage2D(//
         GL_TEXTURE_2D, // 2d textures
         0, // level of detail
         hasAlpha ? GL_RGBA : GL_RGB, // internal format
@@ -128,8 +128,8 @@ public class TextureLoader {
 
     // GL_NEAREST stops bleeding from neighboring pixels,
     // and scales things up looking blocky
-    gl2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gl2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     return textureID;
   }
@@ -144,7 +144,7 @@ public class TextureLoader {
     return 0;
   }
 
-  public static void processDeleteList(GL2 gl2) {
+  public static void processDeleteList(GL2 gl) {
     IntBuffer ib = BufferUtils.createIntBuffer(del.size());
 
     for (int i = 0; i < del.size(); i++)
@@ -152,7 +152,7 @@ public class TextureLoader {
     ib.flip();
 
     del.clear();
-    gl2.glDeleteTextures(del.size(), ib);
+    gl.glDeleteTextures(del.size(), ib);
   }
 
   private static DArray del = new DArray();

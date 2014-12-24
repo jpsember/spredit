@@ -24,14 +24,14 @@ public class Main {
       IPoint size = getSize();
 
       // draw a triangle filling the window
-      gl2.glBegin(GL.GL_TRIANGLES);
-      gl2.glColor3f(1, 0, 0);
-      gl2.glVertex2f(0, 0);
-      gl2.glColor3f(0, 1, 0);
-      gl2.glVertex2f(size.x, 0);
-      gl2.glColor3f(0, 0, 1);
-      gl2.glVertex2f(size.x / 2, size.y);
-      gl2.glEnd();
+      gl.glBegin(GL.GL_TRIANGLES);
+      gl.glColor3f(1, 0, 0);
+      gl.glVertex2f(0, 0);
+      gl.glColor3f(0, 1, 0);
+      gl.glVertex2f(size.x, 0);
+      gl.glColor3f(0, 0, 1);
+      gl.glVertex2f(size.x / 2, size.y);
+      gl.glEnd();
     }
   }
 

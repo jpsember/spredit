@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 
 import javax.media.opengl.GL2;
+import static javax.media.opengl.GL2.*;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
@@ -62,7 +63,7 @@ public class GLPanel {
    * Get the OpenGL context; only valid while render() is being called
    */
   public GL2 glContext() {
-    return gl2;
+    return gl;
   }
 
   /**
@@ -75,7 +76,7 @@ public class GLPanel {
     prepareProjection();
 
     // while in the GL context, delete any previously removed textures
-    TextureLoader.processDeleteList(gl2);
+    TextureLoader.processDeleteList(gl);
   }
 
   public Point getOrigin() {
@@ -110,13 +111,13 @@ public class GLPanel {
     Color c = clearColor;
 
     float TOFLOAT = 1 / 255.0f;
-    gl2.glClearColor(c.getRed() * TOFLOAT, c.getGreen() * TOFLOAT, c.getBlue()
+    gl.glClearColor(c.getRed() * TOFLOAT, c.getGreen() * TOFLOAT, c.getBlue()
         * TOFLOAT, 1);
-    gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+    gl.glClear(GL_COLOR_BUFFER_BIT);
 
     if (sizeHasChanged()) {
       IPoint size = getSize();
-      gl2.glViewport(0, 0, size.x, size.y);
+      gl.glViewport(0, 0, size.x, size.y);
     }
 
   }
@@ -151,19 +152,16 @@ public class GLPanel {
 
         @Override
         public void dispose(GLAutoDrawable glautodrawable) {
-          // MyJOGL.setContext(null);
         }
 
         @Override
         public void display(GLAutoDrawable glautodrawable) {
           setSize(new IPoint(glautodrawable.getSurfaceWidth(), glautodrawable
               .getSurfaceHeight()));
-          // MyJOGL.setContext(mCanvas.getGL());
-          gl2 = mCanvas.getGL().getGL2(); // MyJOGL.context().getGL2();
+          gl = mCanvas.getGL().getGL2();
           render();
-          gl2 = null;
           updateLastRenderedSize();
-          // MyJOGL.setContext(null);
+          gl = null;
         }
       });
     }
@@ -209,20 +207,21 @@ public class GLPanel {
       // The OpenGL projection matrix is world -> NDC:
       Matrix projectionMatrix = Matrix.multiply(viewportToNDC, worldToViewport);
 
-      GLTools.storeMatrix(gl2, GL2.GL_PROJECTION, projectionMatrix);
+      GLTools.storeMatrix(gl, GL_PROJECTION, projectionMatrix);
     }
 
     // Our OpenGL ModelView matrix is just the identity matrix
-    GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, new Matrix());
+    GLTools.storeMatrix(gl, GL_MODELVIEW, new Matrix());
 
     // Set texture matrix so (0,0) is in lower left of image
-    GLTools.storeMatrix(gl2, GL2.GL_TEXTURE, Matrix.getFlipVertically(1));
+    GLTools.storeMatrix(gl, GL_TEXTURE, Matrix.getFlipVertically(1));
 
     // ...leave with GL_MODELVIEW as the active matrix
-    gl2.glMatrixMode(GL2.GL_MODELVIEW);
+    gl.glMatrixMode(GL_MODELVIEW);
   }
 
-  protected GL2 gl2;
+  // Value returned by glContext()
+  protected GL2 gl;
 
   private Matrix mViewToWorldMatrix = new Matrix();
   private GLCanvas mCanvas;

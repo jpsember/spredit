@@ -8,7 +8,7 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.media.opengl.GL2;
+import static javax.media.opengl.GL2.*;
 import javax.swing.JCheckBox;
 
 import com.js.myopengl.BufferUtils;
@@ -32,7 +32,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (!AppTools.isMac())
       MyMenuBar.addRepaintComponent(this.getComponent());
   }
-
 
   @Override
   public void render() {
@@ -86,8 +85,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (mCpt.isSelected()) {
       Point t0 = spriteInfo.centerPoint();
 
-      gl2.glPushMatrix();
-      gl2.glTranslatef(t0.x, t0.y, 0);
+      gl.glPushMatrix();
+      gl.glTranslatef(t0.x, t0.y, 0);
 
       lineWidth(3.2f / getZoom());
       setRenderColor(704);
@@ -101,9 +100,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
       drawLine(-W, 0, W, 0);
       drawLine(0, -W, 0, W);
-      gl2.glPopMatrix();
+      gl.glPopMatrix();
     }
-
   }
 
   private void lineWidth(float width) {
@@ -128,14 +126,14 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
       case RENDER_SPRITE:
         mytexturesOn();
-        gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-        gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GL_VERTEX_ARRAY);
         break;
 
       case RENDER_RGB:
         mytexturesOff();
-        gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-        gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GL_VERTEX_ARRAY);
         break;
       }
     }
@@ -146,21 +144,21 @@ public class SpritePanel extends GLPanel implements IEditorView {
       currentColorId = colorIndex;
 
       Color c = Palette.get(colorIndex);
-      gl2.glColor4ub((byte) c.getRed(), (byte) c.getGreen(),
-          (byte) c.getBlue(), (byte) c.getAlpha());
+      gl.glColor4ub((byte) c.getRed(), (byte) c.getGreen(), (byte) c.getBlue(),
+          (byte) c.getAlpha());
     }
   }
 
   public void mytexturesOn() {
     if (!textureMode) {
-      gl2.glEnable(GL2.GL_TEXTURE_2D);
+      gl.glEnable(GL_TEXTURE_2D);
       textureMode = true;
     }
   }
 
   public void mytexturesOff() {
     if (textureMode) {
-      gl2.glDisable(GL2.GL_TEXTURE_2D);
+      gl.glDisable(GL_TEXTURE_2D);
       textureMode = false;
     }
   }
@@ -202,8 +200,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     int nPts = (int) (radius * getZoom() / 2);
     if (db)
-      pr("before clamping, radius=" + radius + " zoom=" + getZoom()
-          + " nPts=" + nPts);
+      pr("before clamping, radius=" + radius + " zoom=" + getZoom() + " nPts="
+          + nPts);
     nPts = MyMath.clamp(nPts, 6, 50);
 
     Point prev = null;
@@ -240,8 +238,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
     v.put(x);
     v.put(y + h);
     v.rewind();
-    gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v); // only 2 coords per vertex
-    gl2.glDrawArrays(GL2.GL_QUADS, 0, 4);
+    gl.glVertexPointer(2, GL_FLOAT, 0, v); // only 2 coords per vertex
+    gl.glDrawArrays(GL_QUADS, 0, 4);
   }
 
   private int trisBufferCap;
@@ -264,8 +262,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
       v.put(pt.y);
     }
     v.rewind();
-    gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v); // only 2 coords per vertex
-    gl2.glDrawArrays(GL2.GL_TRIANGLES, 0, tris.length);
+    gl.glVertexPointer(2, GL_FLOAT, 0, v); // only 2 coords per vertex
+    gl.glDrawArrays(GL_TRIANGLES, 0, tris.length);
   }
 
   public void drawLine(float x1, float y1, float x2, float y2) {
@@ -283,12 +281,12 @@ public class SpritePanel extends GLPanel implements IEditorView {
       nx = -(y2 - y1) * r;
     }
 
-    gl2.glBegin(GL2.GL_TRIANGLE_STRIP);
-    gl2.glVertex3f(x1 - nx, y1 - ny, 0);
-    gl2.glVertex3f(x2 - nx, y2 - ny, 0);
-    gl2.glVertex3f(x1 + nx, y1 + ny, 0);
-    gl2.glVertex3f(x2 + nx, y2 + ny, 0);
-    gl2.glEnd();
+    gl.glBegin(GL_TRIANGLE_STRIP);
+    gl.glVertex3f(x1 - nx, y1 - ny, 0);
+    gl.glVertex3f(x2 - nx, y2 - ny, 0);
+    gl.glVertex3f(x1 + nx, y1 + ny, 0);
+    gl.glVertex3f(x2 + nx, y2 + ny, 0);
+    gl.glEnd();
   }
 
   public static final int BLACK = 776;// Palette.indexOf(MyColors.BLACK);
@@ -310,17 +308,17 @@ public class SpritePanel extends GLPanel implements IEditorView {
   private void paintStart() {
 
     // set REPLACE mode, to ignore color
-    gl2.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
-    gl2.glShadeModel(GL2.GL_FLAT); // not sure this is necessary
+    gl.glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    gl.glShadeModel(GL_FLAT); // not sure this is necessary
 
     // textures are disabled
-    gl2.glDisable(GL2.GL_TEXTURE_2D);
+    gl.glDisable(GL_TEXTURE_2D);
 
-    gl2.glEnable(GL2.GL_BLEND);
-    gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+    gl.glEnable(GL_BLEND);
+    gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // turn off backspace culling
-    gl2.glDisable(GL2.GL_CULL_FACE);
+    gl.glDisable(GL_CULL_FACE);
 
     activeTexture = 0;
     textureMode = false;
@@ -340,7 +338,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
       int texHandle;
 
-      texHandle = TextureLoader.getTexture(gl2, img, null);
+      texHandle = TextureLoader.getTexture(gl, img, null);
 
       iv = new Integer(texHandle);
 
@@ -389,7 +387,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
   public void selectTexture(int texHandle) {
     if (activeTexture != texHandle) {
       activeTexture = texHandle;
-      gl2.glBindTexture(GL2.GL_TEXTURE_2D, texHandle);
+      gl.glBindTexture(GL_TEXTURE_2D, texHandle);
       err();
     }
   }
@@ -489,12 +487,12 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     t.rewind();
 
-    gl2.glVertexPointer(2, GL2.GL_FLOAT, 0, v);
+    gl.glVertexPointer(2, GL_FLOAT, 0, v);
     err();
-    gl2.glTexCoordPointer(2, GL2.GL_FLOAT, 0, t);
+    gl.glTexCoordPointer(2, GL_FLOAT, 0, t);
     err();
 
-    gl2.glDrawArrays(GL2.GL_QUADS, 0, 4);
+    gl.glDrawArrays(GL_QUADS, 0, 4);
     err();
 
     err();
@@ -528,7 +526,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
   }
 
   public void err() {
-    int f = gl2.glGetError();
+    int f = gl.glGetError();
     if (f != 0) {
       pr("GL error: " + f + "   " + stackTrace());
     }
