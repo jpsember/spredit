@@ -10,6 +10,7 @@ import com.js.geometry.Rect;
 import scanning.*;
 import static com.js.basic.Tools.*;
 
+@Deprecated
 public class DefScanner extends TextScanner {
 
   public DefScanner(File f) throws FileNotFoundException {

@@ -2,6 +2,7 @@ package scanning;
 
 import static com.js.basic.Tools.*;
 
+@Deprecated
 public class Token {
   public static final int T_EOF = -1,
       T_ASCII = 0 // to 127

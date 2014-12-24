@@ -7,7 +7,9 @@ import base.*;
 import static com.js.basic.Tools.*;
 
 /**
- * Deterministic Finite State Automaton 
+ * Deterministic Finite State Automaton
+ * 
+ * @deprecated
  */
 public class DFA {
 
@@ -58,9 +60,13 @@ public class DFA {
 
   /**
    * Read a DFA, if it is not already read, using default DFA map
-   * @param owner : owner of DFA, for using class loader to locate it
-   * @param path : path of DFA
+   * 
+   * @param owner
+   *          : owner of DFA, for using class loader to locate it
+   * @param path
+   *          : path of DFA
    * @return DFA
+   * @deprecated
    */
   public static DFA readFromSet(Object owner, String path) {
     return readFromSet(null, owner, path);
@@ -68,10 +74,15 @@ public class DFA {
 
   /**
    * Read a DFA, if it is not already read
-   * @param map : map to store DFA's within
-   * @param owner : owner of DFA, for using class loader to locate it
-   * @param path : path of DFA
+   * 
+   * @param map
+   *          : map to store DFA's within
+   * @param owner
+   *          : owner of DFA, for using class loader to locate it
+   * @param path
+   *          : path of DFA
    * @return DFA
+   * @deprecated
    */
   public static DFA readFromSet(Map map, Object owner, String path) {
     Class c = Streams.classParam(owner);

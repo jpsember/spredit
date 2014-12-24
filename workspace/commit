@@ -214,17 +214,23 @@ class Commit
   end
 
   def run_unit_tests
+    # Construct class path
+    projects = ["basic","base","testUtils","scanning","basicTest"]
+    command = "java -cp ../eclipse_config/junit.jar"
+    projects.each{|x| command << ":#{x}/bin" }
+    command << " junit.textui.TestRunner"
 
-    proj_main = File.join(@saved_directory,PROJECT_NAME)
-    proj_test = proj_main + "Test"
+    # Collect list of all class files with 'Test' suffix
 
-    Dir.chdir(proj_test)
+    # For now, assume just one
+    testClasses = ["com.js.basicTest.CmdArgsTest"]
 
-    runcmd("ant clean","...cleaning") if @options[:clean]
+    testClasses.each{|x| command << " #{x}"}
+    puts "command now #{command}"
 
-    command = "ant debug install test"
-    output,_ = runcmd(command,"...building, installing, and testing")
-    Dir.chdir(@saved_directory)
+    # command = "java -cp ../eclipse_config/junit.jar:basic/bin:testUtils/bin:basicTest/bin junit.textui.TestRunner com.js.basicTest.CmdArgsTest"
+    output,_ = runcmd(command,"...testing")
+    # Dir.chdir(@saved_directory)
 
     if output.include?("FAILURES!!!")
       puts "\n\n\n-----------------------------------------"

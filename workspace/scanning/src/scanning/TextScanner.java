@@ -5,6 +5,7 @@ import static com.js.basic.Tools.*;
 
 import base.*;
 
+@Deprecated
 public class TextScanner {
 
   public static int parseInt(String s) {

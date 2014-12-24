@@ -9,6 +9,7 @@ import static com.js.basic.Tools.*;
  */
 public class Streams {
 
+  @Deprecated
   public static Class classParam(Object p) {
     Class c = null;
     if (p != null) {

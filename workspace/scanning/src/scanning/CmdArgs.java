@@ -1,26 +1,33 @@
 package scanning;
 
 import java.io.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import streams.*;
-//import streams.*;
-import base.*;
+
+//import static com.js.basic.Tools.*;
 
 /**
  * Class to manipulate command line arguments
- *
- * Arguments are of two types:
- *    single-character options:  -t -I -ab
- *      (they must consist of one or more letters, digits, or _)
- *      (-ab is treated as -a -b)
- *    string options:            --debug
- *    values:   file.txt
- *              42
- *              "string with \n embedded and \\n escaped characters"
- *              'also can be single \n quotes'
- *              -       (single dash)
- *              -2      (digit interpreted as value)
+ * 
+ * <pre>
+ * 
+ * Arguments are of these types: 
+ * 
+ * single-character options: -t -I -ab 
+ *   (they must consist of one or more letters, digits, or _) (-ab is treated as -a -b)
+ * string options: --debug 
+ * values: file.txt 42 "string with \n embedded and \\n escaped characters" 
+ *   'also can be single \n quotes' 
+ * - (single dash) -2 (digit interpreted as value)
+ * 
+ * </pre>
  */
 public class CmdArgs {
+
   public void help() {
     throw new CmdArgsException();
   }
@@ -29,48 +36,29 @@ public class CmdArgs {
     throw new CmdArgsException(msg);
   }
 
-  public static void setDebug(boolean f) {
-    dbc = f;
-  }
-
-  private static boolean dbc;
-
-  /**
-   * Tokenize a string of arguments into an array of strings.
-   * This is a convenience method for debugging purposes.
-   * @param s : String of space-delimited arguments
-   * @return String[]
-   */
-  public static String[] buildArgs(String s) {
-    DArray a = new DArray();
-    TextScanner ts = new TextScanner(s);
-    while (!ts.eof())
-      a.add(ts.readWord());
-    return a.toStringArray();
-  }
-
   /**
    * Constructor
-   *
-   * @param args String[] passed to main(); if the first argument
-   *    is --debugargs, strips it off and sets verbose mode for this
-   *    object
-   * @param defaults : if not null, string to parse and insert in front
-   *   of args as defaults
-   *
-   *     It has the following format:
-   *        ==  : set mode to equivalencies
-   *        !!  : set mode to defaults (the initial mode)
-   *
-   *     In defaults mode, tokens are parsed as arguments
-   *     In equivalencies mode, pairs are read, for --long -short equivalences
-   *
-   * @param helpMsg : if not null, help message to display if exception occurs
+   * 
+   * @param args
+   *          String[] passed to main(); if the first argument is --debugargs,
+   *          strips it off and sets verbose mode for this object
+   * @param defaults
+   *          if not null, string to parse and insert in front of args as
+   *          defaults
+   * 
+   *          It has the following format: == : set mode to equivalencies !! :
+   *          set mode to defaults (the initial mode)
+   * 
+   *          In defaults mode, tokens are parsed as arguments In equivalencies
+   *          mode, pairs are read, for --long -short equivalences
+   * 
+   * @param helpMsg
+   *          if not null, help message to display if exception occurs
    */
   public CmdArgs(String[] args, String defaults, String helpMsg) {
 
     if (helpMsg != null)
-      this.helpMsg = helpMsg;
+      mHelpMsg = helpMsg;
 
     if (defaults != null) {
       boolean modeDef = true;
@@ -83,8 +71,6 @@ public class CmdArgs {
         }
 
         String arg = s.readWordOrStr(false);
-        if (dbc)
-          System.out.println("CmdArgs, scanning " + TextScanner.debug(arg));
         if (arg.equals("!!"))
           modeDef = true;
         else if (arg.equals("=="))
@@ -93,128 +79,35 @@ public class CmdArgs {
           if (modeDef) {
             addArguments(arg, false);
           } else {
-            String arg2 = s.readWordOrStr(true); //Scanner.removeQuotes(s.read(true).text());
-            if (dbc) {
-              System.out.println("adding equivs " + arg + " == " + arg2);
-            }
-            equivs.add(arg);
-            equivs.add(arg2);
+            mEquivalentsMap.put(arg, s.readWordOrStr(true));
           }
         }
       }
     }
-
-    int start = 0;
-    if (args.length > 0 && args[0].equals("--debugargs")) {
-      dbc = true;
-      start = 1;
-    }
-    addArguments(args, start, -1, false);
+    addArguments(args, 0, -1, false);
   }
 
   /**
    * Throw an 'unsupported' CmdArg exception with last option parsed
    */
   public void unsupported() {
-    throw new CmdArgsException("Unsupported option: " + lastOption);
-  }
-
-  private void addArgument(String s, boolean toFront) {
-    if (dbc) {
-      System.out.println(" arg: " + s);
-    }
-
-    String arg = null;
-    // If it starts with a space, surround it with quotes to make it a value.
-    if (s.startsWith(" ")) {
-      s = "\"" + s.trim() + "\"";
-    }
-
-    // is it a character option?
-    if (isStringOption(s)) {
-      if (dbc) {
-        System.out.println("  pushing " + s.substring(1));
-      }
-      arg = s;
-      //      strings.push(s);
-    } else if (isOption(s)) {
-      for (int j = 1; j < s.length(); j++) {
-        char oc = s.charAt(j);
-        if (dbc) {
-          System.out.println("  pushing " + "-" + oc);
-        }
-        arg = "-" + oc;
-        //        strings.push("-" + oc);
-      }
-    } else {
-      if (dbc) {
-        System.out.println("  pushing " + s);
-      }
-      arg = s;
-      //      strings.push(s);
-    }
-    strings.push(arg, toFront);
-  }
-
-  /**
-   * Parse arguments
-   *
-   * @param args String[]
-   */
-  private void addArguments(String[] args, int startOffset, int total,
-      boolean toFront) {
-    if (dbc) {
-      System.out.println("addArguments toFront=" + toFront + ", args=\n"
-          + DArray.toString(args));
-    }
-
-    if (total < 0)
-      total = args.length - startOffset;
-
-    if (toFront) {
-      for (int i = startOffset + total - 1; i >= startOffset; i--) {
-        addArgument(args[i], true);
-      }
-    } else
-      for (int i = startOffset; i < startOffset + total; i++) {
-        addArgument(args[i], false);
-      }
+    throw new CmdArgsException("Unsupported option: " + mLastOption);
   }
 
   // determine if there are more arguments to process
   public boolean hasNext() {
-    boolean f = (argNumber < strings.size());
-    if (dbc) {
-      System.out.println("hasNext " + state() + " returning " + f);
-    }
-    return f;
-  }
-
-  private String state() {
-    StringBuilder sb = new StringBuilder("<");
-    sb.append(argNumber);
-    sb.append(" of " + strings.size());
-    if (argNumber < strings.size()) {
-      sb.append(", next=" + strings.peek());
-    }
-    sb.append(">");
-    return sb.toString();
+    return !mArguments.isEmpty();
   }
 
   // determine if there is a next argument which is a value
   public boolean nextIsValue() {
-    boolean out = hasNext() && !nextIsOption(); //strings.peekString(0).startsWith("-");
-    if (dbc) {
-      System.out.println("nextIsValue " + state() + " returning " + out);
-    }
-    return out;
+    return hasNext() && !nextIsOption();
   }
 
   public String peek() {
     String out = null;
     if (hasNext()) {
-      out = (String) strings.peek();
-      //String(0);
+      out = (String) mArguments.peek();
     }
     return out;
   }
@@ -235,6 +128,7 @@ public class CmdArgs {
   /**
    * Determine if there is a next argument that is a single-character or
    * multiple-character option
+   * 
    * @return boolean
    */
   public boolean nextIsOption() {
@@ -243,21 +137,18 @@ public class CmdArgs {
       if (!hasNext()) {
         break;
       }
-      String s = (String) strings.peek();
+      String s = (String) mArguments.peek();
       if (!isOption(s)) {
         break;
       }
       out = true;
     } while (false);
-    if (dbc) {
-      System.out.println("nextIsChar " + state() + " returning " + out);
-    }
     return out;
   }
 
   /**
-   * Determine if there is a next argument that is a single-character
-   * option
+   * Determine if there is a next argument that is a single-character option
+   * 
    * @return boolean
    */
   public boolean nextIsChar() {
@@ -266,7 +157,7 @@ public class CmdArgs {
       if (!hasNext()) {
         break;
       }
-      String s = peek ();
+      String s = peek();
       if (!isOption(s)) {
         break;
       }
@@ -275,65 +166,29 @@ public class CmdArgs {
       }
       out = true;
     } while (false);
-    if (dbc) {
-      System.out.println("nextIsChar " + state() + " returning " + out);
-    }
     return out;
   }
 
-//  private String peekStr() {
-//    return (String)strings.peek(0);
-//  }
-  
   /**
-   * Read next argument as an option.  Throw exception if missing or not
-   * an option.
-   *
+   * Read next argument as an option. Throw exception if missing or not an
+   * option.
+   * 
    * @return String
    */
   public String nextOption() {
     if (nextIsValue()) {
       throw new CmdArgsException("Unexpected value in arguments: "
-          + strings.peek());
-    }
-    String st = null;
-    if (dbc) {
-      st = state();
+          + mArguments.peek());
     }
 
-    lastOption = findEquiv(strings.popString());
-    if (dbc) {
-      System.out.println("nextOption " + st + " returning " + lastOption);
-    }
-    return lastOption;
-  }
-
-  //  public String nextArg() {
-  //    return strings.popString();
-  //  }
-
-  /**
-   * Examine equivalencies table to convert long option to short
-   * @param s String
-   * @return original string, or equivalent form
-   */
-  private String findEquiv(String s) {
-    String out = s;
-    for (int i = 0; i < equivs.size(); i += 2) {
-      if (s.equals(equivs.getString(i))) {
-        out = equivs.getString(i + 1);
-        break;
-      }
-    }
-    if (dbc) {
-      System.out.println("findEquiv " + s + " is " + out);
-    }
-    return out;
+    mLastOption = canonicalArgument(mArguments.remove());
+    return mLastOption;
   }
 
   /**
-   * Read next argument as a single-character option.  Throw exception if
-   * missing or not of this type
+   * Read next argument as a single-character option. Throw exception if missing
+   * or not of this type
+   * 
    * @return char
    */
   public char nextChar() {
@@ -341,25 +196,16 @@ public class CmdArgs {
     if (s.length() > 2) {
       throw new CmdArgsException("Unexpected argument: " + s);
     }
-    if (dbc) {
-      System.out.println("nextChar " + state() + " returning " + s.charAt(1));
-    }
-
     return s.charAt(1);
   }
-
-  private String lastOption;
 
   // read the next argument if it matches a particular option;
   // if there are no more, or it's not a match, return false
   public boolean peekOption(String c) {
-    if (dbc) {
-      System.out.println("peekOption " + state());
-    }
     boolean out = true;
     do {
       if (hasNext()) {
-        String s =  peek ( );
+        String s = peek();
         if (isOption(s) && optionBody(s).equals(c)) {
           nextOption();
           break;
@@ -367,93 +213,54 @@ public class CmdArgs {
       }
       out = false;
     } while (false);
-    if (dbc) {
-      System.out.println("  returning " + out);
-    }
     return out;
-
-  }
-
-  private static String optionBody(String s) {
-    int i = 1;
-    if (s.startsWith("--")) {
-      i = 2;
-    }
-    return s.substring(i);
   }
 
   // parse next argument as integer
   public int nextInt() {
-    if (dbc) {
-      System.out.println("nextInt " + state());
-    }
     return Integer.parseInt(nextValue());
   }
 
   // parse next argument as double
   public double nextDouble() {
-    if (dbc) {
-      System.out.println("nextDouble " + state());
-    }
     return Double.parseDouble(nextValue());
   }
 
   // read next argument as a value; throw exception if it's
   // not a value, or is missing
   public String nextValue() {
-    if (dbc) {
-      System.out.println("nextValue " + state());
-    }
     if (!nextIsValue()) {
       StringBuilder sb = new StringBuilder("Missing value in arguments");
-      if (lastOption != null) {
-        sb.append(" for option " + lastOption);
+      if (mLastOption != null) {
+        sb.append(" for option " + mLastOption);
       }
       throw new CmdArgsException(sb.toString());
     }
-    if (dbc) {
-      System.out.println(" returning " + strings.peek());
-    }
-    String s = strings.popString();
+    String s = mArguments.remove();
     return TextScanner.removeQuotes(s);
   }
-
-  //  /**
-  //   * Read next argument as an integer
-  //   * @return int
-  //   */
-  //  public int nextInt() {
-  //    String s = nextValue();
-  //    return Scanner.parseInt(s);
-  //}
 
   // indicate that processing is done; generate exception if more
   // arguments remain unprocessed
   public void done() {
-    if (dbc) {
-      System.out.println("done; " + state());
-    }
-    if (argNumber < strings.size()) {
+    if (!hasNext()) {
       StringBuilder sb = new StringBuilder("Unexpected arguments: ");
-      while (!strings.isEmpty()) {
-        sb.append(strings.popString());
+      while (!mArguments.isEmpty()) {
+        sb.append(mArguments.remove());
         sb.append(" ");
       }
       throw new CmdArgsException(sb.toString());
     }
-
   }
 
   /**
    * Get next value as a path, convert to abstract form
-   * @param defaultExtension : if not null, and path hasn't got an extension,
-   *  adds this one
+   * 
+   * @param defaultExtension
+   *          : if not null, and path hasn't got an extension, adds this one
    * @return path
    */
   public File nextPath(String defaultExtension) {
-    if (dbc) {
-      System.out.println("nextPath; " + state());
-    }
     String str = nextValue();
     if (defaultExtension != null)
       str = Streams.addExtension(str, defaultExtension);
@@ -462,15 +269,68 @@ public class CmdArgs {
   }
 
   /**
-   *  Get next value as a path, and convert to abstract form 
+   * Get next value as a path, and convert to abstract form
+   * 
    * @return path
    */
   public File nextPath() {
     return nextPath(null);
-    //    if (db) {
-    //      System.out.println("nextPath; " + state());
-    //    }
-    //    return new File(nextValue());
+  }
+
+  private void addArgument(String s, boolean toFront) {
+    String arg = null;
+    // If it starts with a space, surround it with quotes to make it a value.
+    if (s.startsWith(" ")) {
+      s = "\"" + s.trim() + "\"";
+    }
+
+    // is it a character option?
+    if (isStringOption(s)) {
+      arg = s;
+    } else if (isOption(s)) {
+      for (int j = 1; j < s.length(); j++) {
+        char oc = s.charAt(j);
+        arg = "-" + oc;
+      }
+    } else {
+      arg = s;
+    }
+    if (toFront)
+      mArguments.addFirst(arg);
+    else
+      mArguments.add(arg);
+  }
+
+  /**
+   * Parse arguments
+   * 
+   * @param args
+   *          String[]
+   */
+  private void addArguments(String[] args, int startOffset, int total,
+      boolean toFront) {
+    if (total < 0)
+      total = args.length - startOffset;
+
+    if (toFront) {
+      for (int i = startOffset + total - 1; i >= startOffset; i--) {
+        addArgument(args[i], true);
+      }
+    } else
+      for (int i = startOffset; i < startOffset + total; i++) {
+        addArgument(args[i], false);
+      }
+  }
+
+  /**
+   * Get canonical argument by replacing longer with shorter equivalent (if one
+   * found)
+   */
+  private String canonicalArgument(String s) {
+    String equiv = mEquivalentsMap.get(s);
+    if (equiv == null)
+      equiv = s;
+    return s;
   }
 
   private static boolean isStringOption(String s) {
@@ -478,9 +338,11 @@ public class CmdArgs {
   }
 
   /**
-   * Determine if string represents an option (starts with "-" or "--", and
-   * next character is letter or _)
-   * @param s String
+   * Determine if string represents an option (starts with "-" or "--", and next
+   * character is letter or _)
+   * 
+   * @param s
+   *          String
    * @return boolean
    */
   private static boolean isOption(String s) {
@@ -498,28 +360,30 @@ public class CmdArgs {
     return out;
   }
 
-  private static void addWord(String str, DArray sa, int pos, int len,
+  private static void addWord(String str, List<String> sa, int pos, int len,
       boolean addZeroLen) {
     if (addZeroLen || len > 0) {
       String out = str.substring(pos, pos + len);
       sa.add(out);
-      if (dbc) {
-        System.out.println("addWord [" + out + "]");
-      }
-
     }
+  }
+
+  private static String optionBody(String s) {
+    int i = 1;
+    if (s.startsWith("--")) {
+      i = 2;
+    }
+    return s.substring(i);
   }
 
   /**
    * Parse string into individual strings, add to command arguments
-   * @param str : string to split into individual cmd line args
+   * 
+   * @param str
+   *          : string to split into individual cmd line args
    */
   private void addArguments(String str, boolean toFront) {
-
-    DArray sa = new DArray();
-
-    if (dbc)
-      System.out.println("addArguments [" + str + "]");
+    List<String> sa = new ArrayList();
 
     char strDelim = 0;
     int len = 0;
@@ -527,10 +391,6 @@ public class CmdArgs {
 
     for (int i = 0; i < str.length(); i++) {
       char c = str.charAt(i);
-
-      if (dbc) {
-        System.out.println(" char = " + c);
-      }
 
       if (strDelim == 0 && c == '/' && i + 1 < str.length()
           && str.charAt(i + 1) == '/') {
@@ -547,9 +407,6 @@ public class CmdArgs {
       }
 
       if (strDelim == 0 && (c == '\'' || c == '\"')) {
-        if (dbc) {
-          System.out.println(" starting str");
-        }
         addWord(str, sa, pos, len, false);
         len = 0;
         strDelim = c;
@@ -557,9 +414,6 @@ public class CmdArgs {
       }
 
       if (c <= ' ' && strDelim == 0) {
-        if (dbc) {
-          System.out.println(" whitespace, adding word");
-        }
         addWord(str, sa, pos, len, false);
         len = 0;
         continue;
@@ -575,44 +429,21 @@ public class CmdArgs {
       throw new CmdArgsException("Missing quote in arguments");
     }
     addWord(str, sa, pos, len, false);
-
-    // push these arguments to the head of the queue.
-
-    addArguments(sa.toStringArray(), 0, -1, toFront);
+    addArguments(sa.toArray(new String[0]), 0, -1, toFront);
   }
 
   class CmdArgsException extends ScanException {
     public CmdArgsException() {
-      super(helpMsg);
+      super(mHelpMsg);
     }
 
     public CmdArgsException(String msg) {
-      super(msg + "\n" + helpMsg);
+      super(msg + "\n" + mHelpMsg);
     }
   }
 
-  private DQueue strings = new DQueue();
-
-  private int argNumber;
-
-  private String helpMsg = "(No help provided)\n";
-
-  private DArray equivs = new DArray();
-
-  /**
-   * If next argument exists, treat it as a path; add .txt extension if
-   * it doesn't have one, and parse additional arguments from that file.
-   * 
-   * If no next argument exists, read file from standard input and parse
-   * arguments from it.
-   * @throws IOException 
-   */
-  public void includeArguments() throws IOException {
-    File f = null;
-    if (hasNext()) {
-      f = nextPath("txt");
-    }
-    addArguments(Streams.readTextFile(f.toString()), true);
-  }
-
+  private ArrayDeque<String> mArguments = new ArrayDeque();
+  private String mHelpMsg = "(No help provided)\n";
+  private Map<String, String> mEquivalentsMap = new HashMap();
+  private String mLastOption;
 }
