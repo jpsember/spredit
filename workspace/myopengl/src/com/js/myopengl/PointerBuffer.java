@@ -30,7 +30,7 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package myopengl;
+package com.js.myopengl;
 
 import java.lang.reflect.Method;
 import java.nio.*;

@@ -11,9 +11,9 @@ import java.util.Map;
 import javax.media.opengl.GL2;
 import javax.swing.JCheckBox;
 
-import myopengl.BufferUtils;
-import myopengl.GLPanel;
-import myopengl.TextureLoader;
+import com.js.myopengl.BufferUtils;
+import com.js.myopengl.GLPanel;
+import com.js.myopengl.TextureLoader;
 import tex.Atlas;
 import tex.Palette;
 import tex.Sprite;
@@ -340,7 +340,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
       int texHandle;
 
-      texHandle = TextureLoader.getTexture(img, null);
+      texHandle = TextureLoader.getTexture(gl2, img, null);
 
       iv = new Integer(texHandle);
 
@@ -578,4 +578,5 @@ public class SpritePanel extends GLPanel implements IEditorView {
   private int renderState;
   private int currentColorId;
   private Map atlasTextures;
+
 }

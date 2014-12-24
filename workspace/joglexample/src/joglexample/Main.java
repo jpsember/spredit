@@ -5,7 +5,7 @@ import javax.swing.JFrame;
 
 import com.js.geometry.IPoint;
 
-import myopengl.GLPanel;
+import com.js.myopengl.GLPanel;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;

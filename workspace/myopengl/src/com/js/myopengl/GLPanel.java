@@ -1,4 +1,4 @@
-package myopengl;
+package com.js.myopengl;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -8,8 +8,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
-
-import myjogl.MyJOGL;
 
 import com.js.geometry.*;
 
@@ -61,6 +59,13 @@ public class GLPanel {
   }
 
   /**
+   * Get the OpenGL context; only valid while render() is being called
+   */
+  public GL2 glContext() {
+    return gl2;
+  }
+
+  /**
    * Render view contents using OpenGL. Default implementation clears view to
    * the background color, prepares the projection matrices, and does some
    * additional maintenance
@@ -70,7 +75,7 @@ public class GLPanel {
     prepareProjection();
 
     // while in the GL context, delete any previously removed textures
-    TextureLoader.processDeleteList();
+    TextureLoader.processDeleteList(gl2);
   }
 
   public Point getOrigin() {
@@ -146,19 +151,19 @@ public class GLPanel {
 
         @Override
         public void dispose(GLAutoDrawable glautodrawable) {
-          MyJOGL.setContext(null);
+          // MyJOGL.setContext(null);
         }
 
         @Override
         public void display(GLAutoDrawable glautodrawable) {
           setSize(new IPoint(glautodrawable.getSurfaceWidth(), glautodrawable
               .getSurfaceHeight()));
-          MyJOGL.setContext(mCanvas.getGL());
-          gl2 = MyJOGL.context().getGL2();
+          // MyJOGL.setContext(mCanvas.getGL());
+          gl2 = mCanvas.getGL().getGL2(); // MyJOGL.context().getGL2();
           render();
           gl2 = null;
           updateLastRenderedSize();
-          MyJOGL.setContext(null);
+          // MyJOGL.setContext(null);
         }
       });
     }

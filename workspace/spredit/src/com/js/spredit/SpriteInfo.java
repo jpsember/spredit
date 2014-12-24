@@ -5,7 +5,8 @@ import images.*;
 import java.awt.Dimension;
 import java.awt.image.*;
 import java.io.*;
-import myopengl.*;
+
+import com.js.myopengl.*;
 import apputil.*;
 import streams.*;
 import tex.*;
@@ -682,7 +683,8 @@ public class SpriteInfo {
 
     if (imgTextureId == 0 && img(IMG_WORK) != null) {
       BufferedImage img = compressedImage();
-      imgTextureId = TextureLoader.getTexture(img, imgTextureSize);
+      imgTextureId = TextureLoader.getTexture(panel.glContext(), img,
+          imgTextureSize);
     }
 
     if (imgTextureId == 0)

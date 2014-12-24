@@ -1,4 +1,4 @@
-package myopengl;
+package com.js.myopengl;
 
 import javax.media.opengl.GL2;
 
