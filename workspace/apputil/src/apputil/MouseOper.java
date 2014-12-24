@@ -161,7 +161,7 @@ public abstract class MouseOper {
       throw new IllegalStateException();
     ev = evt;
     currentPtView = viewLoc(evt);
-    currentPtF = view.viewToWorld(currentPtView);
+    currentPtF = view.viewToWorld(new Point(currentPtView));
     currentPt = new IPoint(currentPtF);
   }
 

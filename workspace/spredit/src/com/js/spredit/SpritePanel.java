@@ -11,9 +11,8 @@ import java.util.Map;
 import javax.media.opengl.GL2;
 import javax.swing.JCheckBox;
 
-import myjogl.GLPanel;
 import myopengl.BufferUtils;
-import myopengl.GLTools;
+import myopengl.GLPanel;
 import myopengl.TextureLoader;
 import tex.Atlas;
 import tex.Palette;
@@ -27,11 +26,6 @@ import com.js.geometry.*;
 
 public class SpritePanel extends GLPanel implements IEditorView {
 
-  @Override
-  public Point viewToWorld(IPoint viewPt) {
-    return mViewToWorldMatrix.apply(new Point(viewPt));
-  }
-
   public SpritePanel() {
     getComponent().setBackground(Color.white.darker());
     MouseOper.setView(this);
@@ -39,63 +33,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
       MyMenuBar.addRepaintComponent(this.getComponent());
   }
 
-  private void prepareViewport() {
-    IPoint size = getSize();
-    gl2.glViewport(0, 0, size.x, size.y);
-  }
-
-  private void prepareProjection() {
-
-    IPoint size = getSize();
-    float zoom = zoomFactor();
-
-    // Calculate the origin from the focus and the view size
-    // We want the (possibly zoomed) sprite pixel at sFocus to appear in the
-    // center of the view.
-    //
-    setOrigin(new Point(sFocus.x - size.x / (2 * zoom), sFocus.y - size.y
-        / (2 * zoom)));
-
-    {
-      Matrix translate = Matrix.getTranslate(-getOrigin().x, -getOrigin().y);
-      Matrix scale = Matrix.getScale(zoom);
-      // We want translating to be applied first, so have it be the LAST
-      // multiplicand
-      Matrix worldToViewport = Matrix.multiply(scale, translate);
-
-      // Calculate view -> world matrix, for picking operations
-      // Note that View space is the same as Viewport space, except that the
-      // origin is in the top left, not the bottom left
-      Matrix viewportToView = Matrix.getFlipVertically(size.y);
-      Matrix worldToView = Matrix.multiply(viewportToView, worldToViewport);
-      worldToView.invert(mViewToWorldMatrix);
-
-      // Construct viewport -> NDC matrix. For a description of the
-      // calculations, see (ignoring the z component):
-      //
-      // https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man3/glOrtho.3.html
-      //
-      Matrix viewportToNDC = new Matrix();
-      viewportToNDC.a = 2.0f / size.x;
-      viewportToNDC.d = 2.0f / size.y;
-      viewportToNDC.tx = -1.0f;
-      viewportToNDC.ty = -1.0f;
-
-      // The OpenGL projection matrix is world -> NDC:
-      Matrix projectionMatrix = Matrix.multiply(viewportToNDC, worldToViewport);
-
-      GLTools.storeMatrix(gl2, GL2.GL_PROJECTION, projectionMatrix);
-    }
-
-    // Our OpenGL ModelView matrix is just the identity matrix
-    GLTools.storeMatrix(gl2, GL2.GL_MODELVIEW, new Matrix());
-
-    // Set texture matrix so (0,0) is in lower left of image
-    GLTools.storeMatrix(gl2, GL2.GL_TEXTURE, Matrix.getFlipVertically(1));
-
-    // ...leave with GL_MODELVIEW as the active matrix
-    gl2.glMatrixMode(GL2.GL_MODELVIEW);
-  }
 
   @Override
   public void render() {
@@ -113,10 +50,20 @@ public class SpritePanel extends GLPanel implements IEditorView {
           spriteInfo.workImageSize().y / 2);
     } while (false);
 
+    IPoint size = getSize();
+    float zoom = getZoom();
+
+    // Calculate the origin from the focus and the view size
+    // We want the (possibly zoomed) sprite pixel at sFocus to appear in the
+    // center of the view.
+    //
+    setOrigin(new Point(sFocus.x - size.x / (2 * zoom), sFocus.y - size.y
+        / (2 * zoom)));
+
+    super.render();
+
     paintStart();
-    prepareProjection();
     paintContents();
-    paintEnd();
   }
 
   private void paintContents() {
@@ -132,7 +79,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     if (mShowClip.isSelected()) {
       setRenderColor(hlClip ? RED : BLUE);
-      lineWidth(10f / zoomFactor());
+      lineWidth(10f / getZoom());
       drawFrame(spriteInfo.cropRect());
     }
 
@@ -142,14 +89,14 @@ public class SpritePanel extends GLPanel implements IEditorView {
       gl2.glPushMatrix();
       gl2.glTranslatef(t0.x, t0.y, 0);
 
-      lineWidth(3.2f / zoomFactor());
+      lineWidth(3.2f / getZoom());
       setRenderColor(704);
 
-      float W = 20 / zoomFactor();
+      float W = 20 / getZoom();
 
       drawLine(-W, 0, W, 0);
       drawLine(0, -W, 0, W);
-      lineWidth(1.2f / zoomFactor());
+      lineWidth(1.2f / getZoom());
       setRenderColor(hlCP ? YELLOW : BLACK);
 
       drawLine(-W, 0, W, 0);
@@ -253,9 +200,9 @@ public class SpritePanel extends GLPanel implements IEditorView {
   public void drawCircle(Point origin, float radius) {
     final boolean db = false;
 
-    int nPts = (int) (radius * zoomFactor() / 2);
+    int nPts = (int) (radius * getZoom() / 2);
     if (db)
-      pr("before clamping, radius=" + radius + " zoom=" + zoomFactor()
+      pr("before clamping, radius=" + radius + " zoom=" + getZoom()
           + " nPts=" + nPts);
     nPts = MyMath.clamp(nPts, 6, 50);
 
@@ -361,17 +308,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
   // public static final float[] GREEN = { 0, 1, 0 };
 
   private void paintStart() {
-    // clear to background color
-    Color c = Color.gray;
-
-    float TOFLOAT = 1 / 255.0f;
-    gl2.glClearColor(c.getRed() * TOFLOAT, c.getGreen() * TOFLOAT, c.getBlue()
-        * TOFLOAT, 1);
-    gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
-
-    if (sizeHasChanged()) {
-      prepareViewport();
-    }
 
     // set REPLACE mode, to ignore color
     gl2.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
@@ -388,14 +324,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     activeTexture = 0;
     textureMode = false;
-  }
-
-  /**
-   * Finish rendering frame
-   */
-  private void paintEnd() {
-    // while in the GL context, delete any previously removed textures
-    TextureLoader.processDeleteList();
   }
 
   private int textureFor(Atlas a) {
@@ -647,7 +575,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
   private JCheckBox mShowClip;
   private boolean hlClip, hlCP;
   private float lineWidth = 1;
-  private Matrix mViewToWorldMatrix = new Matrix();
   private int renderState;
   private int currentColorId;
   private Map atlasTextures;

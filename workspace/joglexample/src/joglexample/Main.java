@@ -1,8 +1,11 @@
 package joglexample;
 
+import javax.media.opengl.GL;
 import javax.swing.JFrame;
 
-import myjogl.GLPanel;
+import com.js.geometry.IPoint;
+
+import myopengl.GLPanel;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
@@ -13,12 +16,22 @@ import java.util.TimerTask;
 public class Main {
 
   private static class OurGLPanel extends GLPanel {
+
     @Override
     public void render() {
-      if (sizeHasChanged()) {
-        OneTriangle.setup(getSize());
-      }
-      OneTriangle.render(getSize());
+      super.render();
+
+      IPoint size = getSize();
+
+      // draw a triangle filling the window
+      gl2.glBegin(GL.GL_TRIANGLES);
+      gl2.glColor3f(1, 0, 0);
+      gl2.glVertex2f(0, 0);
+      gl2.glColor3f(0, 1, 0);
+      gl2.glVertex2f(size.x, 0);
+      gl2.glColor3f(0, 0, 1);
+      gl2.glVertex2f(size.x / 2, size.y);
+      gl2.glEnd();
     }
   }
 

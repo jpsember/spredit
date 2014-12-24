@@ -2,7 +2,6 @@ package apputil;
 
 import java.awt.Component;
 
-import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
 public interface IEditorView {
@@ -11,7 +10,7 @@ public interface IEditorView {
    * @param viewPt point in view space
    * @return point in world
    */
-  public Point viewToWorld(IPoint viewPt);
+  public Point viewToWorld(Point viewPt);
   
   /**
    * Repaint view 
@@ -22,7 +21,7 @@ public interface IEditorView {
    * Determine scaling factor to convert world to view
    * @return
    */
-  public float zoomFactor();
+  public float getZoom();
 
   public Component getComponent();
 }
