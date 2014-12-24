@@ -269,23 +269,39 @@ public class SpritePanel extends GLPanel implements IEditorView {
   public void drawLine(float x1, float y1, float x2, float y2) {
     setRenderState(RENDER_RGB);
 
-    float s = lineWidth * .5f;
+    // We want to plot the Minkowski sum of the line segment with a unit square
+    // rotated to be aligned with the line segment;
+    // the square has width equal to the line width
 
-    // Calculate the unit vector rotated 90 degrees from ray p1->p2
+    // Calculate the unit vector from p1 to p2; if undefined, assume line is
+    // horizontal
     float dist = MyMath.distanceBetween(new Point(x1, y1), new Point(x2, y2));
-    float nx = 0;
-    float ny = s;
+
+    // The 'radius' of the unit square representing our pen
+    float radius = lineWidth * .5f;
+
+    float u = radius;
+    float v = 0;
     if (dist > 0) {
-      float r = s / dist;
-      ny = (x2 - x1) * r;
-      nx = -(y2 - y1) * r;
+      float r = radius / dist;
+      u = (x2 - x1) * r;
+      v = -(y2 - y1) * r;
     }
 
+    // The top left corner of the (rotated) unit square has coordinates
+    // (x,y) = (u-v, u+v), and each successive (ccw) corner is found
+    // by applying the substitution (x',y') = (-y, x)
+
     gl.glBegin(GL_TRIANGLE_STRIP);
-    gl.glVertex3f(x1 - nx, y1 - ny, 0);
-    gl.glVertex3f(x2 - nx, y2 - ny, 0);
-    gl.glVertex3f(x1 + nx, y1 + ny, 0);
-    gl.glVertex3f(x2 + nx, y2 + ny, 0);
+    // bottom left
+    gl.glVertex2f(x1 - u + v, y1 - u - v);
+    // bottom right
+    gl.glVertex2f(x2 + u + v, y2 - u + v);
+    // top left
+    gl.glVertex2f(x1 - u - v, y1 + u - v);
+    // top right
+    gl.glVertex2f(x2 + u - v, y2 + u + v);
+
     gl.glEnd();
   }
 
