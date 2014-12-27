@@ -25,6 +25,8 @@ import streams.*;
  * - (single dash) -2 (digit interpreted as value)
  * 
  * </pre>
+ * 
+ * @deprecated
  */
 public class CmdArgs {
 

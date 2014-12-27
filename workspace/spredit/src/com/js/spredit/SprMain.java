@@ -2,7 +2,6 @@ package com.js.spredit;
 
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
 import static com.js.basic.Tools.*;
 
 import javax.swing.*;
@@ -11,7 +10,6 @@ import com.js.basic.CmdLineArgs;
 import com.js.geometry.IPoint;
 
 import apputil.*;
-import scanning.*;
 import streams.*;
 import tex.*;
 
@@ -24,121 +22,75 @@ public class SprMain implements IApplication {
   }
 
   private static final String APP_NAME = "SprEdit";
-
-  private static final String help = "Compile texture atlas\n"
-      + "spredit <options>\n" + "Options: \n"
-      + " -b <projectpath[.txp]>  : build texture atlas\n"
-      + " -w               : write texture atlas to png file\n"
-      + " -p               : include standard palette in atlas\n"
-      + " -f <fontname> <size> <outputpath>\n"
-      + "                  : build atlas from Java font\n"
-      + "                    (replace spaces in font name with underscores)\n"
-      + " -F               : display fonts available on this machine\n"
-      + " -s <width> <height> : set size of atlas for font\n"
-      + " -S               : show built font\n" //
-      + " -R               : plot frames around sprites\n" //
-      + " -T               : disable font sorting\n" //
-      + " -C               : disable font cropping\n" //
-      + " -H <pixels>      : add extra horizontal pixels between characters\n" //
-      + " -h, --help       : help\n" //
-      + " -v               : verbose\n" //
-      + " -B               : set bold attribute\n" //
-      + " -I               : set italic attribute\n" //
-  , //
-
-      defaults = " == --help -h" + " !! " + "   ";
-
   private static IApplication theApp;
 
   public static void main(String[] args) {
-    runGUI = true;
 
     try {
-      CmdArgs ca = new CmdArgs(args, defaults, help);
+      CmdLineArgs ca = new CmdLineArgs();
+      sArgs = ca;
+      ca.banner("Compile texture atlas");
 
-      while (true) {
-        if (!ca.hasNext()) {
-          break;
-        }
+      unimp("some way of describing argument VALUES in help message");
+      ca.add("build").setString()
+          .desc("Build texture atlas <projectpath[.txp]>");
+      ca.add("write").desc("Write texture atlas to .png file");
+      ca.add("palette").desc("Include standard palette in atlas");
+      ca.add("font").setString().setArray()
+          .desc("Build atlas from Java font; <fontname> <size> <outputpath>");
+      ca.add("showfont").desc("Display the built font");
+      ca.add("showfonts").desc("Display fonts available on this machine");
+      ca.add("size").setInt().setArray()
+          .desc("Set size of atlas for font <width> <height>");
+      ca.add("frames").desc("Plot frames around sprites");
+      ca.add("nosort").desc("Disable font sorting");
+      ca.add("nocrop").desc("Disable font cropping");
+      ca.add("horzpixels").def(0)
+          .desc("Add extra horizontal pixels between characters");
+      ca.add("verbose").desc("Verbose messages");
+      ca.add("bold").desc("Set bold attribute");
+      ca.add("italics").desc("Set italics attribute");
+      ca.add("resolutions").setDouble().setArray()
+          .desc("Set resolutions to compile");
 
-        if (!ca.nextIsOption())
-          ca.exception("Unexpected argument: " + ca.nextValue());
+      ca.parse(args);
 
-        switch (ca.nextChar()) {
-        default:
-          ca.unsupported();
-          break;
+      verbose = ca.get("verbose");
 
-        case 'v':
-          verbose = true;
-          break;
-        case 'F': {
-          runGUI = false;
-          String[] fn = Builder.getFontNames();
-          for (int i = 0; i < fn.length; i++) {
-            String s = fn[i];
-            s = s.replaceAll(" ", "_");
-            pr(s);
-          }
+      if (ca.get("showfonts")) {
+        runGUI = false;
+        String[] fn = Builder.getFontNames();
+        for (int i = 0; i < fn.length; i++) {
+          String s = fn[i];
+          s = s.replaceAll(" ", "_");
+          pr(s);
+        }
+      }
+      showAtlas = ca.get("showfont");
+      if (ca.hasValue("font")) {
+        String[] s = ca.getStrings("font");
+        if (s.length != 3)
+          ca.fail("Missing arguments for 'font'");
+        runGUI = false;
+        fontName = s[0];
+        fontName = fontName.replaceAll("_", " ");
+        fontSize = Integer.parseInt(s[1]);
+        fontPath = s[2];
+      }
 
-        }
-          break;
-        case 'S':
-          showAtlas = true;
-          break;
-        case 'C':
-          fontCropping = false;
-          break;
-        case 'B':
-          bold = true;
-          break;
-        case 'I':
-          italic = true;
-          break;
-        case 'T':
-          disableSorting = true;
-          break;
-        case 'H':
-          horzPixels = ca.nextInt();
-          break;
-        case 'f': {
-          runGUI = false;
-          fontName = ca.nextValue();
-          fontName = fontName.replaceAll("_", " ");
-          fontSize = ca.nextInt();
-          fontPath = ca.nextValue();
-        }
-          break;
-        case 'R':
-          plotDebugFrames = true;
-          break;
-        case 's':
-          atlasSize = new IPoint(ca.nextInt(), ca.nextInt());
-          break;
-        case 'b': {
-          runGUI = false;
-          String p = ca.nextValue();
-          p = Streams.addExtension(p, TexProject.SRC_EXT);
-          buildPath = new File(p).getAbsoluteFile();
-        }
-          break;
-        case 'p':
-          includePalette = true;
-          break;
-        case 'w':
-          writeToPNG = true;
-          break;
-        case 'r': {
-          ArrayList<Float> a = new ArrayList();
-          while (ca.nextIsValue()) {
-            a.add((float) ca.nextDouble());
-          }
-          resolutions = new float[a.size()];
-          for (int i = 0; i < resolutions.length; i++)
-            resolutions[i] = a.get(i);
-        }
-          break;
-        }
+      if (ca.hasValue("size")) {
+        int[] v = ca.getInts("size");
+        atlasSize = new IPoint(v[0], v[1]);
+      }
+      if (ca.hasValue("build")) {
+        runGUI = false;
+        String p = ca.getString("build");
+        p = Streams.addExtension(p, TexProject.SRC_EXT);
+        buildPath = new File(p).getAbsoluteFile();
+      }
+
+      if (ca.hasValue("resolutions")) {
+        resolutions = ca.getFloats("resolutions");
       }
 
       if (runGUI) {
@@ -173,9 +125,9 @@ public class SprMain implements IApplication {
           Builder b = new Builder();
           b.setProject(tp);
           b.setVerbose(verbose);
-          b.setSort(!disableSorting);
-          b.setPlotFrames(plotDebugFrames);
-          if (includePalette)
+          b.setSort(!sArgs.get("nosort"));
+          b.setPlotFrames(sArgs.get("frames"));
+          if (sArgs.get("palette"))
             b.includePalette();
 
           b.gatherSprites();
@@ -195,7 +147,7 @@ public class SprMain implements IApplication {
             if (db)
               pr("done building");
 
-            if (writeToPNG) {
+            if (sArgs.get("write")) {
               at.debugWriteToPNG();
               // File pngPath = Streams.changeExtension(f, "png");
               // pr("writing atlas to " + pngPath);
@@ -211,9 +163,9 @@ public class SprMain implements IApplication {
           }
           return;
         }
-
       }
-
+    } catch (CmdLineArgs.Exception e) {
+      System.out.println(e.getMessage());
     } catch (Throwable e) {
       e.printStackTrace();
     }
@@ -286,17 +238,17 @@ public class SprMain implements IApplication {
 
       Builder atlasBuilder = new Builder();
       atlasBuilder.setVerbose(verbose);
-      atlasBuilder.setSort(!disableSorting);
-      atlasBuilder.setPlotFrames(plotDebugFrames);
+      atlasBuilder.setSort(!sArgs.get("nosort"));
+      atlasBuilder.setPlotFrames(sArgs.get("frames"));
 
-      if (includePalette) {
+      if (sArgs.get("palette")) {
         atlasBuilder.includePalette();
       }
 
       int style = 0;
-      if (italic)
+      if (sArgs.get("italics"))
         style |= Font.ITALIC;
-      if (bold)
+      if (sArgs.get("bold"))
         style |= Font.BOLD;
 
       int scaledSize = Math.round(fontSize * scl);
@@ -305,14 +257,14 @@ public class SprMain implements IApplication {
       // f = new Font(fontName, style, fontSize);
       FontExtractor fimg = new FontExtractor(
           new Font(fontName, style, fontSize));
-      fimg.setHorizontalSpacing(horzPixels);
-      fimg.setCropping(fontCropping);
+      fimg.setHorizontalSpacing(sArgs.getInt("horzpixels"));
+      fimg.setCropping(!sArgs.get("nocrop"));
 
       FontExtractor fimg2 = null;
       if (scaledSize != fontSize) {
         fimg2 = new FontExtractor(new Font(fontName, style, scaledSize));
-        fimg2.setHorizontalSpacing(horzPixels);
-        fimg2.setCropping(fontCropping);
+        fimg2.setHorizontalSpacing(sArgs.getInt("horzpixels"));
+        fimg2.setCropping(!sArgs.get("nocrop"));
       }
 
       // if (
@@ -362,7 +314,7 @@ public class SprMain implements IApplication {
       if (verbose)
         pr("built atlas " + at);
 
-      if (writeToPNG)
+      if (sArgs.get("write"))
         at.debugWriteToPNG();
 
       if (slot == 0) {
@@ -410,11 +362,9 @@ public class SprMain implements IApplication {
   private static String fontName;
   private static int fontSize;
   private static boolean verbose;
-  private static boolean runGUI, showAtlas, plotDebugFrames, disableSorting,
-      fontCropping = true, bold, italic, includePalette, writeToPNG;
-  private static int horzPixels;
+  private static boolean runGUI = true;
+  private static boolean showAtlas;
   private static File atlasFile;
   private static float[] resolutions;
-
+  private static CmdLineArgs sArgs;
 }
-

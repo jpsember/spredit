@@ -181,15 +181,16 @@ public class CmdLineArgs {
 
   /**
    * Get the boolean value supplied for an option, or its default if none was
-   * given
+   * given. If no default was specified, assume it was false.
    */
   public boolean get(String optionName) {
     Opt opt = findOption(optionName);
     validate(!opt.mArray && opt.mType == T_BOOL, "type mismatch", optionName);
     Object value = opt.mDefaultValue;
+    if (value == null)
+      value = Boolean.FALSE;
     if (!opt.mValues.isEmpty())
       value = opt.mValues.get(0);
-    validate(value != null, "missing value", optionName);
     return (Boolean) value;
   }
 
@@ -261,6 +262,17 @@ public class CmdLineArgs {
   }
 
   /**
+   * Get the array of doubles supplied for an argument, converted to floats
+   */
+  public float[] getFloats(String arg) {
+    double[] d = getDoubles(arg);
+    float[] f = new float[d.length];
+    for (int i = 0; i < d.length; i++)
+      f[i] = (float) d[i];
+    return f;
+  }
+
+  /**
    * Get the array of strings supplied for an option
    */
   public String[] getStrings(String optionName) {
@@ -284,6 +296,15 @@ public class CmdLineArgs {
     lock();
     ArrayList argList = unpackArguments(args);
     readArgumentValues(argList);
+  }
+
+  /**
+   * Throw a CmdLineArgs.Exception
+   * 
+   * @param message
+   */
+  public void fail(String message) {
+    throw new Exception(message);
   }
 
   public void help() {
@@ -454,6 +475,7 @@ public class CmdLineArgs {
   private static class Opt {
     public Opt(String longName) {
       mLongName = longName;
+      // Until changed to something else, we will assume the type is boolean
       mType = T_BOOL;
     }
 
@@ -481,18 +503,6 @@ public class CmdLineArgs {
         mValues.clear();
       mValues.add(value);
     }
-
-    // @Override
-    // public String toString() {
-    // StringBuilder sb = new StringBuilder(mLongName);
-    // sb.append(" " + mType);
-    // if (mArray)
-    // sb.append("[]");
-    // if (mDefaultValue != null)
-    // sb.append(" def:" + mDefaultValue);
-    // sb.append(" values:" + mValues);
-    // return sb.toString();
-    // }
 
     public String mLongName;
     public String mShortName;
