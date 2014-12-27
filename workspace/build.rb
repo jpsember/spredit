@@ -89,6 +89,12 @@ class App
       Project.add("jogl")
       .add_libraries(["#{JOGAMP}/gluegen/build/gluegen-rt.jar","#{JOGAMP}/jogl/build/jar/jogl-all.jar"])
 
+      Project.add("testUtils")
+      .add_libraries(["../eclipse_config/junit.jar"])
+
+      Project.add("basicTest")
+      .add_projects(["basic"])
+
       build_projects
 
     rescue ProgramException => e
@@ -98,7 +104,6 @@ class App
   end
 
   def build_projects
-    class_path = build_class_path
     Project.map.values.each do |project|
       puts "building project #{project.name}" if @verbose
       @src_path = project.src_path
@@ -120,48 +125,74 @@ class App
 
       orig_cmd_length = cmd.length
       @cmd = cmd
+      test_classes = []
 
-      FileUtils.process_directory_tree(@src_path,".java"){|x| prepare_compile_java_file(x)}
-      next if cmd.length == orig_cmd_length
+      FileUtils.process_directory_tree(@src_path,".java"){|x| prepare_compile_java_file(x,test_classes)}
+      if cmd.length != orig_cmd_length
+        puts "Command: #{cmd}" if @verbose
+        scall(cmd)
+      end
 
-      puts "Command: #{cmd}" if @verbose
-
-      scall(cmd)
+      if !@options[:notests]
+        # Run unit tests
+        all_tests_succeeded = true
+        test_classes.each do |class_name|
+          cmd = "java -cp " << class_path << " junit.textui.TestRunner " << class_name
+          puts "running unit tests for #{class_name}" if @verbose
+          output,success = scall(cmd,false)
+          if @verbose || !success
+            puts output
+          end
+          all_tests_succeeded &= success
+        end
+        raise ProgramException,"Test failures" if !all_tests_succeeded
+      end
     end
   end
 
-  def build_class_path
-    entries = Set.new
-    Project.map.each do |name,project|
-      project.verify_dependent_projects_exist
-      entries.add(project.bin_path)
-      project.libraries.each do |lib|
-        entries.add(lib)
+  def class_path
+    if !@class_path
+      entries = Set.new
+      Project.map.each do |name,project|
+        project.verify_dependent_projects_exist
+        entries.add(project.bin_path)
+        project.libraries.each do |lib|
+          entries.add(lib)
+        end
       end
-    end
-    path = ""
-    entries.each do |x|
-      if path.length > 0
-        path << ":"
+      path = ""
+      entries.each do |x|
+        if path.length > 0
+          path << ":"
+        end
+        path << x
       end
-      path << x
+      @class_path = path
     end
-    path
+    @class_path
   end
 
   def class_path_for_java_file(src_file)
-    rel_path = src_file[@src_path.length..-1]
-    FileUtils.change_extension(File.join(@bin_path,rel_path),"class")
+    rel_path = src_file[@src_path.length+1..-1]
+    class_path = FileUtils.change_extension(File.join(@bin_path,rel_path),"class")
+    [rel_path,class_path]
   end
 
-  def prepare_compile_java_file(src_file)
+  def prepare_compile_java_file(src_file,test_classes)
     # Determine if class file exists and is not older than source
-    class_file = class_path_for_java_file(src_file)
+    rel_path,class_file = class_path_for_java_file(src_file)
     if File.file?(class_file) && File.mtime(class_file) >= File.mtime(src_file)
       puts "   (not recompiling valid class file #{class_file})" if @verbose
-      return
+    else
+      @cmd << " " << src_file
     end
-    @cmd << " " << src_file
+
+    # If class name has "Test" suffix, add to list of test classes
+    if rel_path.end_with?("Test.java")
+      class_name = FileUtils.remove_extension(rel_path).gsub('/','.')
+      test_classes << class_name
+    end
+
   end
 
   def parse_arguments(argv)
@@ -171,6 +202,7 @@ class App
       EOS
       opt :clean, "clean old class files"
       opt :verbose, "display progress"
+      opt :notests, "omit unit tests",:short => '-T'
     end
     options = Trollop::with_standard_exception_handling parser do
       parser.parse argv
