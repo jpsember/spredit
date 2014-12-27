@@ -182,7 +182,7 @@ class App
     # Determine if class file exists and is not older than source
     rel_path,class_file = class_path_for_java_file(src_file)
     if File.file?(class_file) && File.mtime(class_file) >= File.mtime(src_file)
-      puts "   (not recompiling valid class file #{class_file})" if @verbose
+      #puts "   (not recompiling valid class file #{class_file})" if @verbose
     else
       @cmd << " " << src_file
     end

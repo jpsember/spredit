@@ -211,12 +211,17 @@ class Commit
   end
 
   def run_unit_tests
-    output,success = runcmd("build.rb","...building and running unit tests")
-    if !success
-      puts "\n\n\n-----------------------------------------"
+    cmd = "build.rb"
+    if @verbose
+      cmd << " -v"
+    end
+    output,success = runcmd(cmd,"...building and running unit tests")
+    if @verbose || !success
+      puts "\n\n\n" if !success
+      puts "-----------------------------------------"
       puts output
       puts "-----------------------------------------"
-      raise ProgramException,"Problem performing unit tests"
+      raise ProgramException,"Problem performing unit tests" if !success
     end
   end
 
