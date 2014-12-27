@@ -37,7 +37,7 @@ public class AppTools {
         sb.append("\\n");
       } else if (c < 0x20 || c > 0x7f || c == '"' || c == '\\') {
         sb.append("\\u");
-        TextScanner.toHex(sb, c, 4);
+        sb.append(dh(c, "4"));
       } else
         sb.append(c);
     }

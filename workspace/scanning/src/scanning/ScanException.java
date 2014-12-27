@@ -1,4 +1,6 @@
 package scanning;
+
+@Deprecated
 public class ScanException extends RuntimeException {
   public ScanException(String s) {
   super(s);

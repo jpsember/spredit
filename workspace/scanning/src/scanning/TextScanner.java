@@ -1,6 +1,9 @@
 package scanning;
 
 import java.io.*;
+
+import com.js.basic.Tools;
+
 import static com.js.basic.Tools.*;
 
 import base.*;
@@ -32,11 +35,6 @@ public class TextScanner {
     return out;
   }
 
-  //public static final int
-  //      T_WS = 128
-  //      ,T_WORD = 129
-  //      ;
-
   private static Reader sysInReader;
   private static Writer sysOutWriter;
 
@@ -57,7 +55,6 @@ public class TextScanner {
   @Deprecated
   public String tokenName(Token t) {
     return DFA.tokenName(dfa, t.id());
-    //(dfa == null) ? DFA.defaultTokenName(t.id()) : dfa.tokenName(t.id());
   }
 
   public static String convert(String orig) {
@@ -77,9 +74,13 @@ public class TextScanner {
 
   /**
    * Convert a character to escaped form, append to buffer
-   * @param c : char to convert
-   * @param delim : if >= 0, delimeter of string that must be escaped
-   * @param sb : destination StringBuilder; null to create one
+   * 
+   * @param c
+   *          : char to convert
+   * @param delim
+   *          : if >= 0, delimeter of string that must be escaped
+   * @param sb
+   *          : destination StringBuilder; null to create one
    * @return StringBuilder
    */
   public static StringBuilder convert(char c, char delim, StringBuilder sb) {
@@ -95,7 +96,7 @@ public class TextScanner {
         sb.append(c);
       } else {
         sb.append("\\u");
-        sb.append(toHex(c, 4));
+        sb.append(Tools.dh(c, "4"));
       }
       break;
     }
@@ -108,7 +109,9 @@ public class TextScanner {
 
   /**
    * Convert a character to its escaped form
-   * @param c char
+   * 
+   * @param c
+   *          char
    * @return String
    */
   public static String convert(char c) {
@@ -117,10 +120,12 @@ public class TextScanner {
 
   /**
    * Convert string to debug display
-   * @param orig String
+   * 
+   * @param orig
+   *          String
    * @return String in form [xxxxxx...xxx], with nonprintables converted to
-   * unicode or escape sequences, and ... inserted if length is greater than
-   * about the width of a line
+   *         unicode or escape sequences, and ... inserted if length is greater
+   *         than about the width of a line
    */
   public static String debug(String orig) {
     return debug(orig, 75, false);
@@ -128,12 +133,16 @@ public class TextScanner {
 
   /**
    * Convert string to debug display
-   * @param orig String
-   * @param maxLen : maximum length of resulting string
-   * @param pad : if true, pads with spaces after conversion
+   * 
+   * @param orig
+   *          String
+   * @param maxLen
+   *          : maximum length of resulting string
+   * @param pad
+   *          : if true, pads with spaces after conversion
    * @return String in form [xxxxxx...xxx], with nonprintables converted to
-   * unicode or escape sequences, and ... inserted if length is greater than
-   * about the width of a line
+   *         unicode or escape sequences, and ... inserted if length is greater
+   *         than about the width of a line
    */
   public static String debug(String orig, int maxLen, boolean pad) {
     if (maxLen < 8) {
@@ -152,7 +161,7 @@ public class TextScanner {
       }
     }
     if (pad) {
-       tab(sb, maxLen);
+      tab(sb, maxLen);
     }
 
     return sb.toString();
@@ -172,45 +181,42 @@ public class TextScanner {
       }
       char c = orig.charAt(i);
       switch (state) {
-      case NORM:
-        {
-          if (c == '\\') {
-            state = ESC;
-            break;
-          }
-          sb.append(c);
+      case NORM: {
+        if (c == '\\') {
+          state = ESC;
+          break;
         }
+        sb.append(c);
+      }
         break;
-      case ENCODE:
-        {
-          convert(c, delim, sb);
-        }
+      case ENCODE: {
+        convert(c, delim, sb);
+      }
         break;
 
-      case ESC:
-        {
-          state = NORM;
-          switch (c) {
-          default:
+      case ESC: {
+        state = NORM;
+        switch (c) {
+        default:
+          state = ERR;
+          break;
+        case 'u':
+          if (i + 5 > orig.length()) {
             state = ERR;
             break;
-          case 'u':
-            if (i + 5 > orig.length()) {
-              state = ERR;
-              break;
-            }
-            sb.append((char) TextScanner.parseHex(orig, i + 1, 4));
-            i += 4;
-            break;
-          case 'n':
-            sb.append('\n');
-            break;
-          case '\'':
-          case '"':
-            sb.append(c);
-            break;
           }
+          sb.append((char) TextScanner.parseHex(orig, i + 1, 4));
+          i += 4;
+          break;
+        case 'n':
+          sb.append('\n');
+          break;
+        case '\'':
+        case '"':
+          sb.append(c);
+          break;
         }
+      }
         break;
       }
     }
@@ -221,12 +227,16 @@ public class TextScanner {
 
   /**
    * Convert string to/from embedded format
-   * @param orig String
-   * @param toUnicode : if true, converts escape sequences to unicode;
-   *   false, converts unicode to escape sequences
-   * @param delim : if not 0, then if converting FROM unicode, surrounds
-   *  output with this character; if converting TO unicode, removes this
-   *  character from ends if it exists (it must exist at both ends)
+   * 
+   * @param orig
+   *          String
+   * @param toUnicode
+   *          : if true, converts escape sequences to unicode; false, converts
+   *          unicode to escape sequences
+   * @param delim
+   *          : if not 0, then if converting FROM unicode, surrounds output with
+   *          this character; if converting TO unicode, removes this character
+   *          from ends if it exists (it must exist at both ends)
    * @return String
    */
   public static String convert(String orig, boolean toUnicode, char delim) {
@@ -238,11 +248,11 @@ public class TextScanner {
         sb.append(delim);
       } else {
         orig = removeQuotes(orig, delim);
-        //      if (orig.length() >= 2
-        //      && orig.charAt(0) == delim
-        //      && orig.charAt(orig.length()-1) == delim) {
-        //    orig = orig.substring(1,orig.length()-1);
-        //      }
+        // if (orig.length() >= 2
+        // && orig.charAt(0) == delim
+        // && orig.charAt(orig.length()-1) == delim) {
+        // orig = orig.substring(1,orig.length()-1);
+        // }
         convert(orig, toUnicode, (char) 0, sb);
       }
     } else {
@@ -251,26 +261,28 @@ public class TextScanner {
     return sb.toString();
   }
 
-  //  /**
-  //   * Convert string to/from embedded format
-  //   * @param orig String
-  //   * @param toUnicode : if true, converts escape sequences to unicode;
-  //   *   false, converts unicode to escape sequences
-  //   * @return String
-  //   */
-  //  private static String convert(String orig, boolean toUnicode) {
-  //    return convert(orig, toUnicode, (char) 0);
-  //  }
+  // /**
+  // * Convert string to/from embedded format
+  // * @param orig String
+  // * @param toUnicode : if true, converts escape sequences to unicode;
+  // * false, converts unicode to escape sequences
+  // * @return String
+  // */
+  // private static String convert(String orig, boolean toUnicode) {
+  // return convert(orig, toUnicode, (char) 0);
+  // }
 
   /**
-   * Remove quotes from a string if they exist.
-   * Note that no special treatment is given to the last character if it
-   * has been escaped:  'xxxx\' will return xxxx\
+   * Remove quotes from a string if they exist. Note that no special treatment
+   * is given to the last character if it has been escaped: 'xxxx\' will return
+   * xxxx\
    * 
-   * @param s : String
-   * @param delim : quote character to look for
+   * @param s
+   *          : String
+   * @param delim
+   *          : quote character to look for
    * @return original string, or original string with first and last characters
-   *   removed if they equal delim
+   *         removed if they equal delim
    */
   public static String removeQuotes(String s, char delim) {
     do {
@@ -287,10 +299,12 @@ public class TextScanner {
 
   /**
    * Remove quotes from a string.
-   * @param s : String
-  * @return original string, or original string with first and last characters
-   *   removed if they are the same and ' or "
-    */
+   * 
+   * @param s
+   *          : String
+   * @return original string, or original string with first and last characters
+   *         removed if they are the same and ' or "
+   */
   public static String removeQuotes(String s) {
     do {
       if (s.length() < 2) {
@@ -311,10 +325,15 @@ public class TextScanner {
 
   /**
    * Construct a scanner for reading, with optional DFA
-   * @param reader : Reader
-   * @param sourceDescription : String describing reader, or null; i.e. filename
-   * @param dfa : DFA to use, or null
-   * @param skipType : id of tokens to skip, or -1
+   * 
+   * @param reader
+   *          : Reader
+   * @param sourceDescription
+   *          : String describing reader, or null; i.e. filename
+   * @param dfa
+   *          : DFA to use, or null
+   * @param skipType
+   *          : id of tokens to skip, or -1
    */
   public TextScanner(Reader reader, String sourceDescription, DFA dfa,
       int skipType) {
@@ -328,14 +347,15 @@ public class TextScanner {
   }
 
   public TextScanner(Reader reader) {
-    
-     
+
     include(reader, null);
   }
 
   /**
    * Construct a scanner for a string, with no DFA
-   * @param str String
+   * 
+   * @param str
+   *          String
    */
   public TextScanner(String str) {
     include(new StringReader(str), str);
@@ -362,7 +382,9 @@ public class TextScanner {
 
   /**
    * Read a whitespace-delimited token from a reader.
-   * @param r Reader
+   * 
+   * @param r
+   *          Reader
    * @return String; empty if no tokens remain
    */
   public static String readToken(Reader r) throws IOException {
@@ -385,6 +407,7 @@ public class TextScanner {
 
   /**
    * Read a line, trimming any crs.
+   * 
    * @return String, or null if no characters remain in reader
    */
   public String readLine() {
@@ -407,31 +430,35 @@ public class TextScanner {
 
   private void traceMsg(String s) {
     System.out.println(" (Scanner: " + s + ")");
-    //    inf.update();
+    // inf.update();
   }
 
-  //  Inf inf = new Inf("scanner", 200);
+  // Inf inf = new Inf("scanner", 200);
 
-  //  public void include(Reader r, String description) {
-  //    include(r,description);
+  // public void include(Reader r, String description) {
+  // include(r,description);
   //
-  //    if (tracing) {
-  //      traceMsg("include " + description);
-  //    }
-  //    if (ri != null) {
-  //      readerStack.push(ri);
-  //    }
-  //    ri = new MyReader(r, description, dfa, 1024);
-  //  }
+  // if (tracing) {
+  // traceMsg("include " + description);
+  // }
+  // if (ri != null) {
+  // readerStack.push(ri);
+  // }
+  // ri = new MyReader(r, description, dfa, 1024);
+  // }
 
   /**
    * Include reader
-   * @param r  : Reader
-   * @param description : for display purposes, to tell user what
-   *   file produced an error
-   * @param toFront : where in queue to place reader: true if reader should be inserted in front
-   *  of existing ones; false to append to end of existing ones
-   *
+   * 
+   * @param r
+   *          : Reader
+   * @param description
+   *          : for display purposes, to tell user what file produced an error
+   * @param toFront
+   *          : where in queue to place reader: true if reader should be
+   *          inserted in front of existing ones; false to append to end of
+   *          existing ones
+   * 
    */
   public void include(Reader r, String description, boolean toFront) {
     include(r, description, toFront, 0, 0);
@@ -439,16 +466,20 @@ public class TextScanner {
 
   /**
    * Include reader
-   * @param r  : Reader
-   * @param description : for display purposes, to tell user what
-   *   file produced an error
-   * @param toFront : where in queue to place reader: true if reader should be inserted in front
-   *  of existing ones; false to append to end of existing ones
-   *
+   * 
+   * @param r
+   *          : Reader
+   * @param description
+   *          : for display purposes, to tell user what file produced an error
+   * @param toFront
+   *          : where in queue to place reader: true if reader should be
+   *          inserted in front of existing ones; false to append to end of
+   *          existing ones
+   * 
    */
   public void include(Reader r, String description, boolean toFront,
       int startLine, int startCol) {
-     
+
     if (tracing) {
       traceMsg("include " + description);
     }
@@ -475,54 +506,56 @@ public class TextScanner {
     include(r, description, true);
   }
 
-  //  private static String[] tokenize(String s, char delimiter,
-  //                                   boolean skipEmptyTokens) {
-  //    final boolean p = false;
+  // private static String[] tokenize(String s, char delimiter,
+  // boolean skipEmptyTokens) {
+  // final boolean p = false;
   //
-  //    if (p) {
-  //      System.out.println("tokenize [" + s + "]");
-  //    }
-  //    DArray strs = new DArray();
-  //    StringBuilder sb = new StringBuilder();
-  //    {
-  //      boolean escaped = false;
-  //      for (int i = 0; i <= s.length(); i++) {
-  //        char c = delimiter;
-  //        if (i < s.length()) {
-  //          c = s.charAt(i);
-  //        }
-  //        else {
-  //          Tools.ASSERT(!escaped);
-  //        }
+  // if (p) {
+  // System.out.println("tokenize [" + s + "]");
+  // }
+  // DArray strs = new DArray();
+  // StringBuilder sb = new StringBuilder();
+  // {
+  // boolean escaped = false;
+  // for (int i = 0; i <= s.length(); i++) {
+  // char c = delimiter;
+  // if (i < s.length()) {
+  // c = s.charAt(i);
+  // }
+  // else {
+  // Tools.ASSERT(!escaped);
+  // }
   //
-  //        if (!escaped) {
-  //          if (c == '\\') {
-  //            escaped = true;
-  //            continue;
-  //          }
-  //          if (c == delimiter) {
-  //            if (!skipEmptyTokens || sb.length() > 0) {
-  //              strs.add(sb.toString());
-  //              if (p) {
-  //                System.out.println(" added [" + strs.last() + "]");
-  //              }
-  //            }
-  //            sb.setLength(0);
-  //            continue;
-  //          }
-  //        }
-  //        sb.append(c);
-  //        escaped = false;
-  //      }
-  //      return strs.toStringArray();
-  //    }
-  //  }
+  // if (!escaped) {
+  // if (c == '\\') {
+  // escaped = true;
+  // continue;
+  // }
+  // if (c == delimiter) {
+  // if (!skipEmptyTokens || sb.length() > 0) {
+  // strs.add(sb.toString());
+  // if (p) {
+  // System.out.println(" added [" + strs.last() + "]");
+  // }
+  // }
+  // sb.setLength(0);
+  // continue;
+  // }
+  // }
+  // sb.append(c);
+  // escaped = false;
+  // }
+  // return strs.toStringArray();
+  // }
+  // }
 
   /**
    * Return the first n characters of a string
-   * @param s String
-   * @return First n characters of string, or characters before first
-   *   linefeed, whichever is first; "..." added if necessary
+   * 
+   * @param s
+   *          String
+   * @return First n characters of string, or characters before first linefeed,
+   *         whichever is first; "..." added if necessary
    */
   public static String strStart(String s) {
     if (s == null) {
@@ -554,6 +587,7 @@ public class TextScanner {
 
   /**
    * Get last token read
+   * 
    * @return Token, or null if none read yet
    */
   public Token last() {
@@ -563,7 +597,8 @@ public class TextScanner {
   private Token last = Token.eofToken();
 
   /**
-   * Read token.  Returns eof token if end of input.
+   * Read token. Returns eof token if end of input.
+   * 
    * @return Token
    */
   public Token read() {
@@ -609,8 +644,9 @@ public class TextScanner {
   }
 
   /**
-   * Read token.  Returns eof token if end of input, unless mustExist is true,
-   *  in which case it throws an exception.
+   * Read token. Returns eof token if end of input, unless mustExist is true, in
+   * which case it throws an exception.
+   * 
    * @return Token
    */
   private Token read(boolean mustExist, boolean ignoreQueue) {
@@ -651,7 +687,7 @@ public class TextScanner {
             t = Token.eofToken();
           } else {
             t = new Token(t.source(), t.context(), t.line(), t.column(), ""
-                + (char) ch, ch, dfa );
+                + (char) ch, ch, dfa);
           }
         } else {
           String s = t.text();
@@ -667,7 +703,7 @@ public class TextScanner {
           } catch (IOException e) {
             t.exception(e.toString());
           }
-          //          ri.closed = true;
+          // ri.closed = true;
           continue;
         }
 
@@ -716,22 +752,22 @@ public class TextScanner {
   }
 
   private void echo(Token t) {
-    //    pr("echo token "+Tools.d(t.text())+" echoBuffLen="+echoBuffer.length()
-    //        +" = "+Tools.d(echoBuffer.toString())+" echoLineStartToken="+Tools.d(echoLineStartToken));
+    // pr("echo token "+Tools.d(t.text())+" echoBuffLen="+echoBuffer.length()
+    // +" = "+Tools.d(echoBuffer.toString())+" echoLineStartToken="+Tools.d(echoLineStartToken));
     String str = t.text();
     if (t.eof()) {
       if (echoBuffer.length() > 0) {
         echoBuffer.append('\n');
       }
     } else {
-      //      if (echoBuffer.length() == 0) {
-      //        echoLineStartToken = t;
-      //      }
+      // if (echoBuffer.length() == 0) {
+      // echoLineStartToken = t;
+      // }
       echoBuffer.append(str);
     }
 
     if (echoBuffer.length() > 0) {
-      //      for (int dispLine = 1 + echoLineStartToken.line(); ; dispLine++) {
+      // for (int dispLine = 1 + echoLineStartToken.line(); ; dispLine++) {
 
       while (true) {
         int crPos = echoBuffer.indexOf("\n");
@@ -740,13 +776,13 @@ public class TextScanner {
         }
         String s = echoBuffer.substring(0, crPos);
         System.out.print(d(1 + ri.echoLineNumber++, 4));
-       System.out.print(": ");
+        System.out.print(": ");
         pr(s);
         echoBuffer.delete(0, crPos + 1);
       }
     }
-    //    if (t.eof())
-    //      echoLineNumber = 0;
+    // if (t.eof())
+    // echoLineNumber = 0;
   }
 
   public void trace(String s) {
@@ -756,7 +792,8 @@ public class TextScanner {
   }
 
   /**
-   * Peek at next token.  Returns eof token if at end.
+   * Peek at next token. Returns eof token if at end.
+   * 
    * @return Token
    */
   public Token peek() {
@@ -765,6 +802,7 @@ public class TextScanner {
 
   /**
    * Determine if at end of input
+   * 
    * @return boolean
    */
   public boolean eof() {
@@ -776,8 +814,10 @@ public class TextScanner {
   }
 
   /**
-   * Peek ahead at a token.  Returns eof token if past end.
-   * @param offset : 0...n
+   * Peek ahead at a token. Returns eof token if past end.
+   * 
+   * @param offset
+   *          : 0...n
    * @return Token
    */
   public Token peekAt(int offset) {
@@ -788,7 +828,7 @@ public class TextScanner {
       Token t = read(false, true);
       tokenQueue.push(t);
     }
-    return (Token) tokenQueue.peek (Math.min(offset, queued() - 1), true);
+    return (Token) tokenQueue.peek(Math.min(offset, queued() - 1), true);
   }
 
   private int queued() {
@@ -810,12 +850,19 @@ public class TextScanner {
 
   /**
    * Extract tokens from a source.
-   * @param src : Reader to extract from
-   * @param srcDescription : description of source (e.g. filename)
-   * @param dfa : DFA to use, or null
-   * @param tokenIds : if not null, token ids stored here
-   * @param tokenNames : if not null, token names stored here
-   * @param skipType : if >= 0, token id to skip
+   * 
+   * @param src
+   *          : Reader to extract from
+   * @param srcDescription
+   *          : description of source (e.g. filename)
+   * @param dfa
+   *          : DFA to use, or null
+   * @param tokenIds
+   *          : if not null, token ids stored here
+   * @param tokenNames
+   *          : if not null, token names stored here
+   * @param skipType
+   *          : if >= 0, token id to skip
    * @return DArray of Tokens
    */
   public static DArray scanSource(Reader src, String srcDescription, DFA dfa,
@@ -841,7 +888,8 @@ public class TextScanner {
   // Character-based functions
 
   /**
-   * Read character.  If eof, returns -1.
+   * Read character. If eof, returns -1.
+   * 
    * @return char
    */
   public int readChar() {
@@ -857,9 +905,11 @@ public class TextScanner {
   }
 
   /**
-   * Read character.  If eof, returns -1, unless mustExist is true, in which
-   *  case it throws an exception.
-   * @param mustExist boolean
+   * Read character. If eof, returns -1, unless mustExist is true, in which case
+   * it throws an exception.
+   * 
+   * @param mustExist
+   *          boolean
    * @return char
    */
   public int readChar(boolean mustExist) {
@@ -869,7 +919,8 @@ public class TextScanner {
   }
 
   /**
-   * Peek at next character.  If eof, returns -1.
+   * Peek at next character. If eof, returns -1.
+   * 
    * @return char
    */
   public int peekChar() {
@@ -877,9 +928,11 @@ public class TextScanner {
   }
 
   /**
-   * Determine if next characters match a string; only makes sense
-   * for character scanning.
-   * @param s String
+   * Determine if next characters match a string; only makes sense for character
+   * scanning.
+   * 
+   * @param s
+   *          String
    * @return boolean
    */
   public boolean peek(String s) {
@@ -900,8 +953,10 @@ public class TextScanner {
   }
 
   /**
-   * Peek at nth character.  If eof, returns -1.
-   * @param offset : # characters to look ahead (0=first)
+   * Peek at nth character. If eof, returns -1.
+   * 
+   * @param offset
+   *          : # characters to look ahead (0=first)
    * @return char
    */
   public int peekAtChar(int offset) {
@@ -931,7 +986,9 @@ public class TextScanner {
 
   /**
    * Skip any whitespace, excluding linefeeds
-   * @param isLFWS : if true, treats LF as whitespace
+   * 
+   * @param isLFWS
+   *          : if true, treats LF as whitespace
    * @return true if eof
    */
   public boolean readWS(boolean isLFWS) {
@@ -950,22 +1007,26 @@ public class TextScanner {
 
   /**
    * Skip any whitespace in input.
+   * 
    * @return true if eof
    */
   public boolean readWS() {
     return readWS(true);
   }
-  //    while (
-  //        !eof()
-  //        && isWS( (char) peekChar())) {
-  //      read();
-  //    }
-  //    return eof();
-  //  }
+
+  // while (
+  // !eof()
+  // && isWS( (char) peekChar())) {
+  // read();
+  // }
+  // return eof();
+  // }
 
   /**
    * Utility function: determine if a character is whitespace
-   * @param c char
+   * 
+   * @param c
+   *          char
    * @return boolean
    */
   private static boolean isWS(char c, boolean isCRWS) {
@@ -973,8 +1034,11 @@ public class TextScanner {
   }
 
   /**
-   * Read past n tokens (or characters); attempt to read past eof throws exception.
-   * @param count int
+   * Read past n tokens (or characters); attempt to read past eof throws
+   * exception.
+   * 
+   * @param count
+   *          int
    */
   public void skip(int count) {
     while (count > 0) {
@@ -987,9 +1051,12 @@ public class TextScanner {
 
   /**
    * Read word, if one exists
-   * @param mustExist boolean : if true, and no word exists, throws exception
-   * @param parseString boolean : if true, treats single or double quotes
-   *   as delimeters for a string
+   * 
+   * @param mustExist
+   *          boolean : if true, and no word exists, throws exception
+   * @param parseString
+   *          boolean : if true, treats single or double quotes as delimeters
+   *          for a string
    * @return String
    */
   public String readWord(boolean mustExist, boolean parseString, boolean isCRWS) {
@@ -1013,7 +1080,7 @@ public class TextScanner {
         break;
       readChar();
 
-      //      int ch = readChar();
+      // int ch = readChar();
       if (db) {
         System.out.println(" ch=" + ch + " (" + (char) ch + ") state=" + state
             + " sb=[" + sb.toString() + "]");
@@ -1081,21 +1148,22 @@ public class TextScanner {
     return readWord(mustExist, false, true);
   }
 
-  //  public String readWord(boolean mustExist, boolean isLFWS) {
-  //    
-  //  }
+  // public String readWord(boolean mustExist, boolean isLFWS) {
+  //
+  // }
 
-  //  /**
-  //   * Read a whitespace-delimited word or quoted string.  If eof, returns null.
-  //   * @return String
-  //   */
-  //  public String readWordOrStr() {
-  //    return readWord(false, true);
-  //  }
+  // /**
+  // * Read a whitespace-delimited word or quoted string. If eof, returns null.
+  // * @return String
+  // */
+  // public String readWordOrStr() {
+  // return readWord(false, true);
+  // }
   /**
-   * Read a whitespace-delimited word or quoted string.
-   * If eof, returns null.
-   * @param removeQuotes : if true, removes quotes from string
+   * Read a whitespace-delimited word or quoted string. If eof, returns null.
+   * 
+   * @param removeQuotes
+   *          : if true, removes quotes from string
    * @return String
    */
   public String readWordOrStr(boolean removeQuotes) {
@@ -1107,8 +1175,9 @@ public class TextScanner {
   }
 
   /**
-   * Read a whitespace-delimited word.  If eof, returns null.
-   * Skips any leading and trailing whitespace.
+   * Read a whitespace-delimited word. If eof, returns null. Skips any leading
+   * and trailing whitespace.
+   * 
    * @return String
    */
   public String readWord() {
@@ -1128,7 +1197,9 @@ public class TextScanner {
 
   /**
    * Convert a hex digit to an integer.
-   * @param c : char '0..9', 'a..f', 'A...F'
+   * 
+   * @param c
+   *          : char '0..9', 'a..f', 'A...F'
    * @return int 0..15
    */
   public static int parseHex(char c) {
@@ -1150,82 +1221,88 @@ public class TextScanner {
     }
     return val;
   }
-//  public static void main(String[] args) {
-//    int[] v = { 0xf0000000, 0x80000000, 0x7fffffff, 0x0000ffff, };
-//    for (int i = 0; i < v.length; i++) {
-//
-//      pr("toHex " + toHex(null, v[i], 8) + " = "
-//          + toHex(null, v[i]));
-//
-//    }
-//  }
-  public static StringBuilder toHex(StringBuilder sb, int val) {
 
-    int nDig = 8;
-    while (nDig > 1) {
-      if (((((long) val) >> ((nDig - 1) << 2)) & 0xf) != 0)
-        break;
-      nDig--;
-    }
-    return toHex(sb, val, nDig);
-  }
-  //  
-  //    if (sb == null)
-  //      sb = new StringBuilder();
+  // public static void main(String[] args) {
+  // int[] v = { 0xf0000000, 0x80000000, 0x7fffffff, 0x0000ffff, };
+  // for (int i = 0; i < v.length; i++) {
   //
-  //    int digits = 8;
-  //    while (digits > 1 && (val & (0xff << (digits << 2))) == 0) {
-  //      digits--;
-  //    }
+  // pr("toHex " + toHex(null, v[i], 8) + " = "
+  // + toHex(null, v[i]));
   //
-  //    //    int shift = (digits - 1) << 2;
-  //    while (digits-- > 0) {
-  //      int shift = digits << 2;
-  //      int v = (val >> shift) & 0xf;
-  //      char c;
-  //      if (v < 10) {
-  //        c = (char) ('0' + v);
-  //      } else {
-  //        c = (char) ('a' + (v - 10));
-  //      }
-  //      sb.append(c);
-  //    }
-  //    return sb;
-  //  }
+  // }
+  // }
+  // public static StringBuilder toHex(StringBuilder sb, int val) {
+  //
+  // int nDig = 8;
+  // while (nDig > 1) {
+  // if (((((long) val) >> ((nDig - 1) << 2)) & 0xf) != 0)
+  // break;
+  // nDig--;
+  // }
+  // return toHex(sb, val, nDig);
+  // }
 
-  /**
-   * Convert an integer to a hex string
-   * @param val : value
-   * @param digits : number of digits to produce (number of nybbles,
-   *   starting from the lowest 4 bits, of the value to examine)
-   * @return String
-   */
-  public static String toHex(int val, int digits) {
-    return toHex(null, val, digits).toString();
+  //
+  // if (sb == null)
+  // sb = new StringBuilder();
+  //
+  // int digits = 8;
+  // while (digits > 1 && (val & (0xff << (digits << 2))) == 0) {
+  // digits--;
+  // }
+  //
+  // // int shift = (digits - 1) << 2;
+  // while (digits-- > 0) {
+  // int shift = digits << 2;
+  // int v = (val >> shift) & 0xf;
+  // char c;
+  // if (v < 10) {
+  // c = (char) ('0' + v);
+  // } else {
+  // c = (char) ('a' + (v - 10));
+  // }
+  // sb.append(c);
+  // }
+  // return sb;
+  // }
 
-    //    StringBuilder sb = new StringBuilder();
-    //
-    //    int shift = (digits - 1) << 2;
-    //    while (digits-- > 0) {
-    //      shift = digits << 2;
-    //      int v = (val >> shift) & 0xf;
-    //      char c;
-    //      if (v < 10) {
-    //        c = (char) ('0' + v);
-    //      }
-    //      else {
-    //        c = (char) ('A' + (v - 10));
-    //      }
-    //      sb.append(c);
-    //    }
-    //    return sb.toString();
-  }
+  // /**
+  // * Convert an integer to a hex string
+  // * @param val : value
+  // * @param digits : number of digits to produce (number of nybbles,
+  // * starting from the lowest 4 bits, of the value to examine)
+  // * @return String
+  // */
+  // public static String toHex(int val, int digits) {
+  // return toHex(null, val, digits).toString();
+  //
+  // // StringBuilder sb = new StringBuilder();
+  // //
+  // // int shift = (digits - 1) << 2;
+  // // while (digits-- > 0) {
+  // // shift = digits << 2;
+  // // int v = (val >> shift) & 0xf;
+  // // char c;
+  // // if (v < 10) {
+  // // c = (char) ('0' + v);
+  // // }
+  // // else {
+  // // c = (char) ('A' + (v - 10));
+  // // }
+  // // sb.append(c);
+  // // }
+  // // return sb.toString();
+  // }
 
   /**
    * Convert a string of hex digits to an integer
-   * @param s String
-   * @param offset : index of first digit in string
-   * @param length : number of digits
+   * 
+   * @param s
+   *          String
+   * @param offset
+   *          : index of first digit in string
+   * @param length
+   *          : number of digits
    * @return int
    */
   public static int parseHex(CharSequence s, int offset, int length) {
@@ -1240,12 +1317,13 @@ public class TextScanner {
 
   /**
    * Convert a string of hex digits to an integer
-   * @param s String
+   * 
+   * @param s
+   *          String
    * @return int
    */
   public static int parseHex(CharSequence s) {
     return parseHex(s, false);
-    //    return parseHex(s, 0, s.length());
   }
 
   public static int parseHex(CharSequence s, boolean skipDollarSign) {
@@ -1266,9 +1344,13 @@ public class TextScanner {
 
   /**
    * Split a string into substrings at line break positions
-   * @param str String
-   * @param lineWidth : maximum number of characters per row
-   * @param lst : substrings are stored here
+   * 
+   * @param str
+   *          String
+   * @param lineWidth
+   *          : maximum number of characters per row
+   * @param lst
+   *          : substrings are stored here
    * @return int : length of longest substring
    */
   public static int splitString(String str, int lineWidth, DArray lst) {
@@ -1338,20 +1420,19 @@ public class TextScanner {
   }
 
   private DQueue readerQueue = new DQueue();
-  //  private DArray readerStack = new DArray();
   private DFA dfa;
   private MyReader ri;
   private DQueue tokenQueue = new DQueue();
 
   // maximum length of any one file (for multiple-line comments)
-  //  private static final int MAX_FILE_LENGTH = 65536;
+  // private static final int MAX_FILE_LENGTH = 65536;
   private static final boolean ALWAYSTRACE = false;
   private boolean tracing = ALWAYSTRACE;
   static {
     if (ALWAYSTRACE)
       warning("always tracing");
   }
-  
+
   private int skipType = -1;
 
   /**
@@ -1378,9 +1459,11 @@ public class TextScanner {
     public boolean closed;
 
     /**
-     * Set whether location tracking is active.
-     * If inactive, no line, column, or context information is maintained.
-     * @param f boolean
+     * Set whether location tracking is active. If inactive, no line, column, or
+     * context information is maintained.
+     * 
+     * @param f
+     *          boolean
      */
     public void setLocationTrackingActive(boolean f) {
       disableLocationTracking = !f;
@@ -1390,6 +1473,7 @@ public class TextScanner {
 
     /**
      * Get current line of text from reader.
+     * 
      * @return String
      */
     public String currentLineOfText() {
@@ -1445,12 +1529,13 @@ public class TextScanner {
 
     /**
      * Construct a token which describes current read position
+     * 
      * @return Token
      */
     public Token token() {
       Token t = new Token(description, currentLineOfText(), line, column, "",
           Token.T_ASCII, dfa);
-      //      lineAtStartOfToken = line;
+      // lineAtStartOfToken = line;
       return t;
     }
 
@@ -1461,7 +1546,7 @@ public class TextScanner {
     // column, 0...n
     int column;
     DFA dfa;
-    //    int lineAtStartOfToken;
+    // int lineAtStartOfToken;
   }
 
   public boolean readIf(int id) {
@@ -1482,8 +1567,7 @@ public class TextScanner {
   }
 
   /**
-   * Class for reading from System.in; close() commands don't close
-   * the reader.
+   * Class for reading from System.in; close() commands don't close the reader.
    */
   private static class StdInReader extends InputStreamReader {
     public StdInReader() {
@@ -1495,8 +1579,8 @@ public class TextScanner {
   }
 
   /**
-   * Class for writing to System.out; close() commands won't close
-   * the writer (but will flush)
+   * Class for writing to System.out; close() commands won't close the writer
+   * (but will flush)
    */
   private static class StdOutWriter extends OutputStreamWriter {
     public StdOutWriter() {
@@ -1508,44 +1592,15 @@ public class TextScanner {
     }
   }
 
-  /**
-   * Convert value to hex, store in StringBuilder
-   * @param sb where to store result, or null
-   * @param value0 value to convert
-   * @param digits number of hex digits to output
-   * @return result
-   */
-  public static StringBuilder toHex(StringBuilder sb, int value0, int digits) {
-    if (sb == null)
-      sb = new StringBuilder();
-
-    long value = value0;
-
-    int shift = (digits - 1) << 2;
-    while (digits-- > 0) {
-      shift = digits << 2;
-      int v = (int) ((value >> shift)) & 0xf;
-      char c;
-      if (v < 10) {
-        c = (char) ('0' + v);
-      } else {
-        c = (char) ('a' + (v - 10));
-      }
-      sb.append(c);
-    }
-    return sb;
-
-  }
-
-  //  /**
-  //   * @deprecated : use addSp
-  //   * @param sb
-  //   */
-  //  public static void ensureWhitespace(StringBuilder sb) {
-  //    int k = sb.length();
-  //    if (k == 0 || sb.charAt(k - 1) != ' ')
-  //      sb.append(' ');
-  //  }
+  // /**
+  // * @deprecated : use addSp
+  // * @param sb
+  // */
+  // public static void ensureWhitespace(StringBuilder sb) {
+  // int k = sb.length();
+  // if (k == 0 || sb.charAt(k - 1) != ' ')
+  // sb.append(' ');
+  // }
 
   public double readDouble() {
     String s = readWord(true);
