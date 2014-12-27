@@ -25,13 +25,13 @@ public class SprMain implements IApplication {
   private static IApplication theApp;
 
   public static void main(String[] args) {
-
+    args = new String[1];
+    args[0] = "-h";
     try {
       CmdLineArgs ca = new CmdLineArgs();
       sArgs = ca;
       ca.banner("Compile texture atlas");
 
-      unimp("some way of describing argument VALUES in help message");
       ca.add("build").setString()
           .desc("Build texture atlas <projectpath[.txp]>");
       ca.add("write").desc("Write texture atlas to .png file");

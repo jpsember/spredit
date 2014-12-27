@@ -37,7 +37,8 @@ import java.util.regex.Pattern;
  * clArgs.add("verbose");              // Boolean; default is false
  * clArgs.add("maxdepth").def(8);      // Integer
  * clArgs.add("name").setString();     // No default value, type set explicitly
- * clArgs.add("heights").setInt().setArray();   // array of (zero or more) ints
+ * clArgs.add("heights").setInt().setArray();     // array of (zero or more) ints
+ * clArgs.add("dimensions").setInt().setArray(2); // array of exactly two ints
  * 
  * 3) parse command line arguments
  * 
@@ -55,7 +56,7 @@ import java.util.regex.Pattern;
  *    System.out.println("name is "+clArgs.getString("name"));
  * }
  * 
- * clArgs.getInts("heights"); // get array (or ints)
+ * clArgs.getInts("heights"); // get array (of ints)
  * 
  * clArgs.getExtras();  // returns array of any arguments not parsed as options
  * 
@@ -86,7 +87,6 @@ public class CmdLineArgs {
     if (mOptions.containsKey(longName))
       throw new IllegalArgumentException("option already exists: " + longName);
     mOpt = new Opt(longName);
-    mLongestNameLength = Math.max(mLongestNameLength, longName.length());
     mOptions.put(mOpt.mLongName, mOpt);
     mOptionList.add(mOpt.mLongName);
     return this;
@@ -323,13 +323,57 @@ public class CmdLineArgs {
       sb.append(mBanner);
       sb.append("\n");
     }
+    int longestPhrase1Length = 0;
+    ArrayList<String> phrases = new ArrayList();
     for (String key : mOptionList) {
       Opt opt = mOptions.get(key);
-      sb.append(Tools.spaces(mLongestNameLength - opt.mLongName.length()));
-      sb.append("--" + opt.mLongName + ", -" + opt.mShortName + ":  ");
-      sb.append(opt.description());
+      StringBuilder sb2 = new StringBuilder();
+      sb2.append("--" + opt.mLongName + ", -" + opt.mShortName);
+
+      String typeStr = null;
+      switch (opt.mType) {
+      case T_INT:
+        typeStr = "<n>";
+        break;
+      case T_DOUBLE:
+        typeStr = "<f>";
+        break;
+      case T_STRING:
+        typeStr = "<s>";
+        break;
+      }
+      if (typeStr != null) {
+        if (opt.mExpectedValueCount < 0) {
+          sb2.append(" " + typeStr);
+          sb2.append("...");
+        } else {
+          if (opt.mExpectedValueCount <= 3) {
+            for (int i = 0; i < opt.mExpectedValueCount; i++)
+              sb2.append(" " + typeStr);
+          } else {
+            sb2.append(" " + typeStr);
+            sb2.append("..[" + opt.mExpectedValueCount + "]..");
+            sb2.append(typeStr);
+          }
+        }
+      }
+
+      String phrase1 = sb2.toString();
+      phrases.add(phrase1);
+      longestPhrase1Length = Math.max(longestPhrase1Length, phrase1.length());
+      phrases.add(opt.mDescription);
+    }
+
+    for (int j = 0; j < phrases.size(); j += 2) {
+      String phrase1 = phrases.get(j);
+      String phrase2 = phrases.get(j + 1);
+      sb.append(Tools.spaces(longestPhrase1Length - phrase1.length()));
+      sb.append(phrase1);
+      sb.append(" :  ");
+      sb.append(phrase2);
       sb.append("\n");
     }
+
     throw new Exception(sb.toString());
   }
 
@@ -380,7 +424,7 @@ public class CmdLineArgs {
         while (true) {
           if (cursor == args.size())
             break;
-          if (!opt.variableLengthArray() && !opt.isMissingValues()) 
+          if (!opt.variableLengthArray() && !opt.isMissingValues())
             break;
           arg = args.get(cursor);
           if (arg instanceof Opt)
@@ -410,10 +454,10 @@ public class CmdLineArgs {
     }
   }
 
-  private static final String T_INT = "INT";
-  private static final String T_DOUBLE = "DOUBLE";
-  private static final String T_STRING = "STRING";
-  private static final String T_BOOL = "BOOL";
+  private static final int T_BOOL = 0;
+  private static final int T_INT = 1;
+  private static final int T_DOUBLE = 2;
+  private static final int T_STRING = 3;
 
   /**
    * Throw a CmdLineArgs.Exception if a condition is false
@@ -436,7 +480,10 @@ public class CmdLineArgs {
     if (mLocked)
       return;
     add(HELP).desc("Show this message");
-    mOpt = null;
+    // Reserve the 'h' short name for the help option
+    mOpt.mShortName = "h";
+    mOptions.put(mOpt.mShortName, mOpt);
+
     mLocked = true;
     chooseShortNames();
   }
@@ -445,9 +492,13 @@ public class CmdLineArgs {
     for (String key : mOptionList) {
 
       Opt opt = mOptions.get(key);
-
-      for (int j = 0; opt.mShortName == null; j++) {
-        if (j == key.length()) {
+      int j = 0;
+      // If option has prefix "no", it's probably 'noXXX', so avoid
+      // deriving short name from 'n' or 'o'
+      if (key.startsWith("no"))
+        j = 2;
+      for (; opt.mShortName == null; j++) {
+        if (j >= key.length()) {
           // Choose first unused character
           String poss = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
           for (int k = 0; k < poss.length(); k++) {
@@ -486,7 +537,7 @@ public class CmdLineArgs {
       mType = T_BOOL;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
       if (mTypeDefined)
         throw new IllegalStateException();
       mTypeDefined = true;
@@ -497,12 +548,6 @@ public class CmdLineArgs {
       if (!(mTypeDefined && !mArray && mDefaultValue == null))
         throw new IllegalStateException();
       mArray = true;
-    }
-
-    public String description() {
-      if (mDescription == null)
-        return "(no description)";
-      return mDescription;
     }
 
     public void addValue(Object value) {
@@ -529,8 +574,8 @@ public class CmdLineArgs {
     public String mLongName;
     public String mShortName;
     public Object mDefaultValue;
-    public String mDescription;
-    public Object mType;
+    public String mDescription = "*** No description! ***";
+    public int mType;
     public boolean mArray;
     // Number of values expected; -1 if variable-length array
     public int mExpectedValueCount = 1;
@@ -548,7 +593,6 @@ public class CmdLineArgs {
   // Regular expression for arguments; e.g. '-a' '-abc' '--sound'
   private static Pattern sArgumentsPattern = Pattern.compile("^--?[a-zA-Z]+$");
 
-  private int mLongestNameLength = 8;
   private boolean mLocked;
   private String mBanner;
   private Opt mOpt;

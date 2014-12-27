@@ -230,4 +230,22 @@ public class CmdLineArgsTest extends MyTestCase {
     assertTrue(mArgs.getExtras().length == 0);
   }
 
+  public void testHelpMessageWithValueLabels() {
+    mArgs.add("ints1").setInt().setArray(1);
+    mArgs.add("ints2").setInt().setArray(2);
+    mArgs.add("ints3").setInt().setArray(3);
+    mArgs.add("ints4").setInt().setArray(4);
+    mArgs.add("ints5").setInt().setArray(5);
+    mArgs.add("intsN").setInt().setArray();
+    mArgs.add("string").def("xxx");
+    mArgs.add("stringsN").setString().setArray();
+    mArgs.add("double").def(5.2);
+    try {
+      mArgs.parse(split(""));
+      mArgs.help();
+    } catch (CmdLineArgs.Exception e) {
+      // System.out.println(e.getMessage());
+    }
+  }
+
 }
