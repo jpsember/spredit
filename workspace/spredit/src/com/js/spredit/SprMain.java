@@ -36,11 +36,11 @@ public class SprMain implements IApplication {
           .desc("Build texture atlas <projectpath[.txp]>");
       ca.add("write").desc("Write texture atlas to .png file");
       ca.add("palette").desc("Include standard palette in atlas");
-      ca.add("font").setString().setArray()
+      ca.add("font").setString().setArray(3)
           .desc("Build atlas from Java font; <fontname> <size> <outputpath>");
       ca.add("showfont").desc("Display the built font");
       ca.add("showfonts").desc("Display fonts available on this machine");
-      ca.add("size").setInt().setArray()
+      ca.add("size").setInt().setArray(2)
           .desc("Set size of atlas for font <width> <height>");
       ca.add("frames").desc("Plot frames around sprites");
       ca.add("nosort").desc("Disable font sorting");
@@ -69,8 +69,6 @@ public class SprMain implements IApplication {
       showAtlas = ca.get("showfont");
       if (ca.hasValue("font")) {
         String[] s = ca.getStrings("font");
-        if (s.length != 3)
-          ca.fail("Missing arguments for 'font'");
         runGUI = false;
         fontName = s[0];
         fontName = fontName.replaceAll("_", " ");
