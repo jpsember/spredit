@@ -25,8 +25,6 @@ public class SprMain implements IApplication {
   private static IApplication theApp;
 
   public static void main(String[] args) {
-    args = new String[1];
-    args[0] = "-h";
     try {
       CmdLineArgs ca = new CmdLineArgs();
       sArgs = ca;
