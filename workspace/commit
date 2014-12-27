@@ -14,13 +14,10 @@ end
 
 class Commit
 
-  PROJECT_NAME = "spredit"
-
   GIT_STATE_FILENAME = ".commit_state"
   GIT_MESSAGE_FILENAME = ".commit_git_message"
   COMMIT_MESSAGE_FILENAME = ".commit_editor_message"
   PREVIOUS_COMMIT_MESSAGE_FILENAME = ".commit_previous_editor_message"
-
 
   COMMIT_MESSAGE_TEMPLATE_1=<<-EOS.strip_heredoc
   Issue #
@@ -214,25 +211,8 @@ class Commit
   end
 
   def run_unit_tests
-    # Construct class path
-    projects = ["basic","base","testUtils","scanning","basicTest"]
-    command = "java -cp ../eclipse_config/junit.jar"
-    projects.each{|x| command << ":#{x}/bin" }
-    command << " junit.textui.TestRunner"
-
-    # Collect list of all class files with 'Test' suffix
-
-    # For now, assume just one
-    testClasses = ["com.js.basicTest.CmdArgsTest"]
-
-    testClasses.each{|x| command << " #{x}"}
-    puts "command now #{command}"
-
-    # command = "java -cp ../eclipse_config/junit.jar:basic/bin:testUtils/bin:basicTest/bin junit.textui.TestRunner com.js.basicTest.CmdArgsTest"
-    output,_ = runcmd(command,"...testing")
-    # Dir.chdir(@saved_directory)
-
-    if output.include?("FAILURES!!!")
+    output,success = runcmd("build.rb","...building and running unit tests")
+    if !success
       puts "\n\n\n-----------------------------------------"
       puts output
       puts "-----------------------------------------"
@@ -264,10 +244,6 @@ class Commit
 
   def remove(file)
     FileUtils.rm(file) if File.exist?(file)
-  end
-
-  def remove_dir(dir)
-    FileUtils.rm_rf(dir) if File.directory?(dir)
   end
 
 end
