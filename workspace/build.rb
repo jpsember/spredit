@@ -117,8 +117,10 @@ class App
       end
 
       cmd = "javac"
+      cmd << " -source 1.6 -target 1.6"
       cmd << " -Xmaxerrs 1"
       cmd << " -cp "
+
       cmd << class_path
       cmd << " -sourcepath #{project.src_path}"
       cmd << " -d #{project.bin_path}"
