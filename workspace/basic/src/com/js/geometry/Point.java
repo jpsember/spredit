@@ -2,21 +2,15 @@ package com.js.geometry;
 
 import static com.js.basic.Tools.*;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 public class Point {
 
   public static final Point ZERO = new Point();
 
   public Point() {
   }
-
-  // public final void apply(Matrix m) {
-  // float[] f = new float[9];
-  // m.getValues(f);
-  // float newX = f[0] * x + f[1] * y + f[2];
-  // float newY = f[3] * x + f[4] * y + f[5];
-  // this.x = newX;
-  // this.y = newY;
-  // }
 
   public Point(float x, float y) {
     this.x = x;
@@ -92,7 +86,29 @@ public class Point {
     return sb.toString();
   }
 
+  /**
+   * Encode point as JSON array
+   */
+  public JSONArray toJSON() throws JSONException {
+    JSONArray a = new JSONArray();
+    unimp("figure out way to truncate float values to something reasonable");
+    a.put(x);
+    a.put(y);
+    return a;
+  }
+
+  /**
+   * Parse point from JSONArray
+   */
+  public static Point parseJSON(JSONArray array) throws JSONException {
+    int c = 0;
+    float x = (float) array.getDouble(c++);
+    float y = (float) array.getDouble(c++);
+    return new Point(x, y);
+  }
+
   public float x;
   public float y;
+
 
 }

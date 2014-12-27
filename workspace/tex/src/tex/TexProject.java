@@ -2,6 +2,10 @@ package tex;
 
 import java.io.*;
 import java.util.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import apputil.*;
 import base.*;
 import streams.*;
@@ -19,30 +23,29 @@ public class TexProject {
   public static TexProject create(File f) throws IOException {
     if (f.exists())
       throw new IOException("File already exists");
-
-    TexProject p = new TexProject(f, false);
-
-    return p;
+    return new TexProject(f, false);
   }
 
   /**
    * Construct existing project
+   * 
    * @param f
-   * @throws IOException 
-   * @throws FileNotFoundException 
+   * @throws IOException
+   * @throws FileNotFoundException
    */
   public TexProject(File f) throws FileNotFoundException, IOException {
     this(f, true);
   }
 
   /**
-   * Create new project 
-   * @param baseDir location of base directory containing project file;
-   *   if no project file found here, creates it
-   * @throws IOException 
+   * Create new project
+   * 
+   * @param baseDir
+   *          location of base directory containing project file; if no project
+   *          file found here, creates it
+   * @throws IOException
    */
-  private TexProject(File f, boolean mustExist) throws IOException,
-      FileNotFoundException {
+  private TexProject(File f, boolean mustExist) throws IOException {
 
     final boolean db = false;
 
@@ -57,38 +60,25 @@ public class TexProject {
       pr("baseDir=" + baseDir + "\nname=" + name);
 
     if (projectFile.exists()) {
-      read();
-
+      try {
+        read();
+      } catch (JSONException e) {
+        die(e);
+      }
     } else {
       if (mustExist)
         throw new FileNotFoundException();
     }
-
     flush();
   }
 
-  private void read() throws FileNotFoundException {
-    DefScanner sc = new DefScanner(projectFile);
-    while (!sc.done()) {
-      String item = sc.nextDef();
-      String str = sc.readLine();
-      defaults.put(item, str);
-    }
+  private void read() throws IOException, JSONException {
+    String content = Streams.readTextFile(projectFile.getPath());
+    defaults = new JSONObject(content);
   }
 
-  public String getDefaults(String key, String defaultValue) {
-    String val = (String) defaults.get(key);
-    if (val == null) {
-      if (defaultValue == null)
-        defaultValue = "";
-      val = defaultValue;
-    }
-    return val;
-  }
-  public void storeDefaults(String key, Object value) {
-    if (value == null)
-      value = "";
-    defaults.put(key, value.toString());
+  public JSONObject getDefaults() {
+    return defaults;
   }
 
   private static String[] imgExt = { "png", "jpg", };
@@ -97,12 +87,12 @@ public class TexProject {
     if (f.isDirectory())
       return false;
 
-    //    if (Atlas.DATA_FILES_ONLY.accept(f)) return false;
+    // if (Atlas.DATA_FILES_ONLY.accept(f)) return false;
 
     String fileName = f.getName();
     // if name starts with "ATLAS_" prefix, ignore.
-    //    if (!Atlas.ONEFILE && fileName.startsWith(Atlas.PREFIX))
-    //      return false;
+    // if (!Atlas.ONEFILE && fileName.startsWith(Atlas.PREFIX))
+    // return false;
     for (int i = 0; i < imgExt.length; i++)
       if (fileName.endsWith(imgExt[i]))
         return true;
@@ -115,22 +105,8 @@ public class TexProject {
       "Sprite project files", SRC_EXT, true, null);
 
   public void flush() throws IOException {
-
-    DefBuilder sb = new DefBuilder();
-    {
-      DArray k = new DArray();
-      k.addAll(defaults.keySet());
-      k.sort(String.CASE_INSENSITIVE_ORDER);
-      for (int i = 0; i < k.size(); i++) {
-        String key = k.getString(i);
-        sb.append(key);
-        sb.append(defaults.get(key));
-        sb.addCr();
-      }
-    }
-    String content = sb.toString();
+    String content = defaults.toString();
     Streams.writeIfChanged(projectFile, content);
-
   }
 
   public String toString() {
@@ -139,6 +115,7 @@ public class TexProject {
 
   /**
    * Get atlas file associated with this project
+   * 
    * @return .atl file
    */
   public File atlasFile() {
@@ -152,6 +129,7 @@ public class TexProject {
   public File file() {
     return projectFile;
   }
+
   public File baseDirectory() {
     return baseDir;
   }
@@ -168,7 +146,9 @@ public class TexProject {
 
   /**
    * Extract id from image filename
-   * @param texFile image file
+   * 
+   * @param texFile
+   *          image file
    * @return full id
    */
   public String extractId(File texFile) {
@@ -187,8 +167,8 @@ public class TexProject {
       if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')))
         c = '_';
 
-      // if underscore, and start of directory/file, skip 
-      // this portion 
+      // if underscore, and start of directory/file, skip
+      // this portion
       if (c == '_') {
         char cp = s.charAt(i - 1);
         if (cp == '>' || cp == '/') {
@@ -216,6 +196,7 @@ public class TexProject {
 
   /**
    * Get atlas corresponding to this project
+   * 
    * @return atlas
    * @throws IOException
    */
@@ -271,43 +252,6 @@ public class TexProject {
     return imgFiles;
   }
 
-  //  private static class Entry {
-  //    public Entry(String id) {
-  //      this.id = id;
-  //    }
-  //    public SpriteInfo si;
-  //    public String id;
-  //  };
-  //
-  //  private Entry entryFor(String id) {
-  //    return (Entry) entries.get(id);
-  //  }
-  //
-  //  private void addEntries(File f) {
-  //    if (!f.isDirectory()) {
-  //      if (isTexture(f)) {
-  //
-  //        // is there already an entry with this id?
-  //        String id = extractId(f);
-  //        Entry ent = entryFor(id);
-  //        if (ent == null) {
-  //          
-  //        }
-  //      }
-  //    } else {
-  //    }
-  //  }
-  //
-  //  public void readEntries() {
-  //    if (entries == null) {
-  //      entries = new TreeMap();
-  //      addEntries(baseDir);
-  //    }
-  //
-  //  }
-  //
-  //  private TreeMap entries;
-
   private File[] imgFiles;
 
   private Atlas atlas;
@@ -319,20 +263,10 @@ public class TexProject {
   public String name() {
     return name;
   }
-  //  private boolean simulate;
-  //  private int maxFilesRemaining;
-  //  private String simProblem;
 
-  private Map defaults = new HashMap();
+  private JSONObject defaults = new JSONObject();
 
-  //  public void setSimulation() {
-  //    simulate = true;
-  //    maxFilesRemaining = 300;
-  ////    if (true) {
-  ////      warn("using small # files");
-  ////      maxFilesRemaining = 15;
-  ////    }
-  //  }
+  // private Map defaults = new HashMap();
 
   public void discardAtlas() {
     atlas = null;

@@ -6,13 +6,9 @@ import java.util.ArrayList;
 import org.json.*;
 
 import streams.*;
-import base.*;
 import static com.js.basic.Tools.*;
 
 public class ConfigSet {
-
-  private static final boolean db = false;
-  private static final boolean SHOW = false;
 
   public ConfigSet(IConfig c) {
     if (c != null)
@@ -25,9 +21,6 @@ public class ConfigSet {
 
   public String writeTo(File f) throws IOException {
     String s = write();
-    if (SHOW)
-      warning("showing defaults:\n" + s);
-
     Streams.writeIfChanged(f, s);
     return s;
   }
@@ -59,11 +52,6 @@ public class ConfigSet {
   public void readFrom(JSONObject map) throws JSONException {
     for (IConfig ic : configs)
       ic.readFrom(map);
-  }
-
-  @Deprecated
-  public void readFrom(DefScanner sc) {
-    throw new UnsupportedOperationException();
   }
 
   private ArrayList<IConfig> configs = new ArrayList();

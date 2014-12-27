@@ -2,6 +2,9 @@ package com.js.geometry;
 
 import static com.js.basic.Tools.*;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 public final class IPoint {
 
 	public IPoint() {
@@ -50,6 +53,26 @@ public final class IPoint {
 		sb.append(' ');
 		return sb.toString();
 	}
+
+  /**
+   * Encode point as JSON array
+   */
+  public JSONArray toJSON() throws JSONException {
+    JSONArray a = new JSONArray();
+    a.put(x);
+    a.put(y);
+    return a;
+  }
+
+  /**
+   * Parse point from JSONArray
+   */
+  public static IPoint parseJSON(JSONArray array) throws JSONException {
+    int c = 0;
+    int x = array.getInt(c++);
+    int y = array.getInt(c++);
+    return new IPoint(x, y);
+  }
 
 	public int x;
 	public int y;

@@ -191,15 +191,14 @@ public class SpriteEditor {
       if (db)
         pr("SpritePanel, setProject to " + p);
 
-      DefScanner sc = new DefScanner(p.getDefaults(TAG, "1.0"));
-      if (!sc.done()) {
-        float z = sc.sFloat();
-        spritePanel.setZoom(z);
-        spritePanel.repaint(50);
+      float z = (float) p.getDefaults().optDouble(TAG, 1.0);
+      spritePanel.setZoom(z);
+      spritePanel.repaint(50);
+      try {
+        BuildParms.parseFrom(p.getDefaults().optJSONObject("BUILD"));
+      } catch (JSONException e) {
+        die(e);
       }
-      sc = new DefScanner(p.getDefaults("BUILD", null));
-      if (!sc.done())
-        BuildParms.readFrom(sc);
     } else {
       setSprite(null);
     }
@@ -765,12 +764,14 @@ public class SpriteEditor {
   private static final String TAG = "SPRPANEL";
 
   public static void flushTo(TexProject p) {
-    DefBuilder sb = new DefBuilder();
-    sb.append(spritePanel.getZoom());
-    p.storeDefaults(TAG, sb);
-    sb = new DefBuilder();
-    BuildParms.writeTo(sb);
-    p.storeDefaults("BUILD", sb);
+    try {
+      p.getDefaults().put(TAG, spritePanel.getZoom());
+      JSONObject map = new JSONObject();
+      BuildParms.encodeTo(map);
+      p.getDefaults().put("BUILD", map);
+    } catch (JSONException e) {
+      die(e);
+    }
   }
 
   private static void flush() {

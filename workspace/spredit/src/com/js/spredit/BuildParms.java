@@ -4,10 +4,14 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.js.geometry.IPoint;
 
 import apputil.*;
-import static scanning.IBasic.*;
+import static com.js.basic.Tools.*;
 
 public class BuildParms {
 
@@ -191,21 +195,19 @@ public class BuildParms {
     texHeight.setValue(new Integer(s.y));
   }
 
-  public static void readFrom(DefScanner sc) {
-    while (!sc.done()) {
-      if (sc.readTag("SIZE")) {
-        IPoint pt = sc.sIPt();
-        setTexSize(pt);
-        if (sc.peek(BOOL))
-          fixedSize.setSelected(sc.sBool());
-      }
-    }
+  public static void parseFrom(JSONObject map) throws JSONException {
+    if (map == null)
+      map = new JSONObject();
+    JSONArray array = map.optJSONArray("SIZE");
+    unimp("have default value if array is null?");
+    if (array != null)
+      setTexSize(IPoint.parseJSON(array));
+    fixedSize.setSelected(map.optBoolean("FIXEDSIZE", false));
   }
-  public static void writeTo(DefBuilder sb) {
-    sb.append("SIZE");
-    sb.append(iv(texWidth));
-    sb.append(iv(texHeight));
-    sb.append(fixedSize.isSelected());
+
+  public static void encodeTo(JSONObject map) throws JSONException {
+    map.put("SIZE", new IPoint(iv(texWidth), iv(texHeight)).toJSON());
+    map.put("FIXEDSIZE", fixedSize.isSelected());
   }
 
 }

@@ -2,7 +2,10 @@ package apputil;
 
 import java.io.*;
 import javax.swing.*;
-import scanning.*;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import base.*;
 import java.awt.event.*;
 import static com.js.basic.Tools.*;
@@ -16,7 +19,9 @@ public class RecentFiles {
 
   /**
    * Constructor
-   * @param projectBase base of project tree, or null if none (absolute paths)
+   * 
+   * @param projectBase
+   *          base of project tree, or null if none (absolute paths)
    */
   public RecentFiles(File projectBase) {
     this.projectBase = projectBase;
@@ -24,6 +29,7 @@ public class RecentFiles {
 
   /**
    * Get current file
+   * 
    * @return current file, or null if not active
    */
   public File current() {
@@ -47,7 +53,9 @@ public class RecentFiles {
 
   /**
    * Specify current file (if not null, adds or moves file to front of list)
-   * @param f file
+   * 
+   * @param f
+   *          file
    * @return true if current file has changed
    */
   public boolean use(File f) {
@@ -56,7 +64,7 @@ public class RecentFiles {
     File c = current();
     fileActive = false;
     if (f != null) {
-      
+
       int j = files.indexOf(f);
       if (j >= 0) {
         files.remove(j);
@@ -75,13 +83,14 @@ public class RecentFiles {
         }
       }
 
-    } else
-      if (c != null) changed = true;
+    } else if (c != null)
+      changed = true;
     return changed;
   }
 
   /**
    * Get number of files in list
+   * 
    * @return number of files
    */
   public int size() {
@@ -90,8 +99,10 @@ public class RecentFiles {
 
   /**
    * Get nth most recently used file
-   * @param n (0=most recent)
-   * @return nth last used file 
+   * 
+   * @param n
+   *          (0=most recent)
+   * @return nth last used file
    */
   public File get(int n) {
     return (File) files.get(n);
@@ -107,7 +118,8 @@ public class RecentFiles {
 
   /**
    * Get root of project tree, or null if none specified
-   * @return directory 
+   * 
+   * @return directory
    */
   public File getProjectBase() {
     return projectBase;
@@ -115,6 +127,7 @@ public class RecentFiles {
 
   /**
    * Get position of file within tree
+   * 
    * @param file
    * @return position 0...size()-1, or -1 if not found
    */
@@ -124,45 +137,51 @@ public class RecentFiles {
 
   /**
    * Encode object to string
+   * 
    * @return
    */
   public String encode() {
     final boolean db = false;
-    
-    if (db) 
-      pr("RecentFiles, encode; projectBase="+projectBase);
-          
-    DefBuilder sb = new DefBuilder();
-    sb.append(size());
-    sb.append(fileActive);
+
+    if (db)
+      pr("RecentFiles, encode; projectBase=" + projectBase);
+
+    JSONArray a = new JSONArray();
+    a.put(fileActive);
     for (int i = 0; i < size(); i++) {
       File f = get(i);
-      RelPath rp = new RelPath(projectBase,f);
-      if (db) 
-        pr("constructed RelPath for ["+f+"]:\n"+rp);
-            
-      sb.append(rp);
+      RelPath rp = new RelPath(projectBase, f);
+      a.put(rp.toString());
+      // if (db)
+      // pr("constructed RelPath for ["+f+"]:\n"+rp);
+      //
+      // sb.append(rp);
     }
-    sb.addCr();
-    return sb.toString();
+    return a.toString();
+    // sb.addCr();
+    // return sb.toString();
   }
 
   /**
    * Decode object from string
+   * 
    * @param s
    */
   public void decode(String s) {
     clear();
-    if (s != null) {
-      DefScanner sc = new DefScanner(s);
-      int sz = sc.sInt();
-      if (sc.peek(IBasic.BOOL))
-        fileActive = sc.sBool();
-      for (int i = 0; i < sz; i++) {
-        File f = sc.sPath(projectBase);
-        files.add(f);
-        fileActive = true;
+    try {
+      if (s != null) {
+        JSONArray a = new JSONArray(s);
+        int c = 0;
+        fileActive = a.getBoolean(c++);
+        while (c < a.length()) {
+          RelPath rp = new RelPath(projectBase, a.getString(c++));
+          files.add(rp.file());
+          fileActive = true;
+        }
       }
+    } catch (JSONException e) {
+      warning("caught: " + e);
     }
   }
 
@@ -170,12 +189,14 @@ public class RecentFiles {
     public CBItem(File f) {
       this.p = new RelPath(projectBase, f);
     }
+
     public String toString() {
-      String s = p.display(); //toString();
-//      if (p.withinProjectTree()) //s.startsWith(">"))
-//        s = s.substring(1);
+      String s = p.display(); // toString();
+      // if (p.withinProjectTree()) //s.startsWith(">"))
+      // s = s.substring(1);
       return s;
     }
+
     private RelPath p;
   }
 
@@ -186,6 +207,7 @@ public class RecentFiles {
 
   /**
    * Connect this object to a JComboBox
+   * 
    * @param cb
    */
   public void setComboBox(JComboBox cbx) {
@@ -194,7 +216,7 @@ public class RecentFiles {
     cb.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         CBItem itm = (CBItem) cb.getSelectedItem();
-        //        RelPath rp = (RelPath) cb.getSelectedItem();
+        // RelPath rp = (RelPath) cb.getSelectedItem();
         if (!rebuildingBox) {
           if (itm != null) {
             use(itm.p.file());
@@ -204,10 +226,11 @@ public class RecentFiles {
     });
     rebuildComboBox();
   }
+
   private void rebuildComboBox() {
     cb.removeAllItems();
     for (int i = 0; i < size(); i++) {
-      cb.addItem(new CBItem(get(i))); //RelPath(projectBase, get(i)));
+      cb.addItem(new CBItem(get(i))); // RelPath(projectBase, get(i)));
     }
   }
 

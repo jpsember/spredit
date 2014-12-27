@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import java.awt.image.*;
 import java.io.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.js.myopengl.*;
 import apputil.*;
 import streams.*;
@@ -36,35 +39,18 @@ public class SpriteInfo {
 
     try {
       lastFileContents = Streams.readTextFile(metaPath.toString());
-      DefScanner s = new DefScanner(lastFileContents);
-      while (!s.done()) {
-        String idStr = s.nextDef();
-        if (idStr.equals("CP")) {
-          setCenterPoint(s.sFPt());
-        } else if (idStr.equals("CLIP")) {
-          setCropRect(s.sRect());
-        } else if (idStr.equals("SIZE")) {
-          workImageSize = s.sFPt(); // s.sIPt();
-        } else if (idStr.equals("COMPRESS")) {
-          sprite.setCompression(s.sFloat());
-        } else if (idStr.equals("SCALE")) {
-          // don't call setScaleFactor(), since it will modify the clip, cp
-          // values
-          scaleFactor = s.sFloat();
-        } else if (idStr.equals("ALIAS")) {
-          aliasFileRead = s.sPath(project.baseDirectory());
-        } else {
-          s.exception("unexpected token");
-        }
+      JSONObject map = new JSONObject(lastFileContents);
+      setCenterPoint(Point.parseJSON(map.getJSONArray("CP")));
+      setCropRect(Rect.parseJSON(map.getJSONArray("CLIP")));
+      workImageSize = Point.parseJSON(map.getJSONArray("SIZE"));
+      sprite.setCompression((float) map.optDouble("COMPRESS", 1));
+      // don't call setScaleFactor(), since it will modify the clip, cp
+      // values
+      scaleFactor = (float) map.optDouble("SCALE", 1);
+      String alias = map.optString("ALIAS");
+      if (alias != null) {
+        aliasFileRead = new RelPath(project.baseDirectory(), alias).file();
       }
-
-      // verifyMetaData(true);
-      /*
-       * if (imgPath != null) { // if image is newer than metadata, verify
-       * dimensions, etc // warn("always verifying metaData"); if
-       * (metaPath.lastModified() < imgPath.lastModified() ) { verifyMetaData();
-       * } }
-       */
     } catch (Throwable t) {
       warning("problem reading sprinfo: " + t);
       AppTools.showError("reading SpriteInfo", t);
@@ -172,37 +158,27 @@ public class SpriteInfo {
   }
 
   public void flush() {
-    final boolean db = false;
+    JSONObject map = new JSONObject();
+    try {
+      if (isAlias()) {
+        map.put("ALIAS",
+            new RelPath(project.baseDirectory(), imagePath()).toString());
+      }
+      map.put("SIZE", workImageSize.toJSON());
+      map.put("CP", centerPoint().toJSON());
+      map.put("CLIP", cropRect().toJSON());
 
-    DefBuilder sb = new DefBuilder();
-    if (isAlias()) {
-      sb.append("ALIAS");
-      sb.append(new RelPath(project.baseDirectory(), imagePath()));
+      if (sprite.compressionFactor() != 1)
+        map.put("COMPRESS", sprite.compressionFactor());
+      if (scaleFactor != 1)
+        map.put("SCALE", scaleFactor);
+    } catch (JSONException e) {
+      AppTools.showError("encoding SpriteInfo", e);
     }
-    sb.append("SIZE");
-    sb.append(workImageSize);
-    sb.addCr();
-    sb.append("CP");
-    sb.append(centerPoint());
-    sb.addCr();
-    sb.append("CLIP");
-    sb.append(cropRect());
-    sb.addCr();
-    if (sprite.compressionFactor() != 1) {
-      sb.append("COMPRESS");
-      sb.append(sprite.compressionFactor());
-      sb.addCr();
-    }
-    if (scaleFactor != 1) {
-      sb.append("SCALE");
-      sb.append(scaleFactor);
-      sb.addCr();
-    }
-    String str = sb.toString();
+
+    String str = map.toString();
     if (!str.equals(lastFileContents)) {
       try {
-        if (db)
-          pr("writing new version of: " + metaPath);
         Streams.writeTextFile(metaPath, str);
         lastFileContents = str;
       } catch (IOException e) {
@@ -260,7 +236,6 @@ public class SpriteInfo {
     // force rebuild of compressed image
     setImg(IMG_COMPRESSED, null);
   }
-
 
   /**
    * Verify that the meta data is valid; specifically, that the crop rectangle
@@ -695,8 +670,7 @@ public class SpriteInfo {
     // and its translation if for the compressed image's texture
     Sprite s = new Sprite(sprite.id());
     s.setBounds(new Rect(cropRect.x - centerPoint.x,
-        cropRect.y
-        - centerPoint.y, cropRect.width, cropRect.height));
+        cropRect.y - centerPoint.y, cropRect.width, cropRect.height));
     s.setTranslate(compressedCenterPoint());
     s.setCompression(sprite.compressionFactor());
     if (db)

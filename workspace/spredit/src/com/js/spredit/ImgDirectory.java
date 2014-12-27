@@ -6,15 +6,19 @@ import java.io.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import apputil.*;
 import tex.*;
 import static com.js.basic.Tools.*;
 
 /*
-   Features to add:
-   
-   have 'up' button to move to parent folder (if one exists)
-   have 'back', 'fwd' buttons to move to prev, next folders
+ Features to add:
+
+ have 'up' button to move to parent folder (if one exists)
+ have 'back', 'fwd' buttons to move to prev, next folders
  */
 public class ImgDirectory extends JPanel implements ListSelectionListener {
 
@@ -28,7 +32,7 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
 
     listModel = new DefaultListModel();
 
-    //Create the list and put it in a scroll pane.
+    // Create the list and put it in a scroll pane.
     list = new JList(listModel);
     // list.setFocusable(false);
     list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
@@ -43,38 +47,34 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
     add(listScrollPane, BorderLayout.CENTER);
   }
 
-  private static class ProjDefaults {
-    String lastSpriteName = "";
-  };
-  private ProjDefaults def = new ProjDefaults();
+  private JSONObject def = new JSONObject();
 
   public void setProject(TexProject p) {
-    final boolean db = false;
-
-    if (db)
-      pr("ImgDirectory, setProject to " + p);
-
     this.project = p;
-    def = new ProjDefaults();
+    def = new JSONObject();
 
     if (project != null) {
-      DefScanner sc = new DefScanner(project.getDefaults("IMGDIR", null));
-      if (!sc.done())
-        def.lastSpriteName = sc.sLabel();
+      JSONObject newDef = project.getDefaults().optJSONObject("IMGDIR");
+      if (newDef != null)
+        def = newDef;
+      unimp("add optional here");
     }
     repopulateList();
   }
 
   public void flushTo(TexProject p) {
-    DefBuilder sb = new DefBuilder();
-    sb.appendLabel(def.lastSpriteName);
-    p.storeDefaults("IMGDIR", sb);
+    try {
+      p.getDefaults().put("IMGDIR", def);
+    } catch (JSONException e) {
+      die(e);
+    }
   }
 
   @Override
   public Dimension getPreferredSize() {
     return new Dimension(400, 400);
   }
+
   public void remove(SpriteInfo si) {
     entries.remove(si.id());
     listModel.removeElement(si);
@@ -118,29 +118,10 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
         ASSERT(ent != null);
         listModel.addElement(ent);
       }
-      //  
-      //      File[] files = project.getImageFiles();
-      //
-      //      //  int selIndex = -1;
-      //      for (int i = 0; i < files.length; i++) {
-      //        File f = files[i];
-      //        if (!project.isTexture(f)) {
-      //          warn("shouldn't happen!");
-      //          continue;
-      //        }
-      //        try {
-      //          SpriteInfo si = new SpriteInfo(project, f);
-      //
-      //          listModel.addElement(si);
-      //
-      //        } catch (IOException e) {
-      //          AppTools.showError("repopulating sprite list", e);
-      //        }
-      //      }
     }
   }
 
-  //This method is required by ListSelectionListener.
+  // This method is required by ListSelectionListener.
   public void valueChanged(ListSelectionEvent e) {
     final boolean db = false;
 
@@ -149,7 +130,12 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
       if (db)
         pr("ImgDirectory.valueChanged, selected=" + si + "\n" + stackTrace(20));
       if (si != null) {
-        def.lastSpriteName = si.id();
+        try {
+          def.put("lastSpriteName", si.id());
+        } catch (JSONException e1) {
+          die(e1);
+        }
+        // def.lastSpriteName = si.id();
         SpriteEditor.setSprite(si);
       }
     }
@@ -157,12 +143,13 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
 
   private static final int PAD = 2, IMG = SpriteInfo.THUMB_SIZE, IMGLBL = 12;
 
-  //Display an icon and a string for each object in the list.
+  // Display an icon and a string for each object in the list.
   private class MyCellRenderer extends JPanel implements ListCellRenderer {
 
     public MyCellRenderer() {
       this.setFont(new Font("monospaced", Font.PLAIN, 14));
     }
+
     // This is the only method defined by ListCellRenderer.
     // We just reconfigure the JLabel each time we're called.
 
@@ -192,9 +179,9 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
       g.setColor(Color.black);
       String id = sp.id();
       if (sp.isAlias())
-        id = "*"+id;
-      
-    //  id = id.substring(1 + id.lastIndexOf('_'));
+        id = "*" + id;
+
+      // id = id.substring(1 + id.lastIndexOf('_'));
       g.drawString(id, PAD, PAD + IMG + IMGLBL);
 
       BufferedImage img = sp.thumbnailImage();
@@ -206,13 +193,16 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
       }
 
     }
+
     @Override
     public Dimension getPreferredSize() {
       return new Dimension(IMG + PAD * 2, IMG + PAD * 2 + IMGLBL);
     }
+
     private boolean selected;
     private SpriteInfo sp;
   }
+
   public SpriteInfo getSelectedSprite() {
     SpriteInfo si = null;
     int selInd = list.getSelectedIndex();
@@ -220,118 +210,15 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
       si = (SpriteInfo) listModel.elementAt(selInd);
     return si;
   }
+
   private JList list;
   private DefaultListModel listModel;
   private TexProject project;
-
-  //  private static class Entry {
-  //    public Entry(String id) {
-  //      this.id = id;
-  //    }
-  //    public SpriteInfo si;
-  //    public String id;
-  //  };
 
   private SpriteInfo entryFor(String id) {
     return (SpriteInfo) entries.get(id);
   }
 
-  //  /**
-  //   * Add entries for any image files we find in file tree
-  //   * @param f root of file tree
-  //   * @throws IOException
-  //   */
-  //  private void addEntries(File f) {
-  //    if (!f.isDirectory()) {
-  //      if (project.isTexture(f)) {
-  //        String id = project.extractId(f);
-  //        {
-  //          SpriteInfo si;
-  //          try {
-  //            si = new SpriteInfo(project, f);
-  //            // Entry ent = new Entry(id);
-  //            // ent.si = si;
-  //            entries.put(id, si);
-  //          } catch (IOException e) {
-  //            AppTools.showError("adding image entries", e);
-  //          }
-  //        }
-  //      }
-  //    } else {
-  //      if (!TexProject.isMetaInfoFolder(f)) {
-  //        File[] fs = f.listFiles();
-  //        for (int i = 0; i < fs.length; i++)
-  //          addEntries(fs[i]);
-  //      }
-  //    }
-  //  }
-
-  //  /**
-  //   * Add entries for any sprites that are aliased to originals.
-  //   * These will not have source image files, so won't have been detected
-  //   * by the previous pass.
-  //   * 
-  //   * @param f root of file tree
-  //   * @throws IOException
-  //   */
-  //  private void addAliasEntries(File f) {
-  //    final boolean db = false;
-  //
-  //    if (db)
-  //      pr("addAliasEntries " + f);
-  //    do {
-  //      if (!f.isDirectory()) {
-  //        if (!SpriteInfo.META_FILES_ONLY.accept(f))
-  //          break;
-  //
-  //        // is there already an entry with this id?
-  //        String id = project.extractId(f);
-  //        SpriteInfo ent = entryFor(id);
-  //        if (db)
-  //          pr(" entry for id=" + id + " is " + ent);
-  //
-  //        // if entry exists, already added in first pass;
-  //        // not an aliased entry.
-  //        if (ent != null)
-  //          break;
-  //
-  //        // SpriteInfo si;
-  //        try {
-  //          // construct entry, read meta file
-  //          ent = new SpriteInfo(project, f);
-  //
-  //          // if not an alias, something funny going on
-  //          File aTag = ent.getAliasTag();
-  //          if (aTag == null) {
-  //            warn("expected entry to be an alias: " + f);
-  //            break;
-  //          }
-  //
-  //          // find aliased entry
-  //          //  File aimg = ent.imagePath();
-  //          String aid = project.extractId(aTag);
-  //          SpriteInfo aent = entryFor(aid);
-  //          if (aent == null) {
-  //            warn("can't find original " + aTag + " for alias " + f);
-  //            break;
-  //          }
-  //
-  //          ent.setAliasSprite(aent);
-  //          entries.put(ent.id(), ent);
-  //        } catch (IOException e) {
-  //          AppTools.showError("adding alias entries", e);
-  //        }
-  //      } else {
-  //        if (f.getName().equals(TexProject.THUMB_DIR))
-  //          return;
-  //
-  //        File[] fs = f.listFiles();
-  //        for (int i = 0; i < fs.length; i++) {
-  //          addAliasEntries(fs[i]);
-  //        }
-  //      }
-  //    } while (false);
-  //  }
 
   private void readEntries() {
     try {
@@ -339,15 +226,15 @@ public class ImgDirectory extends JPanel implements ListSelectionListener {
     } catch (IOException e) {
       AppTools.showError("reading sprites", e);
     }
-    //    
-    //    addEntries(project.baseDirectory());
-    //    addAliasEntries(project.baseDirectory());
   }
+
   private TreeMap entries;
 
   /**
    * Select an image
-   * @param id image to select; if not found, chooses following one
+   * 
+   * @param id
+   *          image to select; if not found, chooses following one
    */
   public void select(String id) {
     final boolean db = false;
