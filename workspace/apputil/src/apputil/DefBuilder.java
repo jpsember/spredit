@@ -5,6 +5,7 @@ import com.js.geometry.Point;
 import com.js.geometry.Rect;
 import static com.js.basic.Tools.*;
 
+@Deprecated
 public class DefBuilder {
 
   public String toString() {

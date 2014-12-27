@@ -14,6 +14,9 @@ import java.io.*;
 
 import javax.swing.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import tex.*;
 import apputil.*;
 
@@ -69,47 +72,30 @@ public class SpriteEditor {
   }
 
   public static IConfig CONFIG = new IConfig() {
-    private static final String PROJECTS_TAG = "RECENTPROJECTS";
+    private static final String OUR_TAG = "SpriteEditor";
+    private static final String PROJECTS_TAG = "RecentProjects";
+    private static final String CPT_TAG = "ShowCenterpoint";
+    private static final String CLIP_TAG = "ShowClip";
 
     @Override
-    public boolean process(DefScanner sc, String item) {
-      if (item.equals(PROJECTS_TAG)) {
-        String s = sc.readLine();
-        recentProjects.decode(s);
-        return true;
-      }
-
-      if (item.equals("INFOPANEL")) {
-        cpt.setSelected(sc.sBool());
-        showClip.setSelected(sc.sBool());
-        return true;
-      }
-      return false;
+    public void writeTo(JSONObject map) throws JSONException {
+      JSONObject map2 = new JSONObject();
+      map2.put(PROJECTS_TAG, recentProjects.encode());
+      map2.put(CPT_TAG, cpt.isSelected());
+      map2.put(CLIP_TAG, showClip.isSelected());
+      map.put(OUR_TAG, map2);
     }
 
     @Override
-    public void writeTo(DefBuilder sb) {
-      final boolean db = false;
-      if (db)
-        pr("SpriteEditor, writeTo defbuilder");
-
-      sb.append(PROJECTS_TAG);
-      sb.append(recentProjects.encode());
-
-      // if (lastProjectPath != null) {
-      // sb.append("PROJECT");
-      //
-      // RelPath rp = new RelPath(null, lastProjectPath);
-      // if (db)
-      // pr(" constructed RelPath: " + rp);
-      //
-      // sb.append(rp);
-      // sb.addCr();
-      sb.append("INFOPANEL");
-      sb.append(cpt.isSelected());
-      sb.append(showClip.isSelected());
-      sb.addCr();
+    public void readFrom(JSONObject map) throws JSONException {
+      JSONObject map2 = map.optJSONObject(OUR_TAG);
+      if (map2 == null)
+        return;
+      recentProjects.decode(map2.getString(PROJECTS_TAG));
+      cpt.setSelected(map2.getBoolean(CPT_TAG));
+      showClip.setSelected(map2.getBoolean(CLIP_TAG));
     }
+
   };
 
   public static boolean doCloseProject() {

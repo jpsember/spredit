@@ -79,6 +79,7 @@ public class AppTools {
     return sb.toString();
   }
 
+  @Deprecated
   public static String labelToString(String s) {
     StringBuilder sb = new StringBuilder();
     boolean problem = s.length() < 2 || s.charAt(0) != '"'

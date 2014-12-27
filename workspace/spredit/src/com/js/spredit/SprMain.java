@@ -14,8 +14,6 @@ import scanning.*;
 import streams.*;
 import tex.*;
 
-// Requires liblwjgl.jnilib to be in the java.library.path, with appropriate execute permissions
-
 public class SprMain implements IApplication {
 
   public static IApplication app() {
@@ -243,95 +241,14 @@ public class SprMain implements IApplication {
 
     MyFrame frame = new MyFrame("SPRMAIN");
     frame.setTitle(APP_NAME);
-
-    // JFrame f = frame.frame();
     AppTools.setFrame(frame, app());
-
-    // {
-    // // disable the close button, since we want to verify close
-    // f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    // f.addWindowListener(new WindowAdapter() {
-    // public void windowClosing(WindowEvent e) {
-    // if (app().exitProgram())
-    // System.exit(0);
-    // }
-    // });
-    // }
 
     SpriteEditor.init((JComponent) frame.getContentPane());
 
-    // MySprFrame frame = new MySprFrame();
-    // frame.pack();
-    // if (frameRect != null)
-    // frame.setLocation(frameRect.x, frameRect.y);
-    // else
-    // frame.setLocationRelativeTo(null);
-    frame.setVisible(true); // (true);
+    frame.setVisible(true);
   }
 
   private static ConfigSet config;
-
-  // /**
-  // * @deprecated
-  // */
-  // static class MySprFrame extends JFrame implements IConfig {
-  //
-  // private MySprFrame() {
-  //
-  // AppTools.setFrame(this);
-  // readDefaults();
-  // {
-  // // disable the close button, since we want to verify close
-  // setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-  // addWindowListener(new WindowAdapter() {
-  // public void windowClosing(WindowEvent e) {
-  // if (app().exitProgram())
-  // System.exit(0);
-  // }
-  // });
-  // }
-  //
-  // SpriteEditor.init((JComponent) getContentPane());
-  // }
-  //
-  // private void readDefaults() {
-  // config = new ConfigSet(this);
-  // warn("rename one of the two MyFrame classes");
-  // config.add(apputil.MyFrame.CONFIG);
-  // config.add(SpriteEditor.CONFIG);
-  // config.add(AtlasDisplay.CONFIG);
-  // try {
-  // config.readFrom(AppTools.getDefaultsPath("spredit"));
-  // } catch (Throwable e) {
-  // AppTools.showError("reading defaults file", e);
-  // }
-  // }
-  //
-  // /**
-  // * Override this method to change preferred size of application frame.
-  // * @return Dimension
-  // */
-  // public Dimension getPreferredSize() {
-  // if (frameRect != null)
-  // return new Dimension(frameRect.width, frameRect.height);
-  // return new Dimension(1024, 600);
-  // }
-  //
-  // @Override
-  // public boolean process(DefScanner sc, String item) {
-  // if (item.equals("FRAME")) {
-  // frameRect = sc.sIRect();
-  // return true;
-  // }
-  // return false;
-  // }
-  //
-  // @Override
-  // public void writeTo(DefBuilder sb) {
-  // sb.append("FRAME");
-  // sb.append(frameRect);
-  // }
-  // }
 
   public boolean exitProgram() {
     final boolean db = false;

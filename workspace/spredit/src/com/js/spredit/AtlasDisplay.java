@@ -110,34 +110,4 @@ public class AtlasDisplay extends MyFrame {
 
     }
   }
-  //  public void close() {
-  //
-  // //   bounds = new IRect(getBounds());
-  //
-  //    setVisible(false);
-  //    dispose();
-  //  }
-
-  //  public static IConfig CONFIG = new IConfig() {
-  //
-  //    @Override
-  //    public boolean process(DefScanner sc, String item) {
-  //      if (item.equals("ATLASFRAME")) {
-  //        bounds = sc.sIRect();
-  //        return true;
-  //      }
-  //      return false;
-  //    }
-  //
-  //    @Override
-  //    public void writeTo(DefBuilder sb) {
-  //      if (bounds != null) {
-  //        sb.append("ATLASFRAME");
-  //        sb.append(bounds);
-  //        sb.addCr();
-  //      }
-  //    }
-  //  };
-
-  //  public static IRect bounds;
 }

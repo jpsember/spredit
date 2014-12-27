@@ -1,6 +1,10 @@
 package apputil;
 
 import java.io.*;
+import java.util.ArrayList;
+
+import org.json.*;
+
 import streams.*;
 import base.*;
 import static com.js.basic.Tools.*;
@@ -29,60 +33,38 @@ public class ConfigSet {
   }
 
   public String write() {
-    DefBuilder sb = new DefBuilder();
-    for (int i = 0; i < configs.size(); i++) {
-      IConfig ic = (IConfig) configs.get(i);
-      if (db)
-        pr("ConfigSet.write: " + ic);
-
-      ic.writeTo(sb);
-      sb.addCr();
+    JSONObject map = new JSONObject();
+    try {
+      for (IConfig ic : configs)
+        ic.writeTo(map);
+    } catch (JSONException e) {
+      die(e);
     }
-    return sb.toString();
+    return map.toString();
   }
 
   public void readFrom(File f) throws IOException {
-    if (db)
-      pr("ConfigSeg.readFrom file:" + f);
-
-    String s = "";
+    String s = "{}";
     if (f.exists()) {
       s = Streams.readTextFile(f.getPath());
-      if (SHOW)
-        warning("showing defaults:\n" + s);
     }
-
-    readFrom(new DefScanner(s));
+    unimp("this checked exception nonsense is really annoying");
+    try {
+      readFrom(new JSONObject(s));
+    } catch (JSONException e) {
+      die(e);
+    }
   }
 
+  public void readFrom(JSONObject map) throws JSONException {
+    for (IConfig ic : configs)
+      ic.readFrom(map);
+  }
+
+  @Deprecated
   public void readFrom(DefScanner sc) {
-    // final boolean db = false;
-
-    if (db)
-      pr("processConfigs");
-
-    while (!sc.done()) {
-      String item = sc.nextDef();
-
-      boolean processed = false;
-
-      for (int i = 0; i < configs.size(); i++) {
-        IConfig ic = (IConfig) configs.get(i);
-        if (db)
-          pr("ConfigSet.readFrom: " + ic);
-        processed = ic.process(sc, item);
-        if (db)
-          pr(" processed=" + processed);
-        if (processed)
-          break;
-      }
-      if (!processed) {
-        pr("*** ignoring unrecognized ConfigSet argument: " + item //+"\n (called from "+stackTrace(3)+")"
-        );
-        sc.adv();
-      }
-    }
+    throw new UnsupportedOperationException();
   }
 
-  private DArray configs = new DArray();
+  private ArrayList<IConfig> configs = new ArrayList();
 }

@@ -1,18 +1,22 @@
 package apputil;
 
+import org.json.*;
+
 public interface IConfig {
 
   /**
-   * Give object an opportunity to handle a configuration argument
-   * @param scanner
-   * @param item argument
-   * @return true if this object processed the argument
+   * Give client an opportunity to restore configuration state from JSON object
+   * 
+   * @param map
+   * @throws JSONException
    */
-  public boolean process(DefScanner scanner, String item);
-  
+  public void readFrom(JSONObject map) throws JSONException;
+
   /**
-   * Give object an opportunity to write its configuration arguments
-   * @param sb destination
+   * Give client an opportunity to save configuration state to JSON object
+   * 
+   * @param map
+   * @throws JSONException
    */
-  public void writeTo(DefBuilder sb);
+  public void writeTo(JSONObject map) throws JSONException;
 }

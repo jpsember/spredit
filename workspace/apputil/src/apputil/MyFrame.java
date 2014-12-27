@@ -6,6 +6,10 @@ import java.util.*;
 import java.util.Timer;
 
 import javax.swing.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import static com.js.basic.Tools.*;
 
 import com.js.geometry.Rect;
@@ -97,7 +101,6 @@ public class MyFrame extends JFrame {
 
     return sb.toString();
   }
-  // private String persistId;
 
   public MyFrame(String persistId, String title, Component contents) {
     this(persistId);
@@ -109,49 +112,44 @@ public class MyFrame extends JFrame {
       setContents(contents);
     }
   }
+
   public void setContents(Component c) {
     getContentPane().add(c);
   }
 
   private static Map frameInfo = new HashMap();
 
-  private static void readFrameInfo(String fiString) {
-    DefScanner sc = new DefScanner(fiString);
-    frameInfo.clear();
-    while (!sc.done()) {
-      String id = sc.sId();
-      Rect bounds = sc.sRect();
-      frameInfo.put(id, bounds);
-    }
-  }
-
-  private static void writeFrameInfo(DefBuilder sb) {
-    sb.append("FRAMES");
-    Iterator it = frameInfo.keySet().iterator();
+  private static JSONObject constructFrameInfo() throws JSONException {
+    JSONObject framesMap = new JSONObject();
+    Iterator<String> it = frameInfo.keySet().iterator();
     while (it.hasNext()) {
-      String key = (String) it.next();
+      String key = it.next();
       Rect bounds = (Rect) frameInfo.get(key);
-      sb.append(key);
-      sb.append(bounds);
+      framesMap.put(key, bounds.toJSON());
     }
-    sb.addCr();
+    return framesMap;
   }
 
   public static final IConfig CONFIG = new IConfig() {
+    private static final String TAG = "FRAMES";
 
     @Override
-    public boolean process(DefScanner sc, String item) {
-      if (item.equals("FRAMES")) {
-        readFrameInfo(sc.readLine());
-        return true;
+    public void writeTo(JSONObject map) throws JSONException {
+      if (!frameInfo.isEmpty()) {
+        map.put(TAG, constructFrameInfo());
       }
-      return false;
     }
 
     @Override
-    public void writeTo(DefBuilder sb) {
-      if (!frameInfo.isEmpty()) {
-        writeFrameInfo(sb);
+    public void readFrom(JSONObject map) throws JSONException {
+      JSONObject map2 = map.optJSONObject(TAG);
+      if (map2 == null)
+        return;
+      Iterator<String> it = map2.keys();
+      while (it.hasNext()) {
+        String key = it.next();
+        Rect bounds = Rect.parseJSON(map2.getJSONArray(key));
+        frameInfo.put(key, bounds);
       }
     }
   };

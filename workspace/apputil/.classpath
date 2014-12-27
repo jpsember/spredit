@@ -6,5 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/streams"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/basic"/>
+	<classpathentry kind="lib" path="/Users/home/github_projects/spredit/workspace/libs/java-json.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

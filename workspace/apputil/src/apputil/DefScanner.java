@@ -61,6 +61,7 @@ public class DefScanner extends TextScanner {
     return ret;
   }
 
+  @Deprecated
   public String sLabel() {
     String s = AppTools.labelToString(read(LBL).text());
     return s;

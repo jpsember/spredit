@@ -54,6 +54,7 @@ public class TextScanner {
     return sysOutWriter;
   }
 
+  @Deprecated
   public String tokenName(Token t) {
     return DFA.tokenName(dfa, t.id());
     //(dfa == null) ? DFA.defaultTokenName(t.id()) : dfa.tokenName(t.id());
