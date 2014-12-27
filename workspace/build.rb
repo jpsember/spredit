@@ -72,25 +72,25 @@ class App
       # Declare the various projects and their dependencies
       #
 
-      Project.add("basic").add_libraries %w(libs/java-json.jar)
+      Project.add("basic").add_libraries %w(java-json.jar)
 
       # This project is deprecated:
       Project.add("base").add_projects %w(basic)
 
       Project.add("apputil")
       .add_projects(%w(base basic scanning streams))
-      .add_libraries(%w(/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/ui.jar))
+      .add_libraries(%w(ui.jar))
       Project.add("images").add_projects(%w(base basic streams))
-      .add_libraries(["/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar"])
+      .add_libraries(%w(classes.jar))
       Project.add("scanning").add_projects %w(base basic streams)
       Project.add("streams").add_projects %w(base basic)
       Project.add("myopengl").add_projects %w(base basic jogl tex)
       Project.add("tex").add_projects %w(apputil base basic images scanning streams)
       Project.add("jogl")
-      .add_libraries(["#{JOGAMP}/gluegen/build/gluegen-rt.jar","#{JOGAMP}/jogl/build/jar/jogl-all.jar"])
+      .add_libraries(%w(gluegen-rt.jar jogl-all.jar))
 
       Project.add("testUtils")
-      .add_libraries(["../eclipse_config/junit.jar"])
+      .add_libraries(%w(junit.jar))
 
       Project.add("basicTest")
       .add_projects(["basic"])
@@ -157,7 +157,7 @@ class App
         project.verify_dependent_projects_exist
         entries.add(project.bin_path)
         project.libraries.each do |lib|
-          entries.add(lib)
+          entries.add("libs/#{lib}")
         end
       end
       path = ""

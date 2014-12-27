@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="/Users/home/jogamp/gluegen/build/gluegen-rt.jar" sourcepath="/Users/home/jogamp/gluegen/build/gluegen-java-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="/Users/home/jogamp/jogl/build/jar/jogl-all.jar" sourcepath="/Users/home/jogamp/jogl/build/jogl-java-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="/Users/home/github_projects/spredit/workspace/libs/gluegen-rt.jar" sourcepath="/Users/home/jogamp/gluegen/build/gluegen-java-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="/Users/home/github_projects/spredit/workspace/libs/jogl-all.jar" sourcepath="/Users/home/jogamp/jogl/build/jogl-java-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/basic"/>
 	<classpathentry kind="output" path="bin"/>
