@@ -611,9 +611,6 @@ public final class Tools {
 
   /**
    * Describe a double array
-   * 
-   * @param doubleArray
-   *          double array
    */
   public static String d(double[] doubleArray) {
     StringBuilder sb = new StringBuilder("[");
@@ -626,13 +623,25 @@ public final class Tools {
 
   /**
    * Describe an int array
-   * 
-   * @param intArray
    */
   public static String d(int[] intArray) {
     StringBuilder sb = new StringBuilder("[");
     for (int i = 0; i < intArray.length; i++) {
       sb.append(d(intArray[i]));
+    }
+    sb.append(']');
+    return sb.toString();
+  }
+
+  /**
+   * Describe an array of strings
+   */
+  public static String d(String[] strArray) {
+    StringBuilder sb = new StringBuilder("[");
+    for (int i = 0; i < strArray.length; i++) {
+      if (i > 0)
+        sb.append(',');
+      sb.append(d(strArray[i]));
     }
     sb.append(']');
     return sb.toString();

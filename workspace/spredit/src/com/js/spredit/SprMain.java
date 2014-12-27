@@ -7,6 +7,7 @@ import static com.js.basic.Tools.*;
 
 import javax.swing.*;
 
+import com.js.basic.CmdLineArgs;
 import com.js.geometry.IPoint;
 
 import apputil.*;
@@ -50,11 +51,6 @@ public class SprMain implements IApplication {
   private static IApplication theApp;
 
   public static void main(String[] args) {
-    if (false) {
-      RelPath.main(args);
-      return;
-    }
-
     runGUI = true;
 
     try {
@@ -421,3 +417,4 @@ public class SprMain implements IApplication {
   private static float[] resolutions;
 
 }
+
