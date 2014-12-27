@@ -117,10 +117,18 @@ public class CmdLineArgs {
   }
 
   /**
-   * Make current option an array type
+   * Make current option an array type, of variable length
    */
   public CmdLineArgs setArray() {
+    return setArray(-1);
+  }
+
+  /**
+   * Make current option an array type, of fixed length
+   */
+  public CmdLineArgs setArray(int requiredLength) {
     mOpt.setArray();
+    mOpt.mExpectedValueCount = requiredLength;
     return this;
   }
 
@@ -372,7 +380,7 @@ public class CmdLineArgs {
         while (true) {
           if (cursor == args.size())
             break;
-          if (!opt.mArray && !opt.mValues.isEmpty())
+          if (!opt.variableLengthArray() && !opt.isMissingValues()) 
             break;
           arg = args.get(cursor);
           if (arg instanceof Opt)
@@ -395,8 +403,7 @@ public class CmdLineArgs {
             opt.addValue(value);
           }
         }
-        validate(!(!opt.mArray && opt.mValues.isEmpty()), "missing argument",
-            opt.mInvocation);
+        validate(!opt.isMissingValues(), "missing argument", opt.mInvocation);
       } else {
         mExtraArguments.add(arg.toString());
       }
@@ -504,12 +511,29 @@ public class CmdLineArgs {
       mValues.add(value);
     }
 
+    /**
+     * Return true iff type is an array of variable length
+     */
+    public boolean variableLengthArray() {
+      return mExpectedValueCount < 0;
+    }
+
+    /**
+     * Return true if some values are missing (i.e. no value for scalar, or less
+     * than required number for fixed length array)
+     */
+    public boolean isMissingValues() {
+      return !variableLengthArray() && mValues.size() < mExpectedValueCount;
+    }
+
     public String mLongName;
     public String mShortName;
     public Object mDefaultValue;
     public String mDescription;
     public Object mType;
     public boolean mArray;
+    // Number of values expected; -1 if variable-length array
+    public int mExpectedValueCount = 1;
     public boolean mTypeDefined;
     public String mInvocation;
     public ArrayList<Object> mValues = new ArrayList();

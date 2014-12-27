@@ -98,6 +98,22 @@ public class CmdLineArgsTest extends MyTestCase {
     assertEquals(mArgs.getInts("speeds").length, 5);
   }
 
+  public void testFixedArrayInts() {
+    mArgs.add("speeds").setInt().setArray(3);
+    mArgs.add("title").def("Moby Dick");
+    mArgs.parse(split("--speeds 3 1 -41 --title XXX"));
+    assertEquals(mArgs.getInts("speeds").length, 3);
+    assertEquals(0, mArgs.getExtras().length);
+  }
+
+  public void testFixedArrayIntsWithExtras() {
+    mArgs.add("speeds").setInt().setArray(3);
+    mArgs.add("title").def("Moby Dick");
+    mArgs.parse(split("--speeds 3 1 -41 52 --title XXX"));
+    assertEquals(mArgs.getInts("speeds").length, 3);
+    assertEquals(1, mArgs.getExtras().length);
+  }
+
   public void testDoubleDefault() {
     mArgs.add("speed").def(42.0);
     mArgs.parse(split(""));
