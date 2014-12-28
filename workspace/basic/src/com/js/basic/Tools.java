@@ -1,11 +1,15 @@
 package com.js.basic;
 
+import java.awt.Window;
+import java.awt.event.WindowEvent;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1126,6 +1130,20 @@ public final class Tools {
       sTestingKnown = true;
     }
     return sTesting;
+  }
+
+  /**
+   * Set up timer to close an application frame after a minute or so
+   */
+  public static void quitProgramAfterDelay(final Window frame,
+      int delayInSeconds) {
+    warning("will close window in " + delayInSeconds + "s");
+    new Timer().schedule(new TimerTask() {
+      @Override
+      public void run() {
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+      }
+    }, delayInSeconds * 1000);
   }
 
   private static boolean sSanitizeLineNumbersFlag;

@@ -3,7 +3,6 @@ package apputil;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.util.Timer;
 
 import javax.swing.*;
 
@@ -12,6 +11,7 @@ import org.json.JSONObject;
 
 import static com.js.basic.Tools.*;
 
+import com.js.basic.Tools;
 import com.js.geometry.Rect;
 
 public class MyFrame extends JFrame {
@@ -80,17 +80,7 @@ public class MyFrame extends JFrame {
         }
       });
 
-    if (true) {
-      warning("will close frame after ~ 1 minute");
-      // Close frame automatically after several seconds
-      new Timer().schedule(new TimerTask() {
-        @Override
-        public void run() {
-          MyFrame.this.dispatchEvent(new WindowEvent(MyFrame.this,
-              WindowEvent.WINDOW_CLOSING));
-        }
-      }, 60 * 1000);
-    }
+    Tools.quitProgramAfterDelay(this, 60);
   }
 
   public String toString() {

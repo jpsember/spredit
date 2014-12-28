@@ -3,6 +3,7 @@ package joglexample;
 import javax.media.opengl.GL;
 import javax.swing.JFrame;
 
+import com.js.basic.Tools;
 import com.js.geometry.IPoint;
 
 import com.js.myopengl.GLPanel;
@@ -10,8 +11,6 @@ import com.js.myopengl.GLPanel;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Main {
 
@@ -40,6 +39,7 @@ public class Main {
     OurGLPanel panel = new OurGLPanel();
 
     final JFrame jframe = new JFrame("One Triangle Swing GLCanvas");
+    Tools.quitProgramAfterDelay(jframe, 30);
     jframe.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent windowevent) {
         jframe.dispose();
@@ -50,15 +50,6 @@ public class Main {
     jframe.getContentPane().add(panel.getComponent(), BorderLayout.CENTER);
     jframe.setSize(640, 480);
     jframe.setVisible(true);
-
-    // Close frame automatically after several seconds
-    new Timer().schedule(new TimerTask() {
-      @Override
-      public void run() {
-        jframe
-            .dispatchEvent(new WindowEvent(jframe, WindowEvent.WINDOW_CLOSING));
-      }
-    }, 30 * 1000);
 
   }
 }
