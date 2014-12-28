@@ -460,7 +460,7 @@ public class Palette {
     Graphics2D g = img.createGraphics();
 
     int ci = 0;
-    Rect pt = new Rect();
+    IRect pt = new IRect();
     for (int i = 0; i < StandardColors.length; i++) {
       for (int j = 0; j < COLOR_SET_SIZE; j++) {
 
@@ -471,7 +471,7 @@ public class Palette {
         g.setColor(c);
 
         indexToCell(ci, pixelSize, pt);
-        g.fillRect(pt.ix(), pt.iy(), pt.iWidth(), pt.iHeight());
+        g.fillRect(pt.x, pt.y, pt.width, pt.height);
 
         ci++;
       }
@@ -487,12 +487,12 @@ public class Palette {
    * @param dest where to store bounding rectangle; if null, constructs one
    * @return bounding rectangle
    */
-  public static Rect indexToCell(int colorIndex, int pixelSize, Rect dest) {
+  public static IRect indexToCell(int colorIndex, int pixelSize, IRect dest) {
 
     final boolean db = false;
 
     if (dest == null)
-      dest = new Rect();
+      dest = new IRect();
 
     // calculate x,y as if they were stored in one long column
     int y = colorIndex / COLOR_SET_SIZE;

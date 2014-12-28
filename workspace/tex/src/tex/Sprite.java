@@ -1,7 +1,7 @@
 package tex;
 
-import com.js.geometry.Point;
-import com.js.geometry.Rect;
+import com.js.geometry.IPoint;
+import com.js.geometry.IRect;
 
 /**
  * Sprite fields explained
@@ -31,8 +31,8 @@ public class Sprite {
   public Sprite(String id) {
     this.id = id;
     this.compressionFactor = 1;
-    this.translate = new Point();
-    this.bounds = new Rect();
+    this.translate = new IPoint();
+    this.bounds = new IRect();
   }
 
   /**
@@ -41,8 +41,8 @@ public class Sprite {
    */
   public Sprite(Sprite srcSprite) {
     this(srcSprite.id);
-    bounds = new Rect(srcSprite.bounds);
-    translate = new Point(srcSprite.translate);
+    bounds = new IRect(srcSprite.bounds);
+    translate = new IPoint(srcSprite.translate);
     compressionFactor = srcSprite.compressionFactor;
   }
 
@@ -69,7 +69,7 @@ public class Sprite {
    * Set translate
    * @param t
    */
-  public void setTranslate(Point t) {
+  public void setTranslate(IPoint t) {
     translate.setTo(t);
   }
 
@@ -77,7 +77,7 @@ public class Sprite {
    * Get bounds
    * @return bounds (original, not a copy)
    */
-  public Rect bounds() {
+  public IRect bounds() {
     return bounds;
   }
 
@@ -85,7 +85,7 @@ public class Sprite {
    * Get translation 
    * @return translation (original, not a copy)
    */
-  public Point translate() {
+  public IPoint translate() {
     return translate;
   }
 
@@ -101,7 +101,7 @@ public class Sprite {
    * Set bounds
    * @param r
    */
-  public void setBounds(Rect r) {
+  public void setBounds(IRect r) {
     bounds.setTo(r);
   }
 
@@ -113,8 +113,8 @@ public class Sprite {
     this.id = id;
   }
 
-  private Rect bounds;
+  private IRect bounds;
   private float compressionFactor;
-  private Point translate;
+  private IPoint translate;
   private String id;
 }

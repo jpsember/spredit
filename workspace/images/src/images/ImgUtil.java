@@ -9,6 +9,7 @@ import static com.js.basic.Tools.*;
 
 import com.js.basic.Streams;
 import com.js.geometry.IPoint;
+import com.js.geometry.IRect;
 import com.js.geometry.Rect;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageDecoder;
@@ -493,7 +494,7 @@ public class ImgUtil {
    * @param padding number of transparent pixels to retain to each side
    * @return cropped rectangle (not flipped to OpenGL coordinate system)
    */
-  public static Rect calcUsedBounds(BufferedImage img, int padding) {
+  public static IRect calcUsedBounds(BufferedImage img, int padding) {
 
     int x0 = 0, x1 = img.getWidth();
     int y0 = 0, y1 = img.getHeight();
@@ -521,7 +522,7 @@ public class ImgUtil {
     y0 = Math.max(y0 - padding, 0);
     y1 = Math.min(y1 + padding, img.getHeight());
 
-    return new Rect(x0, y0, x1 - x0, y1 - y0);
+    return new IRect(x0, y0, x1 - x0, y1 - y0);
   }
   private static boolean isTransparentColumn(BufferedImage img, int x, int y0,
       int y1) {

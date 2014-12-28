@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import static com.js.basic.Tools.*;
 
 import com.js.basic.Tools;
-import com.js.geometry.Rect;
+import com.js.geometry.IRect;
 
 public class MyFrame extends JFrame {
 
@@ -43,10 +43,9 @@ public class MyFrame extends JFrame {
 
   private boolean restoreBounds() {
     if (!boundsDefined) {
-      Rect r = (Rect) frameInfo.get(persistId2);
+      IRect r = frameInfo.get(persistId2);
       if (r != null) {
-        setBounds(new Rectangle((int) r.x, (int) r.y, (int) r.width,
-            (int) r.height));
+        setBounds(r.toRectangle());
         boundsDefined = true;
       }
     }
@@ -67,7 +66,7 @@ public class MyFrame extends JFrame {
 
         @Override
         public void componentMoved(ComponentEvent ev) {
-          Rect r = new Rect(getBounds());
+          IRect r = new IRect(getBounds());
           frameInfo.put(persistId2, r);
         }
 
@@ -81,15 +80,6 @@ public class MyFrame extends JFrame {
       });
 
     Tools.quitProgramAfterDelay(this, 60);
-  }
-
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("MyFrame");
-    if (persistId2 != null)
-      sb.append(" id=" + persistId2);
-
-    return sb.toString();
   }
 
   public MyFrame(String persistId, String title, Component contents) {
@@ -107,14 +97,14 @@ public class MyFrame extends JFrame {
     getContentPane().add(c);
   }
 
-  private static Map frameInfo = new HashMap();
+  private static Map<String, IRect> frameInfo = new HashMap();
 
   private static JSONObject constructFrameInfo() throws JSONException {
     JSONObject framesMap = new JSONObject();
     Iterator<String> it = frameInfo.keySet().iterator();
     while (it.hasNext()) {
       String key = it.next();
-      Rect bounds = (Rect) frameInfo.get(key);
+      IRect bounds = frameInfo.get(key);
       framesMap.put(key, bounds.toJSON());
     }
     return framesMap;
@@ -132,13 +122,13 @@ public class MyFrame extends JFrame {
 
     @Override
     public void readFrom(JSONObject map) throws JSONException {
-      JSONObject map2 = map.optJSONObject(TAG);
-      if (map2 == null)
+      JSONObject framesMap = map.optJSONObject(TAG);
+      if (framesMap == null)
         return;
-      Iterator<String> it = map2.keys();
+      Iterator<String> it = framesMap.keys();
       while (it.hasNext()) {
         String key = it.next();
-        Rect bounds = Rect.parseJSON(map2.getJSONArray(key));
+        IRect bounds = IRect.parseJSON(framesMap.getJSONArray(key));
         frameInfo.put(key, bounds);
       }
     }

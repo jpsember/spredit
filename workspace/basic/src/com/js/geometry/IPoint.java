@@ -7,8 +7,8 @@ import org.json.JSONException;
 
 public final class IPoint {
 
-	public IPoint() {
-	}
+  public IPoint() {
+  }
 
   public IPoint(IPoint src) {
     this(src.x, src.y);
@@ -18,15 +18,15 @@ public final class IPoint {
     this(src.x, src.y);
   }
 
-	public IPoint(float x, float y) {
-		this.x = (int) x;
-		this.y = (int) y;
-	}
+  public IPoint(float x, float y) {
+    this.x = (int) x;
+    this.y = (int) y;
+  }
 
-	public IPoint(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
+  public IPoint(int x, int y) {
+    this.x = x;
+    this.y = y;
+  }
 
   public static IPoint sum(IPoint a, IPoint b) {
     return new IPoint(a.x + b.x, a.y + b.y);
@@ -36,23 +36,24 @@ public final class IPoint {
     return new IPoint(a.x - b.x, a.y - b.y);
   }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(d(x));
-		sb.append(' ');
-		sb.append(d(y));
-		return sb.toString();
-	}
+  public void setTo(IPoint src) {
+    x = src.x;
+    y = src.y;
+  }
 
-	public String dumpUnlabelled() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(d(x));
-		sb.append(' ');
-		sb.append(d(y));
-		sb.append(' ');
-		return sb.toString();
-	}
+  public void applyScale(float scaleFactor) {
+    x *= scaleFactor;
+    y *= scaleFactor;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(d(x));
+    sb.append(' ');
+    sb.append(d(y));
+    return sb.toString();
+  }
 
   /**
    * Encode point as JSON array
@@ -74,6 +75,6 @@ public final class IPoint {
     return new IPoint(x, y);
   }
 
-	public int x;
-	public int y;
+  public int x;
+  public int y;
 }

@@ -7,8 +7,27 @@ import org.json.*;
 
 public class Rect {
 
+  public Rect(float x, float y, float w, float h) {
+    setTo(x, y, w, h);
+  }
+
   public Rect(Rectangle r) {
-    this(r.x, r.y, r.width, r.height);
+    setTo(r.x, r.y, r.width, r.height);
+  }
+
+  public Rect(IRect r) {
+    setTo(r.x, r.y, r.width, r.height);
+  }
+
+  public void setTo(float x, float y, float w, float h) {
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+  }
+
+  public void setTo(Rect r) {
+    setTo(r.x, r.y, r.width, r.height);
   }
 
   public float midX() {
@@ -30,24 +49,6 @@ public class Rect {
   public boolean equals(Rect r) {
     return r != null && r.x == x && r.y == y && r.width == width
         && r.height == height;
-  }
-
-  public Rect(float x, float y, float w, float h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-  }
-
-  public void setTo(Rect r) {
-    setTo(r.x, r.y, r.width, r.height);
-  }
-
-  public void setTo(float x, float y, float w, float h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
   }
 
   public String toString(boolean digitsOnly) {
@@ -246,22 +247,6 @@ public class Rect {
 
   public Point size() {
     return new Point(width, height);
-  }
-
-  public int ix() {
-    return (int) x;
-  }
-
-  public int iy() {
-    return (int) y;
-  }
-
-  public int iWidth() {
-    return (int) width;
-  }
-
-  public int iHeight() {
-    return (int) height;
   }
 
   /**

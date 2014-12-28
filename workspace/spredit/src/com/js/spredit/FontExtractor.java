@@ -10,6 +10,7 @@ import java.awt.RenderingHints;
 import java.awt.image.*;
 
 import com.js.geometry.IPoint;
+import com.js.geometry.IRect;
 import com.js.geometry.Point;
 import com.js.geometry.Rect;
 
@@ -20,13 +21,11 @@ public class FontExtractor {
   public void setHorizontalSpacing(int n) {
     charXSep = n;
   }
+
   public void setCropping(boolean f) {
     fontCropping = f;
   }
-  /**
-   * Constructor
-   * @param f font to manipulate
-   */
+
   public FontExtractor(Font f) {
     imageSize = new IPoint(1000, 800);
     workImg = new BufferedImage(imageSize.x, imageSize.y,
@@ -44,17 +43,20 @@ public class FontExtractor {
     charHeight = fontAscent + fontDescent;
 
     cursor = new IPoint(0, imageSize.y);
-    
-    // there's no harm in having a large horizontal spacing, since we crop the 
+
+    // there's no harm in having a large horizontal spacing, since we crop the
     // letters to remove any slack.
     setHorizontalSpacing(8);
     setCropping(true);
-    
- //   warn("turning off cropping");setCropping(false);
+
+    // warn("turning off cropping");setCropping(false);
   }
+
   /**
    * Render a character into the image
-   * @param c character to render
+   * 
+   * @param c
+   *          character to render
    */
   public void render(char c) {
     if (advanceRequired)
@@ -63,26 +65,21 @@ public class FontExtractor {
     int charWidth = metrics.charWidth(c) + charXSep;
 
     g.drawString(Character.toString(c), cursor.x, cursor.y - fontDescent);
-    Rect subRect = new Rect(cursor.x, cursor.y - charHeight, charWidth,
+    IRect subRect = new IRect(cursor.x, cursor.y - charHeight, charWidth,
         charHeight);
 
-    //      if (db)
-    //        pr("c=" + c + " pt=" + pt + " ascent=" + m.getAscent() + " desc="
-    //            + m.getDescent() + " charWidth=" + m.charWidth(c) + "\n subr="
-    //            + subRect);
-
-    cimg = workImg.getSubimage(subRect.ix(), subRect.iy(), subRect.iWidth(),
-        subRect.iHeight());
+    cimg = workImg.getSubimage(subRect.x, subRect.y, subRect.width,
+        subRect.height);
 
     // crop vertically (we need width for spacing)
-    Rect cropped = ImgUtil.calcUsedBounds(cimg, 0);
+    IRect cropped = ImgUtil.calcUsedBounds(cimg, 0);
 
     int cropTop = 0, cropBottom = 0;
     warning("clean up font stuff at some point");
-    
-  // if (true) warn("not cropping");else
+
+    // if (true) warn("not cropping");else
     if (fontCropping) {
-      cropTop = cropped.iy();
+      cropTop = cropped.y;
       cropBottom = cimg.getHeight() - (int) cropped.endY();
 
       // if cropped image is empty, pretend its baseline has some pixels
@@ -111,12 +108,14 @@ public class FontExtractor {
   public Rect getClip() {
     return clip;
   }
+
   public BufferedImage getImage() {
     return cimg;
   }
+
   private void advanceCursor() {
     advanceRequired = false;
-    cursor.x += clip.width + charXSep/2;
+    cursor.x += clip.width + charXSep / 2;
     if (cursor.x + metrics.getMaxAdvance() + charXSep > imageSize.x) {
       cursor.x = 0;
       cursor.y -= charHeight;
@@ -127,6 +126,7 @@ public class FontExtractor {
     cp = null;
     clip = null;
   }
+
   public int[] getFontInfo() {
     int[] fd = new int[3];
     fd[0] = fontAscent;
@@ -134,6 +134,7 @@ public class FontExtractor {
     fd[2] = fontLeading;
     return fd;
   }
+
   private boolean fontCropping;
   private FontMetrics metrics;
 

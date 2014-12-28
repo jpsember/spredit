@@ -555,11 +555,11 @@ public class SpriteEditor {
   }
 
   private static void move(int x, int y) {
-    Rect r = spriteInfo.cropRect();
+    IRect r = spriteInfo.cropRect();
     r.x += x;
     r.y += y;
     spriteInfo.setCropRect(r);
-    Point cp = spriteInfo.centerPoint();
+    IPoint cp = spriteInfo.centerPoint();
     cp.x += x;
     cp.y += y;
     spriteInfo.setCenterPoint(cp);
@@ -812,8 +812,8 @@ public class SpriteEditor {
     }
   }
 
-  private static float snapclamp(float v, float min, float max) {
-    v = MyMath.snapToGrid(v, 1);
+  private static int snapclamp(int v, int min, int max) {
+    v = (int) MyMath.snapToGrid(v, 1);
     return MyMath.clamp(v, min, max);
   }
 
@@ -874,8 +874,8 @@ public class SpriteEditor {
         if (!defined() || !right() || ev.isControlDown() || !ev.isShiftDown())
           break;
 
-        Rect clip = spriteInfo.cropRect();
-        float dist = clip.distanceFrom(new Point(startPt))
+        IRect clip = spriteInfo.cropRect();
+        float dist = clip.distanceFrom(startPt)
             * spritePanel.getZoom();
 
         if (dist > HOT_DIST)
@@ -897,8 +897,8 @@ public class SpriteEditor {
     @Override
     public void mouseMove(boolean drag) {
       ASSERT(drag);
-      Point loc = Point.difference(currentPtF, startPtF);
-      Rect clip = spriteInfo.cropRect();
+      IPoint loc = new IPoint(Point.difference(currentPtF, startPtF));
+      IRect clip = spriteInfo.cropRect();
       clip.x = origLoc.x + loc.x;
       clip.y = origLoc.y + loc.y;
 
@@ -908,7 +908,7 @@ public class SpriteEditor {
     }
 
     // bottom left of clip rectangle at start of operation
-    private Point origLoc;
+    private IPoint origLoc;
   }
 
   private static class MoveCPOper extends MouseOper {
@@ -923,7 +923,7 @@ public class SpriteEditor {
           break;
 
         if (ev.isShiftDown())
-          spriteInfo.setCenterPoint(startPtF);
+          spriteInfo.setCenterPoint(startPt);
 
         origLoc = new Point(spriteInfo.centerPoint());
         float dist = MyMath.distanceBetween(origLoc, startPtF)
@@ -949,7 +949,7 @@ public class SpriteEditor {
       if (!drag)
         return;
       Point loc = Point.difference(currentPtF, startPtF);
-      spriteInfo.setCenterPoint(Point.sum(origLoc, loc));
+      spriteInfo.setCenterPoint(new IPoint(Point.sum(origLoc, loc)));
     }
 
     // location of centerpoint at start of operation
@@ -976,9 +976,9 @@ public class SpriteEditor {
         if (db)
           pr("EdgeOper mouseDown, world=" + startPt);
 
-        Point pt1, pt2;
+        IPoint pt1, pt2;
         {
-          Rect clip = spriteInfo.cropRect();
+          IRect clip = spriteInfo.cropRect();
           switch (num) {
           default:
             pt1 = clip.bottomLeft();
@@ -1005,7 +1005,7 @@ public class SpriteEditor {
 
         if (dist > HOT_DIST)
           break;
-        origClip = new Rect(spriteInfo.cropRect());
+        origClip = new IRect(spriteInfo.cropRect());
         spritePanel.setHighlightClip(true);
         f = true;
       } while (false);
@@ -1019,14 +1019,14 @@ public class SpriteEditor {
 
       if (!drag)
         return;
-      Point loc = Point.difference(currentPtF, startPtF);
-      Point bounds = spriteInfo.workImageSize();
+      IPoint loc = new IPoint(Point.difference(currentPtF, startPtF));
+      IPoint bounds = spriteInfo.workImageSize();
 
-      Rect clip = spriteInfo.cropRect();
-      float x1 = clip.x;
-      float y1 = clip.y;
-      float x2 = clip.endX();
-      float y2 = clip.endY();
+      IRect clip = spriteInfo.cropRect();
+      int x1 = clip.x;
+      int y1 = clip.y;
+      int x2 = clip.endX();
+      int y2 = clip.endY();
 
       switch (num) {
       case 0:
@@ -1042,7 +1042,7 @@ public class SpriteEditor {
         x1 = snapclamp(origClip.x + loc.x, 0, x2 - 1);
         break;
       }
-      spriteInfo.setCropRect(new Rect(x1, y1, x2 - x1, y2 - y1));
+      spriteInfo.setCropRect(new IRect(x1, y1, x2 - x1, y2 - y1));
     }
 
     @Override
@@ -1052,7 +1052,7 @@ public class SpriteEditor {
     }
 
     // clip rectangle at start of operation
-    private Rect origClip;
+    private IRect origClip;
   };
 
   private static class CornerOper extends MouseOper {
@@ -1074,9 +1074,9 @@ public class SpriteEditor {
         if (db)
           pr("start, world=" + startPt);
 
-        Point pt1;
+        IPoint pt1;
         {
-          Rect clip = spriteInfo.cropRect();
+          IRect clip = spriteInfo.cropRect();
           switch (num) {
           default:
             pt1 = clip.bottomLeft();
@@ -1093,12 +1093,12 @@ public class SpriteEditor {
           }
         }
 
-        float dist = MyMath.distanceBetween(startPtF, pt1)
+        float dist = MyMath.distanceBetween(startPtF, new Point(pt1))
             * spritePanel.getZoom();
         if (dist > HOT_DIST)
           break;
 
-        origClip = new Rect(spriteInfo.cropRect());
+        origClip = new IRect(spriteInfo.cropRect());
         spritePanel.setHighlightClip(true);
         f = true;
       } while (false);
@@ -1107,34 +1107,34 @@ public class SpriteEditor {
 
     @Override
     public void mouseMove(boolean drag) {
-      Point loc = Point.difference(currentPtF, startPtF);
-      Point bounds = spriteInfo.workImageSize();
+      IPoint loc = new IPoint(Point.difference(currentPtF, startPtF));
+      IPoint bounds = spriteInfo.workImageSize();
 
-      Rect clip = spriteInfo.cropRect();
-      float x1 = clip.x;
-      float y1 = clip.y;
-      float x2 = clip.endX();
-      float y2 = clip.endY();
+      IRect clip = spriteInfo.cropRect();
+      int x1 = clip.x;
+      int y1 = clip.y;
+      int x2 = clip.endX();
+      int y2 = clip.endY();
 
       switch (num) {
       case 0:
-        x1 = snapclamp(origClip.x + loc.x, 0, x2 - 1);
-        y1 = snapclamp(origClip.y + loc.y, 0, y2 - 1);
+        x1 = (int) snapclamp(origClip.x + loc.x, 0, x2 - 1);
+        y1 = (int) snapclamp(origClip.y + loc.y, 0, y2 - 1);
         break;
       case 1:
-        x2 = snapclamp(origClip.endX() + loc.x, x1 + 1, bounds.x);
-        y1 = snapclamp(origClip.y + loc.y, 0, y2 - 1);
+        x2 = (int) snapclamp(origClip.endX() + loc.x, x1 + 1, bounds.x);
+        y1 = (int) snapclamp(origClip.y + loc.y, 0, y2 - 1);
         break;
       case 2:
-        x2 = snapclamp(origClip.endX() + loc.x, x1 + 1, bounds.x);
-        y2 = snapclamp(origClip.endY() + loc.y, y1 + 1, bounds.y);
+        x2 = (int) snapclamp(origClip.endX() + loc.x, x1 + 1, bounds.x);
+        y2 = (int) snapclamp(origClip.endY() + loc.y, y1 + 1, bounds.y);
         break;
       case 3:
-        y2 = snapclamp(origClip.endY() + loc.y, y1 + 1, bounds.y);
-        x1 = snapclamp(origClip.x + loc.x, 0, x2 - 1);
+        y2 = (int) snapclamp(origClip.endY() + loc.y, y1 + 1, bounds.y);
+        x1 = (int) snapclamp(origClip.x + loc.x, 0, x2 - 1);
         break;
       }
-      spriteInfo.setCropRect(new Rect(x1, y1, x2 - x1, y2 - y1));
+      spriteInfo.setCropRect(new IRect(x1, y1, x2 - x1, y2 - y1));
     }
 
     @Override
@@ -1144,7 +1144,7 @@ public class SpriteEditor {
     }
 
     // clip rectangle at start of operation
-    private Rect origClip;
+    private IRect origClip;
   };
 
   private static RecentFiles recentProjects = new RecentFiles(null);

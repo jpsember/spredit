@@ -9,8 +9,7 @@ import java.util.*;
 
 import com.js.basic.Streams;
 import com.js.geometry.IPoint;
-import com.js.geometry.Point;
-import com.js.geometry.Rect;
+import com.js.geometry.IRect;
 
 import apputil.*;
 
@@ -61,7 +60,7 @@ public class Atlas {
     if (true) {
       // create an initial sprite that represents the entire texture
       Sprite page = new Sprite("_ATLAS");
-      page.setBounds(new Rect(0, 0, texPageSize.x, texPageSize.y));
+      page.setBounds(new IRect(0, 0, texPageSize.x, texPageSize.y));
       addSprite(page);
     }
   }
@@ -95,12 +94,12 @@ public class Atlas {
 
     // verify that sprite bounds are valid
     {
-      Rect r = new Rect(spr.bounds());
+      IRect r = new IRect(spr.bounds());
       float f = spr.compressionFactor();
       if (f != 1)
         r.scale(f);
       r.translate(spr.translate());
-      Rect texRect = new Rect(0, 0, texPageSize.x, texPageSize.y);
+      IRect texRect = new IRect(0, 0, texPageSize.x, texPageSize.y);
       if (!texRect.contains(r)) {
 
         pr("**** translated sprite not within atlas bounds!");
@@ -226,11 +225,8 @@ public class Atlas {
     }
     { // entries
       for (int k = 0; k < nSprites; k++) {
-     //   warn("these should be floats, not shorts?");
-        
-        Rect r = new Rect(s.readFloat(), s.readFloat(), s.readFloat(),
-            s.readFloat());
-        Point trans = new Point(s.readFloat(), s.readFloat());
+        IRect r = new IRect(s.readInt(), s.readInt(), s.readInt(), s.readInt());
+        IPoint trans = new IPoint(s.readInt(), s.readInt());
         float shrink = s.readFloat();
         Sprite sp = new Sprite(ids == null ? null : ids[k]);
         sp.setBounds(r);
@@ -316,14 +312,14 @@ public class Atlas {
       for (int k = 0; k < size(); k++) {
         Sprite sp = sprite(k);
         
-        Rect r = sp.bounds();
-        s.writeFloat(r.x);
-        s.writeFloat(r.y);
-        s.writeFloat(r.width);
-        s.writeFloat(r.height);
-        Point trans = sp.translate();
-        s.writeFloat(trans.x);
-        s.writeFloat(trans.y);
+        IRect r = sp.bounds();
+        s.writeInt(r.x);
+        s.writeInt(r.y);
+        s.writeInt(r.width);
+        s.writeInt(r.height);
+        IPoint trans = sp.translate();
+        s.writeInt(trans.x);
+        s.writeInt(trans.y);
         s.writeFloat(sp.compressionFactor());
         if (db)
           pr("wrote #" + k + ":" + sp.id() + " compression="

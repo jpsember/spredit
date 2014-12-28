@@ -13,6 +13,7 @@ import tex.*;
 
 import com.js.basic.Streams;
 import com.js.geometry.IPoint;
+import com.js.geometry.IRect;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 import com.js.geometry.Rect;
@@ -321,8 +322,7 @@ public class Builder {
    * @param bottomLeft
    *          location of bottom left pixel within atlas
    */
-  private void plotSpriteIntoAtlas(SpriteInfo si, IPoint bottomLeft,
-      int padding) {
+  private void plotSpriteIntoAtlas(SpriteInfo si, IPoint bottomLeft, int padding) {
     final boolean db = (DBID != null) && si.id().equals(DBID);
 
     Sprite srcSprite = si.sprite();
@@ -331,8 +331,9 @@ public class Builder {
     // appearance in the atlas
     Sprite destSprite = new Sprite(si.id());
     {
-      Rect destClip = new Rect(si.cropRect());
-      destClip.translate(-si.centerPoint().x, -si.centerPoint().y);
+      unimp("use floating point Rect here");
+      IRect destClip = new IRect(si.cropRect());
+      destClip.translate((int) -si.centerPoint().x, (int) -si.centerPoint().y);
       destSprite.setBounds(destClip);
       destSprite.setCompression(srcSprite.compressionFactor());
     }
@@ -343,7 +344,7 @@ public class Builder {
     // calculate location of centerpoint in atlas
 
     Point cpComp = si.compressedCenterPoint();
-    destSprite.setTranslate(new Point(bottomLeft.x + cpComp.x, bottomLeft.y
+    destSprite.setTranslate(new IPoint(bottomLeft.x + cpComp.x, bottomLeft.y
         + cpComp.y));
 
     if (db)
@@ -355,7 +356,7 @@ public class Builder {
     BufferedImage imgComp = si.compressedImage();
 
     // calculate bounding rectangle within atlas, with AWT y-axis
-    Rect destRect = new Rect(bottomLeft.x, bottomLeft.y, imgComp.getWidth(),
+    IRect destRect = new IRect(bottomLeft.x, bottomLeft.y, imgComp.getWidth(),
         imgComp.getHeight());
     if (db)
       pr(" destRect, before flip=" + destRect);
@@ -367,10 +368,10 @@ public class Builder {
     if (plotFrames) {
       debNumber++;
       graf.setColor((debNumber % 2 == 1) ? Color.yellow : Color.blue);
-      graf.drawRect(destRect.ix(), destRect.iy(), destRect.iWidth() - 1,
-          destRect.iHeight() - 1);
+      graf.drawRect(destRect.x, destRect.y, destRect.width - 1,
+          destRect.height - 1);
     }
-    graf.drawImage(imgComp, destRect.ix(), destRect.iy(), null);
+    graf.drawImage(imgComp, destRect.x, destRect.y, null);
     // plot padding pixels if necessary
     if (padding > 0) {
 
@@ -393,23 +394,10 @@ public class Builder {
   }
 
   private static void plotPaddingPixel(BufferedImage img, int x, int y,
-      Rect bounds) {
-    final boolean db = false;
-    if (db)
-      pr("plotPaddingPixel x=" + x + " y=" + y + " bounds=" + bounds
-          + " into img of size " + img.getWidth() + "," + img.getHeight());
-
-    int srcx = MyMath.clamp(x, (int) bounds.x, (int) bounds.endX() - 1);
-    int srcy = MyMath.clamp(y, (int) bounds.y, (int) bounds.endY() - 1);
-    // if (db)
-    // pr("  clamped src="+srcx+","+srcy);
-
+      IRect bounds) {
+    int srcx = MyMath.clamp(x, bounds.x, bounds.endX() - 1);
+    int srcy = MyMath.clamp(y, bounds.y, bounds.endY() - 1);
     int pixel = img.getRGB(srcx, srcy);
-    if (db)
-      pr("  pixel at " + srcx + "," + srcy + " is " + pixel);
-
-    // pixel |= (0xff << 16);
-    // pixel = ~0;
     img.setRGB(x, y, pixel);
   }
 

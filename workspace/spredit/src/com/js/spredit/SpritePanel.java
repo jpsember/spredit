@@ -74,7 +74,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (image == null)
       return;
 
-    spriteInfo.plotTexture(spriteInfo.centerPoint(), this);
+    spriteInfo.plotTexture(new Point(spriteInfo.centerPoint()), this);
 
     if (mShowClip.isSelected()) {
       setRenderColor(hlClip ? RED : BLUE);
@@ -83,7 +83,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
 
     if (mCpt.isSelected()) {
-      Point t0 = spriteInfo.centerPoint();
+      Point t0 = new Point(spriteInfo.centerPoint());
 
       gl.glPushMatrix();
       gl.glTranslatef(t0.x, t0.y, 0);
@@ -192,6 +192,10 @@ public class SpritePanel extends GLPanel implements IEditorView {
   }
 
   public void drawFrame(Rect r) {
+    drawFrame(r.x, r.y, r.width, r.height);
+  }
+
+  public void drawFrame(IRect r) {
     drawFrame(r.x, r.y, r.width, r.height);
   }
 
@@ -449,12 +453,12 @@ public class SpritePanel extends GLPanel implements IEditorView {
 
     err();
 
-    Rect imgRect = new Rect(sprite.bounds());
+    IRect imgRect = new IRect(sprite.bounds());
     Rect aRect = new Rect(imgRect);
 
     aRect.scale(sprite.compressionFactor());
 
-    Point tr = sprite.translate();
+    IPoint tr = sprite.translate();
     aRect.translate(tr.x, tr.y);
 
     ASSERT(TextureLoader.ceilingPower2(textureSize.x) == textureSize.x
