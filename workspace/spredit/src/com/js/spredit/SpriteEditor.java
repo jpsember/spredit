@@ -337,69 +337,38 @@ public class SpriteEditor {
     // -----------------------------------
     m.addMenu("Sprite", projectMustBeOpenHandler);
 
-    m.addItem("Scale Up", KeyEvent.VK_EQUALS, 0, new ItemHandler() {
-      public void go() {
-        doAdjustScale(1);
-      }
 
-      public boolean isEnabled() {
-        return defined() && spriteInfo.scaleFactor() < 1;
-      }
-    });
-
-    m.addItem("Scale Down", KeyEvent.VK_MINUS, 0, new ItemHandler() {
-      public void go() {
-        doAdjustScale(-1);
-      }
-
-      public boolean isEnabled() {
-        return defined() && spriteInfo.scaleFactor() > .1f;
-      }
-    });
-    m.addItem("Original Size", KeyEvent.VK_0, 0, new ItemHandler() {
-      public boolean isEnabled() {
-        return defined() && spriteInfo.scaleFactor() != 1;
-      }
-
-      public void go() {
-        doAdjustScale(0);
-      }
-    });
-
-    // -----------------------------------
-    m.addSeparator();
-
-    m.addItem("Increase Resolution", KeyEvent.VK_EQUALS, SHIFT,
-        new ItemHandler() {
-          public void go() {
-            doAdjustCompress(-1);
-          }
-
-          public boolean isEnabled() {
-            return defined() && spriteInfo.compressionFactor() < 1;
-          }
-        });
-
-    m.addItem("Decrease Resolution", KeyEvent.VK_MINUS, SHIFT,
-        new ItemHandler() {
-          public void go() {
-            doAdjustCompress(1);
-          }
-
-          public boolean isEnabled() {
-            return defined() && spriteInfo.compressionFactor() > .1f;
-          }
-        });
-    m.addItem("Full Resolution", KeyEvent.VK_0, SHIFT, new ItemHandler() {
-      public boolean isEnabled() {
-        return defined() && spriteInfo.compressionFactor() != 1;
-      }
-
-      public void go() {
-        doAdjustCompress(0);
-      }
-    });
-    m.addSeparator();
+    // m.addItem("Increase Resolution", KeyEvent.VK_EQUALS, SHIFT,
+    // new ItemHandler() {
+    // public void go() {
+    // doAdjustCompress(-1);
+    // }
+    //
+    // public boolean isEnabled() {
+    // return defined() && spriteInfo.compressionFactor() < 1;
+    // }
+    // });
+    //
+    // m.addItem("Decrease Resolution", KeyEvent.VK_MINUS, SHIFT,
+    // new ItemHandler() {
+    // public void go() {
+    // doAdjustCompress(1);
+    // }
+    //
+    // public boolean isEnabled() {
+    // return defined() && spriteInfo.compressionFactor() > .1f;
+    // }
+    // });
+    // m.addItem("Full Resolution", KeyEvent.VK_0, SHIFT, new ItemHandler() {
+    // public boolean isEnabled() {
+    // return defined() && spriteInfo.compressionFactor() != 1;
+    // }
+    //
+    // public void go() {
+    // doAdjustCompress(0);
+    // }
+    // });
+    // m.addSeparator();
 
     m.addItem("Reset Clip", KeyEvent.VK_R, CTRL, new ItemHandler() {
       public void go() {
@@ -619,53 +588,28 @@ public class SpriteEditor {
     repaint();
   }
 
-  /**
-   * Adjust resolution
-   * 
-   * @param code
-   *          0 to reset, -1 to zoom out, +1 to zoom in
-   */
-  private static void doAdjustCompress(int code) {
-    float f = spriteInfo.compressionFactor();
-    switch (code) {
-    default:
-      f = 1;
-      break;
-    case 1:
-      f *= .8f;
-      break;
-    case -1:
-      f = Math.min(1, f * 1 / .8f);
-      break;
-    }
-    spriteInfo.setCompressionFactor(f);
-    repaint();
-  }
-
-  /**
-   * Adjust scale of sprite
-   * 
-   * @param code
-   *          0 to reset, -1 to shrink, +1 to expand
-   */
-  private static void doAdjustScale(int code) {
-    float f = spriteInfo.scaleFactor();
-    switch (code) {
-    default:
-      f = 1;
-      break;
-    case -1:
-      f *= .8f;
-      break;
-    case 1:
-      f = Math.min(1, f * 1 / .8f);
-      break;
-    }
-    spriteInfo.setScaleFactor(f);
-    spritePanel.invalidateFocus();
-
-    repaint();
-  }
+  // /**
+  // * Adjust resolution
+  // *
+  // * @param code
+  // * 0 to reset, -1 to zoom out, +1 to zoom in
+  // */
+  // private static void doAdjustCompress(int code) {
+  // float f = spriteInfo.compressionFactor();
+  // switch (code) {
+  // default:
+  // f = 1;
+  // break;
+  // case 1:
+  // f *= .8f;
+  // break;
+  // case -1:
+  // f = Math.min(1, f * 1 / .8f);
+  // break;
+  // }
+  // spriteInfo.setCompressionFactor(f);
+  // repaint();
+  // }
 
   private static class InfoPanel extends JPanel implements ActionListener {
 

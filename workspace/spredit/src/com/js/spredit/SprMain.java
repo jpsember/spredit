@@ -277,9 +277,10 @@ public class SprMain implements IApplication {
         SpriteInfo si = new SpriteInfo(Integer.toString(c), fimg.getClip(),
             fimg.getCP());
         si.setSourceImage(fimg.getImage());
-        if (fimg2 != null)
-          si.setCompressedImage(fimg2.getImage(), // fimg2.getClip(),
-              fimg2.getCP());
+        warning("compressed images no longer supported");
+        // if (fimg2 != null)
+        // si.setCompressedImage(fimg2.getImage(), // fimg2.getClip(),
+        // fimg2.getCP());
 
         atlasBuilder.addSprite(si, si.id());
 

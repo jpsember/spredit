@@ -12,7 +12,6 @@ import java.awt.image.*;
 import com.js.geometry.IPoint;
 import com.js.geometry.IRect;
 import com.js.geometry.Point;
-import com.js.geometry.Rect;
 
 import static com.js.basic.Tools.*;
 
@@ -89,7 +88,7 @@ public class FontExtractor {
       }
     }
 
-    clip = new Rect(0, cropBottom, cimg.getWidth(), cimg.getHeight() - cropTop
+    clip = new IRect(0, cropBottom, cimg.getWidth(), cimg.getHeight() - cropTop
         - cropBottom);
     cp = new Point(0, fontDescent);
 
@@ -97,7 +96,7 @@ public class FontExtractor {
 
   }
 
-  private Rect clip;
+  private IRect clip;
   private Point cp;
   private BufferedImage cimg;
 
@@ -105,7 +104,7 @@ public class FontExtractor {
     return cp;
   }
 
-  public Rect getClip() {
+  public IRect getClip() {
     return clip;
   }
 

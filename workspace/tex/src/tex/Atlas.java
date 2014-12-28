@@ -90,14 +90,14 @@ public class Atlas {
     final boolean db = false;
     if (db)
       pr("Atlas addSprite " + spr.id() + "\n clip=" + spr.bounds() + "\n trns="
-          + spr.translate() + "\n comp=" + spr.compressionFactor());
+          + spr.translate());
 
     // verify that sprite bounds are valid
     {
       IRect r = new IRect(spr.bounds());
-      float f = spr.compressionFactor();
-      if (f != 1)
-        r.scale(f);
+      // float f = spr.compressionFactor();
+      // if (f != 1)
+      // r.scale(f);
       r.translate(spr.translate());
       IRect texRect = new IRect(0, 0, texPageSize.x, texPageSize.y);
       if (!texRect.contains(r)) {
@@ -105,7 +105,6 @@ public class Atlas {
         pr("**** translated sprite not within atlas bounds!");
         pr(" id=    " + spr);
         pr(" clip=  " + spr.bounds());
-        pr(" comp=  " + spr.compressionFactor());
         pr(" trans= " + spr.translate());
         pr(" pxrect=" + r);
       }
@@ -227,14 +226,13 @@ public class Atlas {
       for (int k = 0; k < nSprites; k++) {
         IRect r = new IRect(s.readInt(), s.readInt(), s.readInt(), s.readInt());
         IPoint trans = new IPoint(s.readInt(), s.readInt());
-        float shrink = s.readFloat();
+        // float shrink = s.readFloat();
         Sprite sp = new Sprite(ids == null ? null : ids[k]);
         sp.setBounds(r);
         sp.setTranslate(trans);
-        sp.setCompression(shrink);
+        // sp.setCompression(shrink);
         if (db)
-          pr(" sprite #" + k + " clip=" + r + " trans=" + trans + " shrink="
-              + d(shrink));
+          pr(" sprite #" + k + " clip=" + r + " trans=" + trans);
 
         addSprite(sp);
       }
@@ -320,10 +318,8 @@ public class Atlas {
         IPoint trans = sp.translate();
         s.writeInt(trans.x);
         s.writeInt(trans.y);
-        s.writeFloat(sp.compressionFactor());
         if (db)
-          pr("wrote #" + k + ":" + sp.id() + " compression="
-              + sp.compressionFactor());
+          pr("wrote #" + k + ":" + sp.id());
 
       }
     }

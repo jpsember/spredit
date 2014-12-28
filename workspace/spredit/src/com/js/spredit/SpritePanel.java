@@ -43,7 +43,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
       sFocusValid = true;
       if (spriteInfo == null)
         break;
-      if (spriteInfo.workImage() == null)
+      if (spriteInfo.getSourceImage() == null)
         break;
       sFocus.setTo(spriteInfo.workImageSize().x / 2,
           spriteInfo.workImageSize().y / 2);
@@ -70,11 +70,12 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (spriteInfo == null)
       return;
 
-    BufferedImage image = spriteInfo.workImage();
+    BufferedImage image = spriteInfo.getSourceImage();
     if (image == null)
       return;
 
-    spriteInfo.plotTexture(new Point(spriteInfo.centerPoint()), this);
+    spriteInfo.plotTexture(Point.ZERO // new Point(spriteInfo.centerPoint())
+        , this);
 
     if (mShowClip.isSelected()) {
       setRenderColor(hlClip ? RED : BLUE);
@@ -456,7 +457,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     IRect imgRect = new IRect(sprite.bounds());
     Rect aRect = new Rect(imgRect);
 
-    aRect.scale(sprite.compressionFactor());
+    // aRect.scale(sprite.compressionFactor());
 
     IPoint tr = sprite.translate();
     aRect.translate(tr.x, tr.y);

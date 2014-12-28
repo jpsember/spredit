@@ -163,26 +163,18 @@ public class Builder {
 
     if (incPalette) {
       BufferedImage palImg = Palette.build(1);
-      SpriteInfo palInfo = new SpriteInfo("_PALETTE", new Rect(
-          ImgUtil.bounds(palImg)), new Point());
+      SpriteInfo palInfo = new SpriteInfo("_PALETTE", ImgUtil.bounds(palImg),
+          new Point());
       palInfo.setSourceImage(palImg);
       addSprite(palInfo, palInfo.id());
     }
 
-    for (int i = 0; i < ents.size(); i++) {
-      AEnt ent = (AEnt) ents.get(i);
-      if (ent.id().startsWith("_"))
-        continue;
-      ent.setResolution(resolution);
-
-      if (false) {
-        // pr("entry=["+ent.id()+"]");
-        if (ent.id().equals("MERCURY")) {
-
-          pr("Sprite " + ent + " compImageSize=" + ent.compImageSize());
-        }
-      }
-    }
+    // for (int i = 0; i < ents.size(); i++) {
+    // AEnt ent = (AEnt) ents.get(i);
+    // if (ent.id().startsWith("_"))
+    // continue;
+    // ent.setResolution(resolution);
+    // }
 
     // sort sprites by size
     ArrayList<AEnt> sortedEnts = ents;
@@ -222,20 +214,21 @@ public class Builder {
       int j = 0;
       for (int i = 0; i < sortedEnts.size(); i++) {
         AEnt ent = (AEnt) sortedEnts.get(i);
-        if (db)
-          pr("sprite #" + i + ": " + ent.id() + " size=" + ent.compImageSize()
-              + " comp=" + ent.si().compressionFactor());
-
-        if (db && DBID != null && ent.id().equals(DBID)) {
-          SpriteInfo si = ent.si();
-          pr(" clip=" + si.cropRect() + "\n   cp=" + si.centerPoint());
-          pr(" compImageSize=" + ent.compImageSize() + "\n comp cp="
-              + ent.compCP());
-        }
+        // if (db)
+        // pr("sprite #" + i + ": " + ent.id() + " size=" + ent.compImageSize()
+        // + " comp=" + ent.si().compressionFactor());
+        //
+        // if (db && DBID != null && ent.id().equals(DBID)) {
+        // SpriteInfo si = ent.si();
+        // pr(" clip=" + si.cropRect() + "\n   cp=" + si.centerPoint());
+        // pr(" compImageSize=" + ent.compImageSize() + "\n comp cp="
+        // + ent.compCP());
+        // }
 
         // find next available slot
         {
-          IPoint paddedSize = new IPoint(ent.compImageSize());
+          IPoint paddedSize = ent.si().cropRect().size();
+          // new IPoint(ent.compImageSize());
           paddedSize.x += padding * 2;
           paddedSize.y += padding * 2;
 
@@ -325,7 +318,7 @@ public class Builder {
   private void plotSpriteIntoAtlas(SpriteInfo si, IPoint bottomLeft, int padding) {
     final boolean db = (DBID != null) && si.id().equals(DBID);
 
-    Sprite srcSprite = si.sprite();
+    // Sprite srcSprite = si.sprite();
 
     // construct a new sprite record, one representing its
     // appearance in the atlas
@@ -335,7 +328,7 @@ public class Builder {
       IRect destClip = new IRect(si.cropRect());
       destClip.translate((int) -si.centerPoint().x, (int) -si.centerPoint().y);
       destSprite.setBounds(destClip);
-      destSprite.setCompression(srcSprite.compressionFactor());
+      // destSprite.setCompression(srcSprite.compressionFactor());
     }
     if (db)
       pr("plotSpriteIntoAtlas " + si.id() + " bottomLeft=" + bottomLeft
@@ -343,7 +336,7 @@ public class Builder {
 
     // calculate location of centerpoint in atlas
 
-    Point cpComp = si.compressedCenterPoint();
+    Point cpComp = new Point(si.centerPoint());
     destSprite.setTranslate(new IPoint(bottomLeft.x + cpComp.x, bottomLeft.y
         + cpComp.y));
 
@@ -353,7 +346,7 @@ public class Builder {
 
     atlas.addSprite(destSprite);
 
-    BufferedImage imgComp = si.compressedImage();
+    BufferedImage imgComp = si.getCompiledImage();
 
     // calculate bounding rectangle within atlas, with AWT y-axis
     IRect destRect = new IRect(bottomLeft.x, bottomLeft.y, imgComp.getWidth(),
@@ -409,11 +402,11 @@ public class Builder {
       public int compare(Object arg0, Object arg1) {
         AEnt s0 = (AEnt) arg0, s1 = (AEnt) arg1;
 
-        Point r0 = s0.compImageSize(), r1 = s1.compImageSize();
+        IPoint r0 = s0.size(), r1 = s1.size();
 
-        float size0 = r0.x * r0.y;
-        float size1 = r1.x * r1.y;
-        return (int) size1 - (int) size0;
+        int size0 = r0.x * r0.y;
+        int size1 = r1.x * r1.y;
+        return size1 - size0;
       }
     });
     return s;

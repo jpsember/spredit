@@ -30,7 +30,7 @@ public class Sprite {
    */
   public Sprite(String id) {
     this.id = id;
-    this.compressionFactor = 1;
+    // this.compressionFactor = 1;
     this.translate = new IPoint();
     this.bounds = new IRect();
   }
@@ -43,27 +43,28 @@ public class Sprite {
     this(srcSprite.id);
     bounds = new IRect(srcSprite.bounds);
     translate = new IPoint(srcSprite.translate);
-    compressionFactor = srcSprite.compressionFactor;
+    // compressionFactor = srcSprite.compressionFactor;
   }
 
   public String toString() {
     return id;
   }
 
-  /**
-   * Get compression factor
-   * @return factor
-   */
-  public float compressionFactor() {
-    return compressionFactor;
-  }
-  /**
-   * Set compression factor
-   * @param factor factor 
-   */
-  public void setCompression(float factor) {
-    compressionFactor = factor;
-  }
+  // /**
+  // * Get compression factor
+  // * @return factor
+  // */
+  // public float compressionFactor() {
+  // return compressionFactor;
+  // }
+
+  // /**
+  // * Set compression factor
+  // * @param factor factor
+  // */
+  // public void setCompression(float factor) {
+  // compressionFactor = factor;
+  // }
 
   /**
    * Set translate
@@ -114,7 +115,7 @@ public class Sprite {
   }
 
   private IRect bounds;
-  private float compressionFactor;
+  // private float compressionFactor;
   private IPoint translate;
   private String id;
 }

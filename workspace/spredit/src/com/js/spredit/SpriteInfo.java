@@ -14,26 +14,21 @@ import apputil.*;
 import tex.*;
 
 import com.js.basic.Streams;
-import com.js.geometry.IPoint;
-import com.js.geometry.IRect;
-import com.js.geometry.MyMath;
-import com.js.geometry.Point;
-import com.js.geometry.Rect;
+import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
-import static com.js.geometry.MyMath.*;
 
 public class SpriteInfo {
 
-  public static final int IMG_SOURCE = 0, IMG_WORK = 1, IMG_COMPRESSED = 2,
-      IMG_THUMBNAIL = 3, IMG_TOTAL = 4;
+  public static final int IMG_SOURCE = 0, IMG_THUMBNAIL = 1,
+      IMG_UNUSEDWORK = 2, IMG_COMPILED = 3, IMG_TOTAL = 4;
 
   public static final int THUMB_SIZE = 80;
 
   private static final String META_DIR_NAME = "_1";
 
   private void readMeta() {
-    final boolean db = false;
+    final boolean db = true;
 
     if (db)
       pr("SpriteInfo.readMeta " + mMetaPath);
@@ -44,10 +39,10 @@ public class SpriteInfo {
       setCenterPoint(IPoint.parseJSON(map.getJSONArray("CP")));
       setCropRect(IRect.parseJSON(map.getJSONArray("CLIP")));
       mWorkImageSize = IPoint.parseJSON(map.getJSONArray("SIZE"));
-      mSprite.setCompression((float) map.optDouble("COMPRESS", 1));
-      // don't call setScaleFactor(), since it will modify the clip, cp
-      // values
-      mScaleFactor = (float) map.optDouble("SCALE", 1);
+      pr("crop " + mCropRect + "\n workImageSize " + mWorkImageSize
+          + "\n centerpt " + mCenterpoint);
+
+      // mSprite.setCompression((float) map.optDouble("COMPRESS", 1));
       String alias = map.optString("ALIAS");
       if (alias != null) {
         mAliasFileRead = new RelPath(mProject.baseDirectory(), alias).file();
@@ -63,10 +58,10 @@ public class SpriteInfo {
    * Constructor for item not associated with a project (used to construct
    * fonts)
    */
-  public SpriteInfo(String id, Rect clip, Point centerPoint) {
+  public SpriteInfo(String id, IRect clip, Point centerPoint) {
     this.mSprite = new Sprite(id);
     this.setCenterPoint(new IPoint(centerPoint));
-    this.setCropRect(new IRect(clip));
+    this.setCropRect(clip);
   }
 
   /**
@@ -146,12 +141,10 @@ public class SpriteInfo {
     this.mCenterpoint = new IPoint(orig.mCenterpoint);
     this.mCropRect = new IRect(orig.mCropRect);
 
-    this.mScaleFactor = orig.mScaleFactor;
-
     this.setAliasSprite(orig);
 
     // initialize imageSize by getting the image
-    this.workImage();
+    getSourceImage();
   }
 
   public File metaPath() {
@@ -169,10 +162,8 @@ public class SpriteInfo {
       map.put("CP", centerPoint().toJSON());
       map.put("CLIP", cropRect().toJSON());
 
-      if (mSprite.compressionFactor() != 1)
-        map.put("COMPRESS", mSprite.compressionFactor());
-      if (mScaleFactor != 1)
-        map.put("SCALE", mScaleFactor);
+      // if (mSprite.compressionFactor() != 1)
+      // map.put("COMPRESS", mSprite.compressionFactor());
     } catch (JSONException e) {
       AppTools.showError("encoding SpriteInfo", e);
     }
@@ -190,49 +181,21 @@ public class SpriteInfo {
 
   public void setCenterPoint(IPoint cp) {
     mCenterpoint = new IPoint(cp);
-    // rebuild compressed image
-    setImg(IMG_COMPRESSED, null);
   }
 
-  public void setCompressionFactor(float shrink) {
-    // unimp("append subfolders to id shown in imgDirectory");
-
-    float prev = mSprite.compressionFactor();
-    if (prev != shrink) {
-      mSprite.setCompression(shrink);
-      // rebuild compressed image
-      setImg(IMG_COMPRESSED, null);
-
-    }
-  }
-
-  /**
-   * Get centerpoint
-   * 
-   * @return centerpoint
-   */
   public IPoint centerPoint() {
     return mCenterpoint;
   }
 
-  /**
-   * Get cropping rectangle to be applied to work image
-   * 
-   * @return cropping rectangle
-   */
   public IRect cropRect() {
     return mCropRect;
   }
 
-  /**
-   * Set cropping rectangle
-   * 
-   * @param r
-   */
   public void setCropRect(IRect r) {
+    if (!r.equals(mCropRect)) {
+      setImg(IMG_COMPILED, null);
+    }
     mCropRect = new IRect(r);
-    // force rebuild of compressed image
-    setImg(IMG_COMPRESSED, null);
   }
 
   /**
@@ -244,22 +207,13 @@ public class SpriteInfo {
    *          centerpoint to default; otherwise, just fixes crop so it's legal
    */
   public void verifyMetaData(boolean resetIfProblem) {
-    final boolean db = false;
-
-    if (workImage() == null) {
+    if (getSourceImage() == null) {
       warning("can't verify meta data, no image for " + this);
       return;
     }
 
     IRect bounds = new IRect(new Rect(0, 0, mWorkImageSize.x, mWorkImageSize.y));
     if (!bounds.contains(mCropRect)) {
-      if (db)
-        pr("verifyMetaData, crop rectangle fails: \n" + mCropRect + "\n "
-            + bounds);
-      // else
-      // warn("*** bad crop rectangle, "+sprite.id()+"\n clip:  " + cropRect +
-      // "\n bounds:"
-      // + bounds);
 
       if (resetIfProblem) {
         resetClip();
@@ -271,8 +225,6 @@ public class SpriteInfo {
         int cy2 = MyMath.clamp(mCropRect.endY(), cy + 1, mWorkImageSize.y);
         IRect cr = new IRect(cx, cy, cx2 - cx, cy2 - cy);
         setCropRect(cr);
-        if (db)
-          pr("set crop rect to " + cr);
       }
     }
   }
@@ -287,33 +239,16 @@ public class SpriteInfo {
   }
 
   public void resetClip() {
-    final boolean db = this.id().equals("BOOT");
-
-    // setImg(IMG_WORK,
-    // workImage = null;
-
-    BufferedImage img = workImage();
-
+    BufferedImage img = getSourceImage();
     setCropRect(new IRect(0, 0, mWorkImageSize.x, mWorkImageSize.y));
-
-    if (db)
-      pr("resetClip to image size=" + this.mCropRect);
-
     IRect ub = new IRect(ImgUtil.calcUsedBounds(img, 0));
-
-    if (db)
-      pr(" calcUsedBounds= " + ub);
-
-    ub.y = SprTools.flipYAxis((int) mWorkImageSize.y, ub);
-
-    if (db)
-      pr(" flipped y axis= " + ub);
-
+    ub.y = SprTools.flipYAxis(mWorkImageSize.y, ub);
     setCropRect(ub);
     resetCenterPoint();
   }
 
-  private static final String META_SPRITE_EXT = "spi", THUMB_EXT = "png";
+  private static final String META_SPRITE_EXT = "spi";
+  private static final String THUMB_EXT = "png";
   public static MyFileFilter META_FILES_ONLY = new MyFileFilter(
       "Sprite Meta files", META_SPRITE_EXT, false, null);
 
@@ -336,38 +271,19 @@ public class SpriteInfo {
   /**
    * Set source image. Used for constructing fonts (and palettes), where images
    * are not loaded from files.
-   * 
-   * @param img
    */
   public void setSourceImage(BufferedImage img) {
-    // unimp("pass in prescaled version from smaller font size");
     setImg(IMG_SOURCE, img);
     mImageLocked = true;
-    /*
-     * setImg(IMG_COMPRESSED, img); compCP = centerPoint; ASSERT(compCP !=
-     * null); imageLocked = true;
-     */
   }
 
-  public void setCompressedImage(BufferedImage img, Point cp) {
-    mPreCompressedImg = img;
-    mPreCompressedCenterpoint = cp;
-  }
-
-  private BufferedImage getSourceImage() {
-    final boolean db = false;
-
+  public BufferedImage getSourceImage() {
     if (img(IMG_SOURCE) == null) {
-
       if (aliasSprite != null) {
         setImg(IMG_SOURCE, aliasSprite.getSourceImage());
       } else
         try {
-          if (db)
-            pr("getImage for " + this + ", reading from " + mImgPath);
-
           setImg(IMG_SOURCE, ImgUtil.read(mImgPath));
-
         } catch (IOException e) {
           AppTools.showError("reading image", e);
         }
@@ -375,98 +291,77 @@ public class SpriteInfo {
     return img(IMG_SOURCE);
   }
 
-  /**
-   * Get work image. This is the original source image after undergoing any
-   * scaling, but before any clipping or compression is applied.
-   * 
-   * @return image
-   */
-  public BufferedImage workImage() {
-    final boolean db = false;
-    do {
-      if (img(IMG_WORK) != null)
-        break;
-
-      if (db)
-        pr("getImage for " + this + "\n  scaleFactor=" + d(mScaleFactor)
-            + " compress=" + d(compressionFactor()));
-
-      getSourceImage();
-      if (img(IMG_SOURCE) == null)
-        break;
-
-      if (mScaleFactor != 1) {
-        setImg(IMG_WORK, ImgEffects.scale(img(IMG_SOURCE), mScaleFactor));
-        if (db)
-          pr(" scaled by " + mScaleFactor + " to " + img(IMG_WORK));
-      } else {
-        setImg(IMG_WORK, img(IMG_SOURCE));
-      }
-      mWorkImageSize = new IPoint(ImgUtil.size(img(IMG_WORK)));
-
-      // verifyMetaData();
-    } while (false);
-    return img(IMG_WORK);
-  }
+  // /**
+  // * Get work image. This is the original source image after undergoing any
+  // * scaling, but before any clipping or compression is applied.
+  // *
+  // * @return image
+  // */
+  // public BufferedImage workImage() {
+  // unimp("work image is same as source image");
+  // do {
+  // if (img(IMG_WORK) != null)
+  // break;
+  // getSourceImage();
+  // if (img(IMG_SOURCE) == null)
+  // break;
+  // setImg(IMG_WORK, img(IMG_SOURCE));
+  // mWorkImageSize = new IPoint(ImgUtil.size(img(IMG_WORK)));
+  // } while (false);
+  // return img(IMG_WORK);
+  // }
 
   /**
-   * Get BufferedImage for sprite as it will appear in an atlas. This is work
-   * image after it has been cropped and scaled by the compression factor.
+   * Get BufferedImage for sprite as it will appear in an atlas. This is the
+   * work image after it has been cropped
    * 
    * @return BufferedImage
    */
-  public BufferedImage compressedImage() {
+  public BufferedImage getCompiledImage() {
     BufferedImage img = null;
     do {
-      img = img(IMG_COMPRESSED);
+      img = img(IMG_COMPILED);
       if (img != null)
         break;
-
-      // if a pre-compressed image is available, use it instead
-      if (mPreCompressedImg != null) {
-        img = mPreCompressedImg;
-        mCompressedCenterpoint = mPreCompressedCenterpoint;
-        break;
-      }
 
       // get origin-oriented version of work image:
       // one whose clip rectangle position is at the origin.
 
-      img = workImage();
+      img = getSourceImage();
       img = SprTools.subImage(img, mCropRect);
-      Rect wRect = new Rect(0, 0, mCropRect.width, mCropRect.height);
-      Point wcp = new Point(mCenterpoint.x - mCropRect.x, mCenterpoint.y
-          - mCropRect.y);
+      // IRect wRect = new IRect(0, 0, mCropRect.width, mCropRect.height);
+      // Point wcp = new Point(mCenterpoint.x - mCropRect.x, mCenterpoint.y
+      // - mCropRect.y);
 
-      // calculate centerpoint-oriented work rectangle
-      // after undergoing compression
+      // // calculate centerpoint-oriented work rectangle
+      // // after undergoing compression
+      //
+      // float c = compressionFactor();
+      // float x1 = -wcp.x * c;
+      // float y1 = -wcp.y * c;
+      // float x2 = x1 + wRect.width * c;
+      // float y2 = y1 + wRect.height * c;
+      //
+      // // expand sides so they are at pixel boundaries
+      // float cxadj = x1 - floorf(x1);
+      // float cyadj = y1 - floorf(y1);
+      //
+      // x1 -= cxadj;
+      // y1 -= cyadj;
+      // x2 = ceilf(x2);
+      // y2 = ceilf(y2);
+      //
+      // // calculate centerpoint of origin-oriented compressed image
+      // mCompressedCenterpoint = new Point(-x1 - cxadj, -y1 - cyadj);
+      //
+      // img = ImgEffects.scaleToFitExact(img, new Dimension((int) (x2 - x1),
+      // (int) (y2 - y1)));
 
-      float c = compressionFactor();
-      float x1 = -wcp.x * c;
-      float y1 = -wcp.y * c;
-      float x2 = x1 + wRect.width * c;
-      float y2 = y1 + wRect.height * c;
-
-      // expand sides so they are at pixel boundaries
-      float cxadj = x1 - floorf(x1);
-      float cyadj = y1 - floorf(y1);
-
-      x1 -= cxadj;
-      y1 -= cyadj;
-      x2 = ceilf(x2);
-      y2 = ceilf(y2);
-
-      // calculate centerpoint of origin-oriented compressed image
-      mCompressedCenterpoint = new Point(-x1 - cxadj, -y1 - cyadj);
-
-      img = ImgEffects.scaleToFitExact(img, new Dimension((int) (x2 - x1),
-          (int) (y2 - y1)));
-
-      setImg(IMG_COMPRESSED, img);
-
+      setImg(IMG_COMPILED, img);
     } while (false);
     return img;
   }
+
   private BufferedImage img(int i) {
     return mImg[i];
   }
@@ -476,7 +371,7 @@ public class SpriteInfo {
 
     for (int j = i + 1; j < IMG_THUMBNAIL; j++)
       setImg(j, null);
-    if (i == IMG_COMPRESSED && im == null)
+    if (i == IMG_COMPILED && im == null)
       mImgTextureId = TextureLoader.deleteTexture(mImgTextureId);
   }
 
@@ -582,36 +477,10 @@ public class SpriteInfo {
       return mImgPath;
   }
 
-  public float scaleFactor() {
-    return mScaleFactor;
-  }
+  // public float compressionFactor() {
+  // return mSprite.compressionFactor();
+  // }
 
-  public float compressionFactor() {
-    return mSprite.compressionFactor();
-  }
-
-  public void setScaleFactor(float f) {
-    final boolean db = false;
-
-    if (f != mScaleFactor) {
-      float sRel = f / mScaleFactor;
-      mCropRect.scale(sRel);
-      mCropRect.snapToGrid(1);
-
-      mCenterpoint.applyScale(sRel);
-      mScaleFactor = f;
-
-      // reconstruct work image using new scale factor
-      setImg(IMG_WORK, null);
-
-      if (db)
-        pr(mSprite.id() + " setScaleFactor to " + d(f) + "\n cropRect now "
-            + mCropRect + " workImage.size " + workImageSize());
-
-      // make sure crop rectangle remains legal
-      verifyMetaData(false);
-    }
-  }
   public File getAliasTag() {
     return mAliasFileRead;
   }
@@ -641,10 +510,8 @@ public class SpriteInfo {
   }
 
   public void plotTexture(Point location, SpritePanel panel) {
-    final boolean db = false;
-
-    if (mImgTextureId == 0 && img(IMG_WORK) != null) {
-      BufferedImage img = compressedImage();
+    if (mImgTextureId == 0 && img(IMG_SOURCE) != null) {
+      BufferedImage img = getCompiledImage();
       mImgTextureId = TextureLoader.getTexture(panel.glContext(), img,
           mImgTextureSize);
     }
@@ -656,26 +523,30 @@ public class SpriteInfo {
     // Its clip bounds is that of a centerpoint-oriented work image,
     // and its translation if for the compressed image's texture
     Sprite s = new Sprite(mSprite.id());
-    s.setBounds(new IRect(mCropRect.x - mCenterpoint.x, mCropRect.y
-        - mCenterpoint.y, mCropRect.width, mCropRect.height));
-    s.setTranslate(new IPoint(compressedCenterPoint()));
-    s.setCompression(mSprite.compressionFactor());
-    if (db)
-      pr("plotTexture " + this + " clip=" + this.mCropRect + " cp="
-          + this.mCenterpoint + " compcp=" + compressedCenterPoint());
+    s.setBounds(mCropRect);
+    // s.setTranslate(new IPoint(mCenterpoint));
+    warning("make centerpoints floats again");
+    //
+    // s.setBounds(new IRect(mCropRect.x - mCenterpoint.x, mCropRect.y
+    // - mCenterpoint.y, mCropRect.width, mCropRect.height));
+    // s.setTranslate(new IPoint(compressedCenterPoint()));
+    // s.setCompression(mSprite.compressionFactor());
+    // if (db)
+    // pr("plotTexture " + this + " clip=" + this.mCropRect + " cp="
+    // + this.mCenterpoint + " compcp=" + compressedCenterPoint());
 
     panel.plotSprite(mImgTextureId, mImgTextureSize, s, location.x, location.y);
   }
 
-  /**
-   * Get centerpoint of compressed image
-   * 
-   * @return centerpoint of origin-oriented compressed image
-   */
-  public Point compressedCenterPoint() {
-    compressedImage();
-    return mCompressedCenterpoint;
-  }
+  // /**
+  // * Get centerpoint of compressed image
+  // *
+  // * @return centerpoint of origin-oriented compressed image
+  // */
+  // public Point compressedCenterPoint() {
+  // getCompiledImage();
+  // return mCompressedCenterpoint;
+  // }
 
   private IPoint mImgTextureSize = new IPoint();
   private int mImgTextureId;
@@ -689,11 +560,6 @@ public class SpriteInfo {
   private File mImgPath;
   private Sprite mSprite;
 
-  // centerpoint of origin-oriented compressed image
-  private Point mCompressedCenterpoint;
-
-  private float mScaleFactor = 1;
-
   // size of scaled image (BEFORE compressing)
   private IPoint mWorkImageSize;
 
@@ -702,6 +568,6 @@ public class SpriteInfo {
 
   private BufferedImage[] mImg = new BufferedImage[IMG_TOTAL];
   private boolean mImageLocked;
-  private BufferedImage mPreCompressedImg;
-  private Point mPreCompressedCenterpoint;
+  // private BufferedImage mPreCompressedImg;
+  // private Point mPreCompressedCenterpoint;
 }
