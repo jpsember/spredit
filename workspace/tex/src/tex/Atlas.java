@@ -264,32 +264,20 @@ public class Atlas {
   }
 
   /*
-     File format:
-     
-     --- header
-     [2] version
-     [2] # entries
-     [2,2] image size
-     
-     --- font info
-     [3] font ascent, descent, leading (unsigned bytes)
-     
-     --- ids
-     [1] zero if ids omitted; else, one
-     [x] id strings; zero-terminated c strings
-     
-     
-     --- entries
-     for each of n entries:
-      {
-       [4,4,4,4] clip rect (FlRect)
-       [4,4] translate world origin -> atlas centerpoint (FlPoint2)
-       [4] shrink factor
-      }
-      
-     --- image
-     [4] length of .PNG
-     [n] image file
+   * File format:
+   * 
+   * --- header [2] version [2] # entries [2,2] image size
+   * 
+   * --- font info [3] font ascent, descent, leading (unsigned bytes)
+   * 
+   * --- ids [1] zero if ids omitted; else, one [x] id strings; zero-terminated
+   * c strings
+   * 
+   * 
+   * --- entries for each of n entries: { [4,4,4,4] clip rect (Rect) [4,4]
+   * translate world origin -> atlas centerpoint (Point) [4] shrink factor }
+   * 
+   * --- image [4] length of .PNG [n] image file
    */
   public void write(File dataFile) throws IOException {
 

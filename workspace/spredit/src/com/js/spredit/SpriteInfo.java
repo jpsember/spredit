@@ -193,9 +193,6 @@ public class SpriteInfo {
     setImg(IMG_COMPRESSED, null);
   }
 
-  // public void setCenterPoint(IPoint2 cp) {
-  // setCenterPoint(new FlPoint2(cp));
-  // }
   public void setCompressionFactor(float shrink) {
     // unimp("append subfolders to id shown in imgDirectory");
 
@@ -285,8 +282,7 @@ public class SpriteInfo {
   }
 
   public void resetCenterPoint() {
-    setCenterPoint(cropRect.midPoint()); // new FlPoint2(cropRect.midX(),
-                                         // cropRect.midY()));
+    setCenterPoint(cropRect.midPoint());
   }
 
   public void resetClip() {

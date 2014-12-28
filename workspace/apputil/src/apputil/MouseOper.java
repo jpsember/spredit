@@ -146,9 +146,9 @@ public abstract class MouseOper {
   }
 
   /**
-   * Construct IPoint2 from MouseEvent
+   * Construct IPoint from MouseEvent
    * @param ev mouse event
-   * @return IPoint2 containing mouse (view) coordinates
+   * @return IPoint containing mouse (view) coordinates
    */
   private static IPoint viewLoc(MouseEvent ev) {
     return new IPoint(ev.getX(), ev.getY());

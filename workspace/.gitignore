@@ -43,4 +43,5 @@ proguard/
 
 unit_test_reports
 
-
+# Omit this until I've got it cleaned up
+scredit

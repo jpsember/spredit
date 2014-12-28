@@ -48,7 +48,7 @@ public class SprTools {
   //   * @return compressed rectangle
   //   * @deprecated
   //   */
-  //  public static IRect compress(IRect origClip, float c, IPoint2 origCenterPt) {
+  //  public static IRect compress(IRect origClip, float c, IPoint origCenterPt) {
   //
   //    float cx = origCenterPt.x - origClip.x;
   //    float cy = origCenterPt.y - origClip.y;

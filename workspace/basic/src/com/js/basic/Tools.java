@@ -1146,6 +1146,13 @@ public final class Tools {
     }, delayInSeconds * 1000);
   }
 
+  public static int[] toArray(List<Integer> list) {
+    int[] a = new int[list.size()];
+    for (int i = 0; i < a.length; i++)
+      a[i] = list.get(i);
+    return a;
+  }
+
   private static boolean sSanitizeLineNumbersFlag;
   private static Pattern sLineNumbersPattern;
   private static long sTimeStampPreviousTime;

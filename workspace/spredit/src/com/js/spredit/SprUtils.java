@@ -52,6 +52,7 @@ public class SprUtils {
       }
     }
   }
+
   private static final int MANY_FILES = 200;
 
   private static boolean manyFiles(File f) {
@@ -77,11 +78,12 @@ public class SprUtils {
   }
 
   /**
-   * Verify that it is ok to create a sprite project at a location.
-   * Warns user if project tree has > 200 files or so; reports error
-   * if an existing sprite project is found in the project tree.
+   * Verify that it is ok to create a sprite project at a location. Warns user
+   * if project tree has > 200 files or so; reports error if an existing sprite
+   * project is found in the project tree.
    * 
-   * @param f path
+   * @param f
+   *          path
    * @return true if ok; false if user aborted, or some error found
    */
   public static boolean verifyCreateTexProject(File f) {
@@ -145,23 +147,12 @@ public class SprUtils {
     return ret;
 
   }
-  //  public static void main(String[] args) {
-  //    String[] s = { "system/backup/file.png", "system/backup/file123.png",
-  //        "system/backup/file5.png", "system/backup/file9.png",
-  //        "system/backup/file0.png", };
-  //    for (int i = 0; i < s.length; i++) {
-  //      File f = new File(s[i]);
-  //      pr("Inc: " + f + "\n is: " + incrementFile(f));
-  //    }
-  //  }
-
-  //  private static SpriteInfo entryFor(String id) {
-  //    return (SpriteInfo) entries.get(id);
-  //  }
 
   /**
    * Add entries for any image files we find in file tree
-   * @param f root of file tree
+   * 
+   * @param f
+   *          root of file tree
    * @throws IOException
    */
   private static void addEntries(TexProject project, TreeMap entries, File f)
@@ -189,11 +180,11 @@ public class SprUtils {
   }
 
   /**
-   * Add entries for any sprites that are aliased to originals.
-   * These will not have source image files, so won't have been detected
-   * by the previous pass.
+   * Add entries for any sprites that are aliased to originals. These will not
+   * have source image files, so won't have been detected by the previous pass.
    * 
-   * @param f root of file tree
+   * @param f
+   *          root of file tree
    * @throws IOException
    */
   private static void addAliasEntries(TexProject project, TreeMap entries,
@@ -227,17 +218,17 @@ public class SprUtils {
 
         File aTag = ent.getAliasTag();
         if (aTag == null) {
-          //          File imgPath = ent.imagePath();
-          //          if (db)
-          //            pr(" not an alias; imgPath=[" + imgPath + "]");
+          // File imgPath = ent.imagePath();
+          // if (db)
+          // pr(" not an alias; imgPath=[" + imgPath + "]");
           pr("Deleting meta file that has no sprite: " + f);
           f.delete();
-          
+
           break;
         }
 
         // find aliased entry
-        //  File aimg = ent.imagePath();
+        // File aimg = ent.imagePath();
         String aid = project.extractId(aTag);
         SpriteInfo aent = (SpriteInfo) entries.get(aid);
         if (aent == null) {

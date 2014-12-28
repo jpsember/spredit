@@ -432,7 +432,7 @@ public class Builder {
   }
 
   private void createPage(IPoint texPageSize) {
-    // IPoint2 texPageSize = BuildParms.texSize();
+    // IPoint texPageSize = BuildParms.texSize();
     atlas.setImage(new BufferedImage(texPageSize.x, texPageSize.y,
         BufferedImage.TYPE_INT_ARGB));
     graf = atlas.image().createGraphics();

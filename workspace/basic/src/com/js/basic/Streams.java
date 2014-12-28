@@ -1,6 +1,7 @@
 package com.js.basic;
 
 import java.io.*;
+
 import static com.js.basic.Tools.*;
 
 /**
@@ -15,7 +16,6 @@ public class Streams {
    *          path of file
    * @return OutputStream
    * @throws IOException
-   * @deprecated use File version
    */
   public static InputStream inputStream(String path) throws IOException {
     ASSERT(path != null);
@@ -40,7 +40,6 @@ public class Streams {
    *          path of file
    * @return OutputStream
    * @throws IOException
-   * @deprecated use File version
    */
   public static OutputStream outputStream(String path) throws IOException {
     ASSERT(path != null);
@@ -128,8 +127,6 @@ public class Streams {
     homeDirectory();
   }
 
-  @Deprecated
-  // use File version
   public static byte[] readBinaryFile(String path) throws IOException {
     FileInputStream r = new FileInputStream(path);
     ByteArrayOutputStream w = new ByteArrayOutputStream();
@@ -152,7 +149,6 @@ public class Streams {
    * @param file
    *          File to read
    * @return String
-   * @deprecated use File version
    */
   public static String readTextFile(String path) throws IOException {
     StringBuilder sb = new StringBuilder();
@@ -196,14 +192,10 @@ public class Streams {
     return sb.toString();
   }
 
-  @Deprecated
-  // Use File version
   public static boolean hasExtension(String path) {
     return (getExtension(path).length() != 0);
   }
 
-  @Deprecated
-  // Use File version
   public static String addExtension(String path, String ext) {
     if (!hasExtension(path)) {
       path = changeExtension(path, ext);
@@ -219,7 +211,6 @@ public class Streams {
    * @param ext
    *          new extension, "" for none
    * @return String representing new filename
-   * @deprecated // Use File version
    */
   public static String changeExtension(String name, String ext) {
     ext = extString(ext);
@@ -255,8 +246,6 @@ public class Streams {
     return new File(parent, changeExtension(name, ext));
   }
 
-  @Deprecated
-  // Use File version
   public static String getParent(String f) {
     int i = f.lastIndexOf('/');
     if (i < 0) {
@@ -275,6 +264,11 @@ public class Streams {
     return h;
   }
 
+  /**
+   * @param path
+   * @return
+   * @deprecated use Strings to manipulate paths
+   */
   public static String relativeToUserHome(File path) {
     File userDir = Streams.homeDirectory();
 
@@ -311,6 +305,7 @@ public class Streams {
    *          : File
    * @return String containing extension, empty if it has none (or is a
    *         directory)
+   * @deprecated use Strings to represent paths
    */
   public static String getExtension(File file) {
     String ext = "";
@@ -322,20 +317,17 @@ public class Streams {
     return ext;
   }
 
+  @Deprecated
   public static boolean hasExtension(File file) {
     return getExtension(file).length() > 0;
   }
 
-  // Use File versions
-  @Deprecated
   public static String getExtension(String path) {
     return getExtension(new File(path));
   }
 
   /**
    * Remove extension, if any, from path
-   * 
-   * @deprecated
    */
   public static String removeExt(String path) {
     int extPos = path.lastIndexOf('.');
@@ -346,4 +338,5 @@ public class Streams {
   }
 
   private static File sHomeDir;
+
 }
