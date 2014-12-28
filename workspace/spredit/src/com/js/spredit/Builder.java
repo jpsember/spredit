@@ -9,10 +9,9 @@ import java.awt.GraphicsEnvironment;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
-import streams.*;
 import tex.*;
-import base.*;
 
+import com.js.basic.Streams;
 import com.js.geometry.IPoint;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
@@ -110,8 +109,8 @@ public class Builder {
       pr("gatherSprites");
 
     // private DArray readSprites() throws IOException {
-    TreeMap map = SprUtils.readSprites(project);
-    DArray a = new DArray();
+    TreeMap<String, SpriteInfo> map = SprUtils.readSprites(project);
+    ArrayList<SpriteInfo> a = new ArrayList();
     a.addAll(map.values());
     // return a;
     // }
@@ -185,7 +184,7 @@ public class Builder {
     }
 
     // sort sprites by size
-    DArray sortedEnts = ents;
+    ArrayList<AEnt> sortedEnts = ents;
     if (sortBySize)
       sortedEnts = sortSprites(ents);
 
@@ -414,11 +413,10 @@ public class Builder {
     img.setRGB(x, y, pixel);
   }
 
-  private DArray sortSprites(DArray ae) {
-    DArray s = new DArray();
+  private ArrayList<AEnt> sortSprites(ArrayList<AEnt> ae) {
+    ArrayList<AEnt> s = new ArrayList();
     s.addAll(ae);
-    s.sort(new Comparator() {
-
+    Collections.sort(s, new Comparator() {
       @Override
       public int compare(Object arg0, Object arg1) {
         AEnt s0 = (AEnt) arg0, s1 = (AEnt) arg1;
@@ -484,7 +482,7 @@ public class Builder {
   private Atlas atlas;
   private TexProject project;
   private boolean verbose;
-  private DArray ents = new DArray();
+  private ArrayList<AEnt> ents = new ArrayList();
   private boolean plotFrames;
   private boolean incPalette;
 }

@@ -11,9 +11,9 @@ import org.json.JSONObject;
 
 import com.js.myopengl.*;
 import apputil.*;
-import streams.*;
 import tex.*;
 
+import com.js.basic.Streams;
 import com.js.geometry.IPoint;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;

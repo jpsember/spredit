@@ -2,7 +2,9 @@ package apputil;
 
 import java.io.*;
 import java.util.*;
-import streams.*;
+
+import com.js.basic.Streams;
+
 import static com.js.basic.Tools.*;
 
 public class MyFileFilter extends javax.swing.filechooser.FileFilter implements

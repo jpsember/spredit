@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jogl"/>
-	<classpathentry kind="src" path="/base"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/basic"/>
 	<classpathentry kind="src" path="/myopengl"/>
 	<classpathentry kind="output" path="bin"/>

@@ -4,8 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
-import scanning.*;
-import streams.*;
+
+import com.js.basic.Streams;
+
 import static com.js.basic.Tools.*;
 
 public class AppTools {
@@ -76,45 +77,6 @@ public class AppTools {
   public static String stringToLabel(String s) {
     StringBuilder sb = new StringBuilder();
     stringToLabel(s, sb);
-    return sb.toString();
-  }
-
-  @Deprecated
-  public static String labelToString(String s) {
-    StringBuilder sb = new StringBuilder();
-    boolean problem = s.length() < 2 || s.charAt(0) != '"'
-        || s.charAt(s.length() - 1) != '"';
-
-    for (int i = 1; i < s.length() - 1; i++) {
-      char c = s.charAt(i);
-      if (c == '\\') {
-        i++;
-        if (i == s.length() - 1) {
-          problem = true;
-          break;
-        }
-        c = s.charAt(i);
-        if (c == 'n') {
-          c = '\n';
-        } else if (c == 'u') {
-          i++;
-          if (i + 4 > s.length()) {
-            problem = true;
-            break;
-          }
-          c = (char) TextScanner.parseHex(s, i, 4);
-          i += 4 - 1;
-        } else {
-          c = s.charAt(i);
-          // problem = true;
-          // break;
-        }
-      }
-      sb.append(c);
-    }
-    if (problem)
-      throw new IllegalArgumentException(s);
-
     return sb.toString();
   }
 

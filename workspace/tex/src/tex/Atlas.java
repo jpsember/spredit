@@ -7,13 +7,12 @@ import java.awt.image.*;
 import java.io.*;
 import java.util.*;
 
+import com.js.basic.Streams;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 import com.js.geometry.Rect;
 
-import streams.*;
 import apputil.*;
-import base.*;
 
 public class Atlas {
 
@@ -129,7 +128,7 @@ public class Atlas {
   }
 
   public Sprite sprite(int i) {
-    return (Sprite) records.get(i);
+    return records.get(i);
   }
 
   /**
@@ -393,5 +392,5 @@ public class Atlas {
   private Map idMap;
   private BufferedImage image;
   private IPoint texPageSize;
-  private DArray records = new DArray();
+  private ArrayList<Sprite> records = new ArrayList();
 }

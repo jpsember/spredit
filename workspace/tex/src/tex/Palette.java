@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 
-import base.*;
 import com.js.geometry.*;
 import static com.js.basic.Tools.*;
 
@@ -174,7 +173,7 @@ public class Palette {
     for (int i = 0; i < skipC.length; i++)
       skipMap.add(skipC[i]);
 
-    DArray myc = new DArray();
+    ArrayList<Color> myc = new ArrayList();
     for (int i = 0;; i++) {
       // float r, g, b;
       int q = i;
@@ -217,7 +216,7 @@ public class Palette {
       //      if (i == BASE_COLOR_COUNT)
       //        break;
 
-      Color c = (Color) myc.get(i);
+      Color c = myc.get(i);
       float r = c.getRed() / 255.0f;
       float g = c.getGreen() / 255.0f;
       float b = c.getBlue() / 255.0f;

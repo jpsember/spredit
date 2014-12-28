@@ -5,7 +5,8 @@ import java.util.ArrayList;
 
 import org.json.*;
 
-import streams.*;
+import com.js.basic.Streams;
+
 import static com.js.basic.Tools.*;
 
 public class ConfigSet {

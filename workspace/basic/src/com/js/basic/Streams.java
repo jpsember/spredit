@@ -1,11 +1,10 @@
-package streams;
+package com.js.basic;
 
 import java.io.*;
 import static com.js.basic.Tools.*;
 
 /**
  * Utility class for streams.
- *
  */
 public class Streams {
 

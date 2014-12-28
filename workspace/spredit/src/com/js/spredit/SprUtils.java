@@ -3,10 +3,11 @@ package com.js.spredit;
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import streams.*;
+
+import com.js.basic.Streams;
+
 import tex.*;
 import apputil.*;
-import base.*;
 import static com.js.basic.Tools.*;
 
 public class SprUtils {
@@ -26,7 +27,8 @@ public class SprUtils {
     }
     return file;
   }
-  private static void addFiles(DArray lst, File f, int max) {
+
+  private static void addFiles(ArrayList<File> lst, File f, int max) {
     final boolean db = false;
 
     if (db)
@@ -53,7 +55,7 @@ public class SprUtils {
   private static final int MANY_FILES = 200;
 
   private static boolean manyFiles(File f) {
-    DArray lst = new DArray();
+    ArrayList<File> lst = new ArrayList();
     int max = MANY_FILES;
     addFiles(lst, f, MANY_FILES);
     return lst.size() >= max;

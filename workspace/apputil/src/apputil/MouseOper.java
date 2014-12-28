@@ -10,8 +10,6 @@ import javax.swing.*;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
-import base.*;
-
 /**
  * Class representing a mouse editing operation
  */
@@ -182,8 +180,7 @@ public abstract class MouseOper {
       }
 
       if (editOper == null) {
-        for (int i = 0; i < opers.size(); i++) {
-          MouseOper sp = (MouseOper) opers.get(i);
+        for (MouseOper sp : opers) {
           if (db)
             pr("testing start " + sp);
 
@@ -241,7 +238,7 @@ public abstract class MouseOper {
     }
   }
 
-  private static DArray opers = new DArray();
+  private static ArrayList<MouseOper> opers = new ArrayList();
 
   // event when operation started
   public static MouseEvent startEv;

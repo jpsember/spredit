@@ -73,19 +73,13 @@ class App
       #
 
       Project.add("basic").add_libraries %w(java-json.jar)
-
-      # This project is deprecated:
-      Project.add("base").add_projects %w(basic)
-
       Project.add("apputil")
-      .add_projects(%w(base basic scanning streams))
+      .add_projects(%w(basic))
       .add_libraries(%w(ui.jar))
-      Project.add("images").add_projects(%w(base basic streams))
+      Project.add("images").add_projects(%w(basic))
       .add_libraries(%w(classes.jar))
-      Project.add("scanning").add_projects %w(base basic streams)
-      Project.add("streams").add_projects %w(base basic)
-      Project.add("myopengl").add_projects %w(base basic jogl tex)
-      Project.add("tex").add_projects %w(apputil base basic images scanning streams)
+      Project.add("myopengl").add_projects %w(basic jogl tex)
+      Project.add("tex").add_projects %w(apputil basic images)
       Project.add("jogl")
       .add_libraries(%w(gluegen-rt.jar jogl-all.jar))
 

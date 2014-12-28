@@ -1,7 +1,9 @@
 package apputil;
 
 import java.io.*;
-import base.*;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import static com.js.basic.Tools.*;
 
 /**
@@ -24,11 +26,11 @@ public class RelPath {
       pr("RelPath constructor, projectDir=[" + projectDir + "] file=[" + file
           + "]");
 
-    DArray dirComp = extractComponents(projectDir);
-    DArray fileComp = extractComponents(file);
+    ArrayList<String> dirComp = extractComponents(projectDir);
+    ArrayList<String> fileComp = extractComponents(file);
     int i = 0;
     while (i < dirComp.size() && i < fileComp.size()) {
-      if (!dirComp.getString(i).equals(fileComp.getString(i)))
+      if (!dirComp.get(i).equals(fileComp.get(i)))
         break;
       i++;
     }
@@ -83,7 +85,7 @@ public class RelPath {
       extractComponents(abstractPath.substring(1), abstractNames);
       this.abstractFilePath = abstractPath;
     } else {
-      abstractNames = new DArray();
+      abstractNames = new ArrayList();
       extractComponents(abstractPath, abstractNames);
 
       if (baseDir != null) {
@@ -92,13 +94,13 @@ public class RelPath {
         if (db)
           pr(" seeing if file lies within project tree");
 
-        DArray dirComp = extractComponents(baseDir);
+        ArrayList dirComp = extractComponents(baseDir);
         if (db)
           pr(" extracted components from baseDir=\n" + dirComp);
 
         int i = 0;
         while (i < dirComp.size() && i < abstractNames.size()) {
-          if (!dirComp.getString(i).equals(abstractNames.getString(i)))
+          if (!dirComp.get(i).equals(abstractNames.get(i)))
             break;
           i++;
         }
@@ -119,11 +121,11 @@ public class RelPath {
    * @param f file
    * @return array of strings
    */
-  private static DArray extractComponents(File f) {
+  private static ArrayList<String> extractComponents(File f) {
     if (db)
       pr("RelPath extractComponents for file:[" + f + "]");
 
-    DArray a = new DArray();
+    ArrayList<String> a = new ArrayList();
     while (f != null) {
       String nm = f.getName();
       if (db)
@@ -148,7 +150,7 @@ public class RelPath {
     int revTotal = (a.size() / 2) - 1;
 
     for (int j = revTotal; j >= 0; j--)
-      a.swap(j, a.size() - 1 - j);
+      Collections.swap(a, j, a.size() - 1 - j);
 
     return a;
   }
@@ -158,7 +160,7 @@ public class RelPath {
    * @param absPath abstract path
    * @param dest names of directories/files appended to this array of strings
    */
-  private static void extractComponents(String absPath, DArray dest) {
+  private static void extractComponents(String absPath, ArrayList<String> dest) {
     if (db)
       pr("extractComponents from [" + absPath + "]");
 
@@ -194,7 +196,7 @@ public class RelPath {
       for (int i = 0; i < abstractNames.size(); i++) {
         if (i != 0)
           sb.append(File.separatorChar);
-        sb.append(abstractNames.getString(i));
+        sb.append(abstractNames.get(i));
       }
       systemFile = new File(sb.toString());
       if (db)
@@ -218,7 +220,7 @@ public class RelPath {
       for (int j = projectDirElements; j < abstractNames.size(); j++) {
         if (j > projectDirElements)
           sb.append(OUR_SEPARATOR);
-        sb.append(abstractNames.getString(j));
+        sb.append(abstractNames.get(j));
       }
       this.abstractFilePath = sb.toString();
     }
@@ -263,7 +265,7 @@ public class RelPath {
   private String abstractFilePath;
 
   // names of directories/file comprising file's path
-  private DArray abstractNames;
+  private ArrayList<String> abstractNames;
 
   // if 0, file is not within project tree; otherwise, number of path elements comprising project tree
   private int projectDirElements;

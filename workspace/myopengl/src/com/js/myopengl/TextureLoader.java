@@ -4,12 +4,11 @@ import static com.js.basic.Tools.*;
 
 import java.awt.image.*;
 import java.nio.*;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 
 import com.js.geometry.IPoint;
-
-import base.*;
 
 import static javax.media.opengl.GL.*;
 
@@ -148,12 +147,12 @@ public class TextureLoader {
     IntBuffer ib = BufferUtils.createIntBuffer(del.size());
 
     for (int i = 0; i < del.size(); i++)
-      ib.put(del.getInt(i));
+      ib.put(del.get(i));
     ib.flip();
 
     del.clear();
     gl.glDeleteTextures(del.size(), ib);
   }
 
-  private static DArray del = new DArray();
+  private static ArrayList<Integer> del = new ArrayList();
 }

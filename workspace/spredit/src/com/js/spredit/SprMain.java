@@ -7,10 +7,10 @@ import static com.js.basic.Tools.*;
 import javax.swing.*;
 
 import com.js.basic.CmdLineArgs;
+import com.js.basic.Streams;
 import com.js.geometry.IPoint;
 
 import apputil.*;
-import streams.*;
 import tex.*;
 
 public class SprMain implements IApplication {

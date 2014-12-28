@@ -1,6 +1,5 @@
 package images;
 
-import streams.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
@@ -8,6 +7,7 @@ import javax.imageio.*;
 import javax.imageio.stream.*;
 import static com.js.basic.Tools.*;
 
+import com.js.basic.Streams;
 import com.js.geometry.IPoint;
 import com.js.geometry.Rect;
 import com.sun.image.codec.jpeg.JPEGCodec;

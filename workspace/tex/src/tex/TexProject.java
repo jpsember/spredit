@@ -6,9 +6,9 @@ import java.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.basic.Streams;
+
 import apputil.*;
-import base.*;
-import streams.*;
 import static com.js.basic.Tools.*;
 
 public class TexProject {
@@ -207,7 +207,7 @@ public class TexProject {
     return atlas;
   }
 
-  private void addImgFiles(DArray imgFiles, File dir) {
+  private void addImgFiles(ArrayList<File> imgFiles, File dir) {
     File[] f = dir.listFiles();
     Arrays.sort(f);
 
@@ -245,9 +245,9 @@ public class TexProject {
   public File[] getImageFiles() {
 
     if (imgFiles == null) {
-      DArray lst = new DArray();
+      ArrayList<File> lst = new ArrayList();
       addImgFiles(lst, baseDir);
-      imgFiles = (File[]) lst.toArray(File.class);
+      imgFiles = lst.toArray(new File[0]);
     }
     return imgFiles;
   }

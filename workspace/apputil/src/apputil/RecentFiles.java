@@ -1,12 +1,13 @@
 package apputil;
 
 import java.io.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import base.*;
 import java.awt.event.*;
 import static com.js.basic.Tools.*;
 
@@ -72,7 +73,7 @@ public class RecentFiles {
       files.add(0, f);
       fileActive = true;
       while (files.size() > MAX)
-        files.pop();
+        files.remove(files.size() - 1);
 
       if (!f.equals(c)) {
         changed = true;
@@ -202,7 +203,7 @@ public class RecentFiles {
 
   private JComboBox cb;
   private File projectBase;
-  private DArray files = new DArray();
+  private ArrayList<File> files = new ArrayList();
   private boolean rebuildingBox;
 
   /**
