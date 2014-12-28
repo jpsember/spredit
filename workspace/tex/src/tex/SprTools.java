@@ -1,8 +1,5 @@
 package tex;
 
-import static com.js.basic.Tools.*;
-
-import images.*;
 import java.awt.image.*;
 
 import com.js.geometry.IRect;
@@ -41,14 +38,7 @@ public class SprTools {
    * @return subimage
    */
   public static BufferedImage subImage(BufferedImage img, IRect crop) {
-    final boolean db = false;
-
-    if (db)
-      pr("SprTools.subImage\n imgBounds=" + ImgUtil.bounds(img)
-          + "\n      crop=" + crop);
-
     int imgY = flipYAxis(img.getHeight(), crop);
-
     return img.getSubimage(crop.x, imgY, crop.width, crop.height);
   }
 

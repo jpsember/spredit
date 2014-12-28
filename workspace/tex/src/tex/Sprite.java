@@ -1,5 +1,6 @@
 package tex;
 
+import com.js.basic.Tools;
 import com.js.geometry.IPoint;
 import com.js.geometry.IRect;
 
@@ -24,58 +25,30 @@ import com.js.geometry.IRect;
  */
 public class Sprite {
 
-  /**
-   * Constructor.  Sets compression to 1.
-   * @param id 
-   */
   public Sprite(String id) {
     this.id = id;
-    // this.compressionFactor = 1;
     this.translate = new IPoint();
     this.bounds = new IRect();
   }
 
   /**
    * Copy constructor
+   * 
    * @param srcSprite
    */
   public Sprite(Sprite srcSprite) {
     this(srcSprite.id);
     bounds = new IRect(srcSprite.bounds);
     translate = new IPoint(srcSprite.translate);
-    // compressionFactor = srcSprite.compressionFactor;
   }
 
-  public String toString() {
-    return id;
-  }
-
-  // /**
-  // * Get compression factor
-  // * @return factor
-  // */
-  // public float compressionFactor() {
-  // return compressionFactor;
-  // }
-
-  // /**
-  // * Set compression factor
-  // * @param factor factor
-  // */
-  // public void setCompression(float factor) {
-  // compressionFactor = factor;
-  // }
-
-  /**
-   * Set translate
-   * @param t
-   */
   public void setTranslate(IPoint t) {
     translate.setTo(t);
   }
 
   /**
    * Get bounds
+   * 
    * @return bounds (original, not a copy)
    */
   public IRect bounds() {
@@ -83,7 +56,8 @@ public class Sprite {
   }
 
   /**
-   * Get translation 
+   * Get translation
+   * 
    * @return translation (original, not a copy)
    */
   public IPoint translate() {
@@ -92,6 +66,7 @@ public class Sprite {
 
   /**
    * Get id
+   * 
    * @return id
    */
   public String id() {
@@ -100,6 +75,7 @@ public class Sprite {
 
   /**
    * Set bounds
+   * 
    * @param r
    */
   public void setBounds(IRect r) {
@@ -108,14 +84,22 @@ public class Sprite {
 
   /**
    * Set id
+   * 
    * @param id
    */
   public void setId(String id) {
     this.id = id;
   }
 
+  @Override
+  public String toString() {
+    warning("is toString() relied upon to just return the id?");
+  //  Tools.die("called sprite.toString()");
+    return "Sprite id='" + id + "' bounds=" + bounds + " translate="
+        + translate;
+  }
+
   private IRect bounds;
-  // private float compressionFactor;
   private IPoint translate;
   private String id;
 }

@@ -528,7 +528,7 @@ public class SpriteEditor {
     r.x += x;
     r.y += y;
     spriteInfo.setCropRect(r);
-    IPoint cp = spriteInfo.centerPoint();
+    Point cp = spriteInfo.centerPoint();
     cp.x += x;
     cp.y += y;
     spriteInfo.setCenterPoint(cp);
@@ -867,7 +867,7 @@ public class SpriteEditor {
           break;
 
         if (ev.isShiftDown())
-          spriteInfo.setCenterPoint(startPt);
+          spriteInfo.setCenterPoint(startPtF);
 
         origLoc = new Point(spriteInfo.centerPoint());
         float dist = MyMath.distanceBetween(origLoc, startPtF)
@@ -893,7 +893,7 @@ public class SpriteEditor {
       if (!drag)
         return;
       Point loc = Point.difference(currentPtF, startPtF);
-      spriteInfo.setCenterPoint(new IPoint(Point.sum(origLoc, loc)));
+      spriteInfo.setCenterPoint(Point.sum(origLoc, loc));
     }
 
     // location of centerpoint at start of operation

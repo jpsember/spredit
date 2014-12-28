@@ -155,7 +155,8 @@ public class TexProject {
 
     RelPath rp = new RelPath(baseDir, texFile);
     if (!rp.withinProjectTree())
-      throw new IllegalStateException();
+      throw new IllegalStateException("TexProject " + rp
+          + " is not within project tree");
 
     String s = rp.toString();
 

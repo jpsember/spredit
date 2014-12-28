@@ -74,8 +74,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     if (image == null)
       return;
 
-    spriteInfo.plotTexture(Point.ZERO // new Point(spriteInfo.centerPoint())
-        , this);
+    spriteInfo.plotTexture(this);
 
     if (mShowClip.isSelected()) {
       setRenderColor(hlClip ? RED : BLUE);
@@ -252,15 +251,10 @@ public class SpritePanel extends GLPanel implements IEditorView {
   }
 
   private int textureFor(Atlas a) {
-    final boolean db = false;
-
     if (atlasTextures == null)
       atlasTextures = new HashMap();
     Integer iv = (Integer) atlasTextures.get(a);
     if (iv == null) {
-      if (db)
-        pr("installing atlas texture: " + a);
-
       BufferedImage img = a.image();
 
       int texHandle;
@@ -270,8 +264,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
       iv = new Integer(texHandle);
 
       atlasTextures.put(a, iv);
-      if (db)
-        pr(" handle=" + iv);
     }
     return iv.intValue();
   }
@@ -333,9 +325,8 @@ public class SpritePanel extends GLPanel implements IEditorView {
    * @param y
    */
   public void plotSprite(int texHandle, IPoint textureSize, Sprite sprite,
-      float x, float y) {
-
-    Matrix tfm = Matrix.getTranslate(new Point(x, y));
+      Point location) {
+    Matrix tfm = Matrix.getTranslate(location);
     plotSprite(texHandle, textureSize, sprite, tfm);
   }
 
@@ -363,8 +354,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     IRect imgRect = new IRect(sprite.bounds());
     Rect aRect = new Rect(imgRect);
 
-    // aRect.scale(sprite.compressionFactor());
-
     IPoint tr = sprite.translate();
     aRect.translate(tr.x, tr.y);
 
@@ -377,9 +366,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     aRect.y *= sy;
     aRect.width *= sx;
     aRect.height *= sy;
-
-    if (db)
-      pr("texture rect= " + aRect);
 
     FloatBuffer v = BufferUtils.createFloatBuffer(2 * 4);
     FloatBuffer t = BufferUtils.createFloatBuffer(2 * 4);

@@ -7,6 +7,8 @@ import org.json.JSONException;
 
 public final class IPoint {
 
+  public static final IPoint ZERO = new IPoint();
+
   public IPoint() {
   }
 
