@@ -1,6 +1,5 @@
 package apputil;
 
 public interface IApplication {
-  public   boolean exitProgram();
-    
+  public boolean exitProgram();
 }
