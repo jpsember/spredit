@@ -112,10 +112,10 @@ public class SpritePanel extends GLPanel implements IEditorView {
   /*
    * Render states; used to avoid making unnecessary OGL state calls
    */
-  public static final int RENDER_UNDEFINED = 0, RENDER_RGB = 1,
+  private static final int RENDER_UNDEFINED = 0, RENDER_RGB = 1,
       RENDER_SPRITE = 2, RENDER_TOTAL = 3;
 
-  public void setRenderState(int state) {
+  private void setRenderState(int state) {
     ASSERT(state > RENDER_UNDEFINED && state < RENDER_TOTAL);
 
     boolean changed = renderState != state;
@@ -140,7 +140,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
   }
 
-  public void setRenderColor(int colorIndex) {
+  private void setRenderColor(int colorIndex) {
     if (currentColorId != colorIndex) {
       currentColorId = colorIndex;
 
@@ -150,29 +150,21 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
   }
 
-  public void mytexturesOn() {
+  private void mytexturesOn() {
     if (!textureMode) {
       gl.glEnable(GL_TEXTURE_2D);
       textureMode = true;
     }
   }
 
-  public void mytexturesOff() {
+  private void mytexturesOff() {
     if (textureMode) {
       gl.glDisable(GL_TEXTURE_2D);
       textureMode = false;
     }
   }
 
-  public void drawLine(Point pt1, Point pt2) {
-    drawLine(pt1.x, pt1.y, pt2.x, pt2.y);
-  }
-
-  public void drawRect(Rect r) {
-    drawRect(r.x, r.y, r.width, r.height);
-  }
-
-  public void drawRect(float x, float y, float w, float h) {
+  private void drawRect(float x, float y, float w, float h) {
     drawLine(x, y, x + w, y);
     drawLine(x, y + h, x + w, y + h);
     drawLine(x, y, x, y + h);
@@ -187,91 +179,16 @@ public class SpritePanel extends GLPanel implements IEditorView {
    * @param w
    * @param h
    */
-  public void drawFrame(float x, float y, float w, float h) {
+  private void drawFrame(float x, float y, float w, float h) {
     float halfLineWidth = lineWidth * .5f;
     drawRect(x - halfLineWidth, y - halfLineWidth, w + lineWidth, h + lineWidth);
   }
 
-  public void drawFrame(Rect r) {
+  private void drawFrame(IRect r) {
     drawFrame(r.x, r.y, r.width, r.height);
   }
 
-  public void drawFrame(IRect r) {
-    drawFrame(r.x, r.y, r.width, r.height);
-  }
-
-  public void drawCircle(Point origin, float radius) {
-    final boolean db = false;
-
-    int nPts = (int) (radius * getZoom() / 2);
-    if (db)
-      pr("before clamping, radius=" + radius + " zoom=" + getZoom() + " nPts="
-          + nPts);
-    nPts = MyMath.clamp(nPts, 6, 50);
-
-    Point prev = null;
-    float angle = 0;
-    for (int i = 0; i <= nPts; i++) {
-      Point curr = MyMath.pointOnCircle(origin, angle, radius);
-      if (prev != null)
-        drawLine(prev, curr);
-      prev = curr;
-      angle += (2 * MyMath.PI) / nPts;
-    }
-  }
-
-  public void drawCircle(float x, float y, float radius) {
-    drawCircle(new Point(x, y), radius);
-  }
-
-  public void fillRect(Rect r) {
-    fillRect(r.x, r.y, r.width, r.height);
-  }
-
-  public void fillRect(float x, float y, float w, float h) {
-    setRenderState(RENDER_RGB);
-    FloatBuffer rectVertBuffer = BufferUtils.createFloatBuffer(4 * 2);
-
-    FloatBuffer v = rectVertBuffer;
-    v.rewind();
-    v.put(x);
-    v.put(y);
-    v.put(x + w);
-    v.put(y);
-    v.put(x + w);
-    v.put(y + h);
-    v.put(x);
-    v.put(y + h);
-    v.rewind();
-    gl.glVertexPointer(2, GL_FLOAT, 0, v); // only 2 coords per vertex
-    gl.glDrawArrays(GL_QUADS, 0, 4);
-  }
-
-  private int trisBufferCap;
-
-  public void fillTriangles(Point[] tris) {
-    FloatBuffer trisVertBuffer = null;
-
-    setRenderState(RENDER_RGB);
-
-    if (trisVertBuffer == null || trisBufferCap < tris.length) {
-      trisVertBuffer = BufferUtils.createFloatBuffer(2 * tris.length);
-      trisBufferCap = tris.length;
-    }
-
-    FloatBuffer v = trisVertBuffer;
-    v.rewind();
-    for (int i = 0; i < tris.length; i++) {
-      Point pt = tris[i];
-      v.put(pt.x);
-      v.put(pt.y);
-    }
-    v.rewind();
-    gl.glVertexPointer(2, GL_FLOAT, 0, v); // only 2 coords per vertex
-    gl.glDrawArrays(GL_TRIANGLES, 0, tris.length);
-  }
-
-  public void drawLine(float x1, float y1, float x2, float y2) {
+  private void drawLine(float x1, float y1, float x2, float y2) {
     setRenderState(RENDER_RGB);
 
     // We want to plot the Minkowski sum of the line segment with a unit square
@@ -310,21 +227,10 @@ public class SpritePanel extends GLPanel implements IEditorView {
     gl.glEnd();
   }
 
-  public static final int BLACK = 776;// Palette.indexOf(MyColors.BLACK);
-  public static final int RED = 8;// Palette.indexOf(MyColors.RED);
-  public static final int BLUE = 416;// Palette.indexOf(MyColors.BLUE);
-  public static final int YELLOW = 129;// Palette.indexOf(MyColors.YELLOW);
-  public static final int WHITE = 680;// Palette.indexOf(MyColors.WHITE);
-  public static final int GREEN = 224;// Palette.indexOf(MyColors.GREEN);
-  public static final int GRAY = 704;// Palette.indexOf(MyColors.GRAY);
-  public static final int DARKGRAY = 728;// Palette.indexOf(MyColors.DARKGRAY);
-
-  // public static final float[] BLACK = { 0, 0, 0 };
-  // public static final float[] RED = { 1, 0, 0 };
-  // public static final float[] BLUE = { 0, 0, 1 };
-  // public static final float[] YELLOW = { 1, 1, 0 };
-  // public static final float[] WHITE = { 1, 1, 1 };
-  // public static final float[] GREEN = { 0, 1, 0 };
+  private static final int BLACK = 776;// Palette.indexOf(MyColors.BLACK);
+  private static final int RED = 8;// Palette.indexOf(MyColors.RED);
+  private static final int BLUE = 416;// Palette.indexOf(MyColors.BLUE);
+  private static final int YELLOW = 129;// Palette.indexOf(MyColors.YELLOW);
 
   private void paintStart() {
 
@@ -446,7 +352,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
    *          location
    * @param y
    */
-  public void plotSprite(int texHandle, IPoint textureSize, Sprite sprite,
+  private void plotSprite(int texHandle, IPoint textureSize, Sprite sprite,
       Matrix tfm) {
 
     setRenderState(RENDER_SPRITE);
@@ -519,45 +425,11 @@ public class SpritePanel extends GLPanel implements IEditorView {
     err();
   }
 
-  public void plotString(String str, Point pt) {
-    plotString(str, (int) pt.x, (int) pt.y);
-  }
-
-  public void plotString(String str, float x, float y) {
-    plotString(str, (int) x, (int) y);
-  }
-
-  public void plotString(String str, int x, int y) {
-
-    if (currentFont == null)
-      throw new IllegalStateException();
-
-    for (int i = 0; i < str.length(); i++) {
-      char c = str.charAt(i);
-      int si = fontCharToSprite(c);
-      Sprite spr = plotSprite(currentFont, si, x, y);
-      x += spr.bounds().width;
-    }
-  }
-
-  public void setFont(Atlas font) {
-    if (currentFont != font) {
-      currentFont = font;
-    }
-  }
-
-  public void err() {
+  private void err() {
     int f = gl.glGetError();
     if (f != 0) {
       pr("GL error: " + f + "   " + stackTrace());
     }
-  }
-
-  private static int fontCharToSprite(char c) {
-    if (c < ' ' || c > 0x7f)
-      c = '_';
-    warning("figure out where first character is using better method");
-    return c - ' ' + 1;
   }
 
   public void setSpriteInfo(SpriteInfo spriteInfo) {
@@ -584,7 +456,6 @@ public class SpritePanel extends GLPanel implements IEditorView {
     mShowClip = showClip;
   }
 
-  private Atlas currentFont;
   private int activeTexture; // id of last selected texture, or 0 if none
   private boolean textureMode; // true if GL_TEXTURE_2D enabled
   private boolean sFocusValid;
