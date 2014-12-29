@@ -2,6 +2,9 @@ package com.js.geometry;
 
 import static com.js.basic.Tools.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -107,8 +110,33 @@ public class Point {
     return new Point(x, y);
   }
 
+  public static JSONArray toJSON(List<Point> points) throws JSONException {
+    JSONArray a = new JSONArray();
+    for (Point pt : points) {
+      a.put(pt.x);
+      a.put(pt.y);
+    }
+    return a;
+  }
+
+  public static ArrayList<Point> parseListFromJSON(JSONArray array)
+      throws JSONException {
+    ArrayList<Point> list = new ArrayList();
+    for (int i = 0; i < array.length(); i++) {
+      int c = 0;
+      float x = (float) array.getDouble(c++);
+      float y = (float) array.getDouble(c++);
+      list.add(new Point(x, y));
+    }
+    return list;
+  }
+
+  public void snapToGrid(float gridSize) {
+    x = MyMath.snapToGrid(x, gridSize);
+    y = MyMath.snapToGrid(y, gridSize);
+  }
+
   public float x;
   public float y;
-
 
 }

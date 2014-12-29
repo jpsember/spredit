@@ -1,7 +1,5 @@
 package com.js.spredit;
 
-import static com.js.basic.Tools.*;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 

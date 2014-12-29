@@ -38,6 +38,8 @@ import tex.Sprite;
 
 import com.js.geometry.*;
 
+import static com.js.basic.Tools.*;
+
 /**
  * <pre>
  * 
@@ -147,6 +149,18 @@ public class GLPanel {
     gl.glVertex2f(x, y2);
     gl.glVertex2f(x2, y2);
     gl.glEnd();
+  }
+
+  public void fillTriangles(Point[] vertices) {
+    unimp("fillTriangles");
+  }
+
+  public void plotString(String string, Point location) {
+    plotString(string, location.x, location.y);
+  }
+
+  public void plotString(String string, float x, float y) {
+    unimp("plotString");
   }
 
   private void clearViewport(Color clearColor) {
@@ -338,11 +352,16 @@ public class GLPanel {
    */
   public void drawFrame(float x, float y, float w, float h) {
     float halfLineWidth = mLineWidth * .5f;
-    drawRect(x - halfLineWidth, y - halfLineWidth, w + mLineWidth, h + mLineWidth);
+    drawRect(x - halfLineWidth, y - halfLineWidth, w + mLineWidth, h
+        + mLineWidth);
   }
 
   public void drawFrame(Rect r) {
     drawFrame(r.x, r.y, r.width, r.height);
+  }
+
+  public void drawLine(Point p1, Point p2) {
+    drawLine(p1.x, p1.y, p2.x, p2.y);
   }
 
   public void drawLine(float x1, float y1, float x2, float y2) {
@@ -382,6 +401,10 @@ public class GLPanel {
     gl.glVertex2f(x2 + u - v, y2 + u + v);
 
     gl.glEnd();
+  }
+
+  public void drawCircle(Point point, float f) {
+    unimp("drawCircle");
   }
 
   private void paintStart() {
@@ -579,4 +602,5 @@ public class GLPanel {
   private int mRenderState; // RENDER_xxx
   private Color mCurrentColor;
   private Map<Atlas, Integer> mAtlasToTextureIdMap = new HashMap();
+
 }

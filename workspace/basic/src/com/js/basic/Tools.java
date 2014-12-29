@@ -1158,10 +1158,12 @@ public final class Tools {
   }
 
   public static int[] toArray(List<Integer> list) {
-    int[] a = new int[list.size()];
-    for (int i = 0; i < a.length; i++)
-      a[i] = list.get(i);
-    return a;
+    int[] ret = new int[list.size()];
+    Iterator<Integer> iterator = list.iterator();
+    for (int i = 0; i < ret.length; i++) {
+      ret[i] = iterator.next().intValue();
+    }
+    return ret;
   }
 
   private static boolean sSanitizeLineNumbersFlag;

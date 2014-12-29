@@ -43,6 +43,11 @@ public final class IPoint {
     y = src.y;
   }
 
+  public void add(IPoint offset) {
+    x += offset.x;
+    y += offset.y;
+  }
+
   public void applyScale(float scaleFactor) {
     x *= scaleFactor;
     y *= scaleFactor;
@@ -83,4 +88,5 @@ public final class IPoint {
 
   public int x;
   public int y;
+
 }

@@ -518,6 +518,7 @@ public final class MyMath {
     return area;
   }
 
+  // TODO: Rename this to just 'polarAngle' since it's clear from the arguments
   public static float polarAngleOfSegment(Point s1, Point s2) {
     return polarAngle(s2.x - s1.x, s2.y - s1.y);
   }
