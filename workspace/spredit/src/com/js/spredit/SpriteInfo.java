@@ -20,8 +20,8 @@ import static com.js.basic.Tools.*;
 
 public class SpriteInfo {
 
-  public static final int IMG_SOURCE = 0, IMG_THUMBNAIL = 1,
-      IMG_UNUSEDWORK = 2, IMG_COMPILED = 3, IMG_TOTAL = 4;
+  private static final int IMG_SOURCE = 0, IMG_THUMBNAIL = 1, IMG_COMPILED = 2,
+      IMG_TOTAL = 3;
 
   public static final int THUMB_SIZE = 80;
 
@@ -31,9 +31,9 @@ public class SpriteInfo {
     try {
       mLastFileContents = Streams.readTextFile(mMetaPath.toString());
       JSONObject map = new JSONObject(mLastFileContents);
-      setCenterPoint(Point.parseJSON(map.getJSONArray("CP")));
+      setCenterpoint(Point.parseJSON(map.getJSONArray("CP")));
       setCropRect(IRect.parseJSON(map.getJSONArray("CLIP")));
-      mWorkImageSize = IPoint.parseJSON(map.getJSONArray("SIZE"));
+      mSourceImageSize = IPoint.parseJSON(map.getJSONArray("SIZE"));
       String alias = map.optString("ALIAS");
       if (alias != null) {
         mAliasFileRead = new RelPath(mProject.baseDirectory(), alias).file();
@@ -50,9 +50,9 @@ public class SpriteInfo {
    * fonts)
    */
   public SpriteInfo(String id, IRect clip, Point centerPoint) {
-    this.mSprite = new Sprite(id);
-    this.setCenterPoint(centerPoint);
-    this.setCropRect(clip);
+    mSprite = new Sprite(id);
+    setCenterpoint(centerPoint);
+    setCropRect(clip);
   }
 
   /**
@@ -66,42 +66,21 @@ public class SpriteInfo {
    * @throws IOException
    */
   public SpriteInfo(TexProject project, File path) throws IOException {
-    final boolean db = false;
-
-    if (db)
-      pr("SpriteInfo.construct path=" + path);
-
-    this.mProject = project;
+    mProject = project;
 
     String sprId = project.extractId(path);
 
-    if (db)
-      pr(" id=" + sprId);
-
-    this.mSprite = new Sprite(sprId);
+    mSprite = new Sprite(sprId);
 
     if (META_FILES_ONLY.accept(path)) {
-      if (db)
-        pr(" meta file;");
-
-      this.mMetaPath = path;
+      mMetaPath = path;
       readMeta();
     } else {
-      this.mImgPath = path;
-      this.mMetaPath = createMetaPath();
-
-      if (db)
-        pr(" img file; metaPath=" + mMetaPath);
-
+      mImgPath = path;
+      mMetaPath = createMetaPath();
       if (mMetaPath.exists()) {
-        if (db)
-          pr("  reading meta data");
-
         readMeta();
       } else {
-        if (db)
-          pr("  meta data doesn't exist, constructing");
-
         constructMetaData();
         flush();
       }
@@ -122,17 +101,18 @@ public class SpriteInfo {
    */
   private SpriteInfo(SpriteInfo orig, File aliasMetaPath) {
 
-    this.mProject = orig.mProject;
-    this.mMetaPath = aliasMetaPath;
+    mProject = orig.mProject;
+    mMetaPath = aliasMetaPath;
 
     String sprId = mProject.extractId(aliasMetaPath);
-    this.mSprite = new Sprite(orig.mSprite);
-    this.mSprite.setId(sprId);
+    mSprite = new Sprite(orig.mSprite);
+    mSprite.setId(sprId);
 
-    this.mCenterpoint = new Point(orig.mCenterpoint);
-    this.mCropRect = new IRect(orig.mCropRect);
+    mCenterpoint = new Point(orig.mCenterpoint);
+    mSourceCropRect = new IRect(orig.mSourceCropRect);
+    mSourceImageSize = orig.mSourceImageSize;
 
-    this.setAliasSprite(orig);
+    setAliasSprite(orig);
 
     // initialize imageSize by getting the image
     getSourceImage();
@@ -149,12 +129,9 @@ public class SpriteInfo {
         map.put("ALIAS",
             new RelPath(mProject.baseDirectory(), imagePath()).toString());
       }
-      map.put("SIZE", mWorkImageSize.toJSON());
-      map.put("CP", centerPoint().toJSON());
+      map.put("SIZE", workImageSize().toJSON());
+      map.put("CP", centerpoint().toJSON());
       map.put("CLIP", cropRect().toJSON());
-
-      // if (mSprite.compressionFactor() != 1)
-      // map.put("COMPRESS", mSprite.compressionFactor());
     } catch (JSONException e) {
       AppTools.showError("encoding SpriteInfo", e);
     }
@@ -170,23 +147,23 @@ public class SpriteInfo {
     }
   }
 
-  public void setCenterPoint(Point cp) {
+  public void setCenterpoint(Point cp) {
     mCenterpoint = new Point(cp);
   }
 
-  public Point centerPoint() {
+  public Point centerpoint() {
     return mCenterpoint;
   }
 
   public IRect cropRect() {
-    return mCropRect;
+    return mSourceCropRect;
   }
 
   public void setCropRect(IRect r) {
-    if (!r.equals(mCropRect)) {
+    if (!r.equals(mSourceCropRect)) {
       setImg(IMG_COMPILED, null);
     }
-    mCropRect = new IRect(r);
+    mSourceCropRect = new IRect(r);
   }
 
   /**
@@ -203,17 +180,17 @@ public class SpriteInfo {
       return;
     }
 
-    IRect bounds = new IRect(new Rect(0, 0, mWorkImageSize.x, mWorkImageSize.y));
-    if (!bounds.contains(mCropRect)) {
-
+    IRect bounds = new IRect(workImageSize());
+    if (!bounds.contains(mSourceCropRect)) {
       if (resetIfProblem) {
         resetClip();
         resetCenterPoint();
       } else {
-        int cx = MyMath.clamp(mCropRect.x, 0, mWorkImageSize.x - 1);
-        int cy = MyMath.clamp(mCropRect.y, 0, mWorkImageSize.y - 1);
-        int cx2 = MyMath.clamp(mCropRect.endX(), cx + 1, mWorkImageSize.x);
-        int cy2 = MyMath.clamp(mCropRect.endY(), cy + 1, mWorkImageSize.y);
+        IPoint size = workImageSize();
+        int cx = MyMath.clamp(mSourceCropRect.x, 0, size.x - 1);
+        int cy = MyMath.clamp(mSourceCropRect.y, 0, size.y - 1);
+        int cx2 = MyMath.clamp(mSourceCropRect.endX(), cx + 1, size.x);
+        int cy2 = MyMath.clamp(mSourceCropRect.endY(), cy + 1, size.y);
         IRect cr = new IRect(cx, cy, cx2 - cx, cy2 - cy);
         setCropRect(cr);
       }
@@ -221,19 +198,22 @@ public class SpriteInfo {
   }
 
   private void constructMetaData() {
+    unimp("if no source image exists, throw an exception?");
+    BufferedImage img = getSourceImage();
+    mSourceImageSize = ImgUtil.size(img);
     resetClip();
     resetCenterPoint();
   }
 
   public void resetCenterPoint() {
-    setCenterPoint(new Rect(mCropRect).midPoint());
+    setCenterpoint(new Rect(mSourceCropRect).midPoint());
   }
 
   public void resetClip() {
     BufferedImage img = getSourceImage();
-    setCropRect(new IRect(0, 0, mWorkImageSize.x, mWorkImageSize.y));
+    setCropRect(new IRect(workImageSize()));
     IRect ub = new IRect(ImgUtil.calcUsedBounds(img, 0));
-    ub.y = SprTools.flipYAxis(mWorkImageSize.y, ub);
+    ub.y = SprTools.flipYAxis(workImageSize().y, ub);
     setCropRect(ub);
     resetCenterPoint();
   }
@@ -270,8 +250,8 @@ public class SpriteInfo {
 
   public BufferedImage getSourceImage() {
     if (img(IMG_SOURCE) == null) {
-      if (aliasSprite != null) {
-        setImg(IMG_SOURCE, aliasSprite.getSourceImage());
+      if (mAlias != null) {
+        setImg(IMG_SOURCE, mAlias.getSourceImage());
       } else
         try {
           setImg(IMG_SOURCE, ImgUtil.read(mImgPath));
@@ -292,7 +272,7 @@ public class SpriteInfo {
     BufferedImage img = null;
     img = img(IMG_COMPILED);
     if (img == null) {
-      img = SprTools.subImage(getSourceImage(), mCropRect);
+      img = SprTools.subImage(getSourceImage(), mSourceCropRect);
       setImg(IMG_COMPILED, img);
     }
     return img;
@@ -312,16 +292,11 @@ public class SpriteInfo {
   }
 
   public BufferedImage thumbnailImage() {
-    final boolean db = false;
     try {
       if (img(IMG_THUMBNAIL) == null) {
-        if (aliasSprite != null) {
-          setImg(IMG_THUMBNAIL, aliasSprite.thumbnailImage());
+        if (mAlias != null) {
+          setImg(IMG_THUMBNAIL, mAlias.thumbnailImage());
         } else {
-          final boolean SIMMOD = false;
-          if (SIMMOD)
-            warning("simmod = true");
-
           // if disk thumb version exists, and is older than original,
           // delete it
           {
@@ -339,23 +314,14 @@ public class SpriteInfo {
               thumbPath = new File(thumbDir, Streams.addExtension(mSprite.id(),
                   THUMB_EXT));
             }
-
-            if (db)
-              pr(mSprite.id() + " determine if " + thumbPath + " exists");
-
             // if disk thumb version exists, and is not older than disk
             // original,
             // use it
             if (thumbPath.exists()
-                && (thumbPath.lastModified() < mImgPath.lastModified() || (SIMMOD && thumbPath
-                    .lastModified() < System.currentTimeMillis() - 10000))) {
+                && (thumbPath.lastModified() < mImgPath.lastModified())) {
               thumbPath.delete();
             }
             if (!thumbPath.exists()) {
-              if (db)
-                pr(mSprite.id() + " thumbthread: determine if " + thumbPath
-                    + " exists");
-
               BufferedImage img = getSourceImage();
 
               if (img.getWidth() > THUMB_SIZE || img.getHeight() > THUMB_SIZE)
@@ -363,11 +329,6 @@ public class SpriteInfo {
                     THUMB_SIZE, THUMB_SIZE)));
               else
                 setImg(IMG_THUMBNAIL, img);
-
-              if (db)
-                pr(mSprite.id() + " thumbthread: writing thumbnail to "
-                    + thumbPath);
-
               ImgUtil.writePNG(img(IMG_THUMBNAIL), thumbPath);
             }
             if (img(IMG_THUMBNAIL) == null) {
@@ -401,12 +362,12 @@ public class SpriteInfo {
    * @return size
    */
   public IPoint workImageSize() {
-    return mWorkImageSize;
+    return mSourceImageSize;
   }
 
   public File imagePath() {
-    if (aliasSprite != null)
-      return aliasSprite.imagePath();
+    if (mAlias != null)
+      return mAlias.imagePath();
     else if (mAliasFileRead != null)
       return mAliasFileRead;
     else
@@ -417,14 +378,9 @@ public class SpriteInfo {
     return mAliasFileRead;
   }
 
-  /**
-   * @return
-   */
   public boolean isAlias() {
-    return aliasSprite != null;
+    return mAlias != null;
   }
-
-  private SpriteInfo aliasSprite;
 
   /**
    * Alias this sprite to another
@@ -432,7 +388,7 @@ public class SpriteInfo {
    * @param si
    */
   public void setAliasSprite(SpriteInfo si) {
-    aliasSprite = si;
+    mAlias = si;
     mAliasFileRead = null;
     releaseImage();
   }
@@ -453,13 +409,14 @@ public class SpriteInfo {
       return;
 
     Sprite s = new Sprite(mSprite.id());
-    s.setBounds(new IRect(IPoint.ZERO, mCropRect.size()));
-    panel.plotSprite(mImgTextureId, mImgTextureSize, s,
-        new Point(mCropRect.bottomLeft()));
+    s.setBounds(new IRect(IPoint.ZERO, mSourceCropRect.size()));
+    panel.plotSprite(mImgTextureId, mImgTextureSize, s, new Point(
+        mSourceCropRect.bottomLeft()));
   }
 
   private IPoint mImgTextureSize = new IPoint();
   private int mImgTextureId;
+  private SpriteInfo mAlias;
 
   private TexProject mProject;
   // value of ALIAS tag read from meta file
@@ -470,11 +427,9 @@ public class SpriteInfo {
   private File mImgPath;
   private Sprite mSprite;
 
-  // Why is this necessary? Isn't it just the size of the source image?
-  private IPoint mWorkImageSize;
-
+  private IPoint mSourceImageSize;
+  private IRect mSourceCropRect = new IRect();
   private Point mCenterpoint = new Point();
-  private IRect mCropRect = new IRect();
 
   private BufferedImage[] mImg = new BufferedImage[IMG_TOTAL];
   private boolean mImageLocked;

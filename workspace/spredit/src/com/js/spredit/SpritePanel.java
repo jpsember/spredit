@@ -83,7 +83,7 @@ public class SpritePanel extends GLPanel implements IEditorView {
     }
 
     if (mCpt.isSelected()) {
-      Point t0 = new Point(spriteInfo.centerPoint());
+      Point t0 = new Point(spriteInfo.centerpoint());
 
       gl.glPushMatrix();
       gl.glTranslatef(t0.x, t0.y, 0);

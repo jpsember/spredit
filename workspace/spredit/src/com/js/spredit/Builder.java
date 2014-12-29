@@ -326,7 +326,7 @@ public class Builder {
     {
       unimp("use floating point Rect here");
       IRect destClip = new IRect(si.cropRect());
-      destClip.translate((int) -si.centerPoint().x, (int) -si.centerPoint().y);
+      destClip.translate((int) -si.centerpoint().x, (int) -si.centerpoint().y);
       destSprite.setBounds(destClip);
       // destSprite.setCompression(srcSprite.compressionFactor());
     }
@@ -336,7 +336,7 @@ public class Builder {
 
     // calculate location of centerpoint in atlas
 
-    Point cpComp = new Point(si.centerPoint());
+    Point cpComp = new Point(si.centerpoint());
     destSprite.setTranslate(new IPoint(bottomLeft.x + cpComp.x, bottomLeft.y
         + cpComp.y));
 

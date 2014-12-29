@@ -1,8 +1,8 @@
 package tex;
 
-import com.js.basic.Tools;
 import com.js.geometry.IPoint;
 import com.js.geometry.IRect;
+import static com.js.basic.Tools.*;
 
 /**
  * Sprite fields explained

@@ -11,6 +11,13 @@ public class Rect {
     setTo(x, y, w, h);
   }
 
+  /**
+   * Constructor for rectangle at origin
+   */
+  public Rect(Point size) {
+    setTo(0, 0, size.x, size.y);
+  }
+
   public Rect(Rectangle r) {
     setTo(r.x, r.y, r.width, r.height);
   }

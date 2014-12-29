@@ -528,10 +528,10 @@ public class SpriteEditor {
     r.x += x;
     r.y += y;
     spriteInfo.setCropRect(r);
-    Point cp = spriteInfo.centerPoint();
+    Point cp = spriteInfo.centerpoint();
     cp.x += x;
     cp.y += y;
-    spriteInfo.setCenterPoint(cp);
+    spriteInfo.setCenterpoint(cp);
     repaint();
   }
 
@@ -867,9 +867,9 @@ public class SpriteEditor {
           break;
 
         if (ev.isShiftDown())
-          spriteInfo.setCenterPoint(startPtF);
+          spriteInfo.setCenterpoint(startPtF);
 
-        origLoc = new Point(spriteInfo.centerPoint());
+        origLoc = new Point(spriteInfo.centerpoint());
         float dist = MyMath.distanceBetween(origLoc, startPtF)
             * spritePanel.getZoom();
         if (dist > HOT_DIST * 3)
@@ -893,7 +893,7 @@ public class SpriteEditor {
       if (!drag)
         return;
       Point loc = Point.difference(currentPtF, startPtF);
-      spriteInfo.setCenterPoint(Point.sum(origLoc, loc));
+      spriteInfo.setCenterpoint(Point.sum(origLoc, loc));
     }
 
     // location of centerpoint at start of operation

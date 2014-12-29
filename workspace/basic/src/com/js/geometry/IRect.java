@@ -88,6 +88,10 @@ public class IRect {
     height = Math.max(pt1.y, pt2.y) - y;
   }
 
+  public IRect(IPoint size) {
+    setTo(0, 0, size.x, size.y);
+  }
+
   public void inset(int dx, int dy) {
     x += dx;
     y += dy;

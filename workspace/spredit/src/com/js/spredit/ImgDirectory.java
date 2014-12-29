@@ -14,11 +14,18 @@ import apputil.*;
 import tex.*;
 import static com.js.basic.Tools.*;
 
-/*
- Features to add:
-
- have 'up' button to move to parent folder (if one exists)
- have 'back', 'fwd' buttons to move to prev, next folders
+/**
+ * <pre>
+ * 
+ * GUI element displaying sprites for current project
+ * 
+ * Features to add:
+ * 'up' button to move to parent folder  
+ * 'back', 'fwd' buttons
+ * 
+ * 
+ * </pre>
+ * 
  */
 public class ImgDirectory extends JPanel implements ListSelectionListener {
 
