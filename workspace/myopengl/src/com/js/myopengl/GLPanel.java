@@ -2,13 +2,39 @@ package com.js.myopengl;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.image.BufferedImage;
+import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.media.opengl.GL2;
+
+import static com.js.basic.Tools.ASSERT;
+import static com.js.basic.Tools.pr;
+import static com.js.basic.Tools.stackTrace;
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_CULL_FACE;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
+import static javax.media.opengl.GL.GL_REPLACE;
+import static javax.media.opengl.GL.GL_SRC_ALPHA;
+import static javax.media.opengl.GL.GL_TEXTURE_2D;
+import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 import static javax.media.opengl.GL2.*;
+import static javax.media.opengl.GL2ES1.GL_TEXTURE_ENV;
+import static javax.media.opengl.GL2ES1.GL_TEXTURE_ENV_MODE;
+import static javax.media.opengl.GL2GL3.GL_QUADS;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_FLAT;
+import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_TEXTURE_COORD_ARRAY;
+import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_VERTEX_ARRAY;
+
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
+
+import tex.Atlas;
+import tex.Sprite;
 
 import com.js.geometry.*;
 
@@ -77,6 +103,7 @@ public class GLPanel {
 
     // while in the GL context, delete any previously removed textures
     TextureLoader.processDeleteList(gl);
+    paintStart();
   }
 
   public Point getOrigin() {
@@ -103,6 +130,23 @@ public class GLPanel {
    */
   public Point viewToWorld(Point viewPt) {
     return mViewToWorldMatrix.apply(viewPt);
+  }
+
+  public void fillRect(Rect r) {
+    fillRect(r.x, r.y, r.endX(), r.endY());
+  }
+
+  public void fillRect(float x, float y, float width, float height) {
+    float x2 = x + width;
+    float y2 = y + height;
+    setRenderState(RENDER_RGB);
+
+    gl.glBegin(GL_TRIANGLE_STRIP);
+    gl.glVertex2f(x, y);
+    gl.glVertex2f(x2, y);
+    gl.glVertex2f(x, y2);
+    gl.glVertex2f(x2, y2);
+    gl.glEnd();
   }
 
   private void clearViewport(Color clearColor) {
@@ -220,6 +264,306 @@ public class GLPanel {
     gl.glMatrixMode(GL_MODELVIEW);
   }
 
+  public void lineWidth(float width) {
+    mLineWidth = width;
+  }
+
+  /*
+   * Render states; used to avoid making unnecessary OGL state calls
+   */
+  private static final int RENDER_UNDEFINED = 0, RENDER_RGB = 1,
+      RENDER_SPRITE = 2, RENDER_TOTAL = 3;
+
+  private void setRenderState(int state) {
+    ASSERT(state > RENDER_UNDEFINED && state < RENDER_TOTAL);
+
+    boolean changed = mRenderState != state;
+    if (changed) {
+
+      mRenderState = state;
+
+      switch (mRenderState) {
+
+      case RENDER_SPRITE:
+        mytexturesOn();
+        gl.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GL_VERTEX_ARRAY);
+        break;
+
+      case RENDER_RGB:
+        mytexturesOff();
+        gl.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GL_VERTEX_ARRAY);
+        break;
+      }
+    }
+  }
+
+  public void setRenderColor(Color c) {
+    if (c != mCurrentColor) {
+      mCurrentColor = c;
+      gl.glColor4ub((byte) c.getRed(), (byte) c.getGreen(), (byte) c.getBlue(),
+          (byte) c.getAlpha());
+    }
+  }
+
+  private void mytexturesOn() {
+    if (!mTextureEnabled) {
+      gl.glEnable(GL_TEXTURE_2D);
+      mTextureEnabled = true;
+    }
+  }
+
+  private void mytexturesOff() {
+    if (mTextureEnabled) {
+      gl.glDisable(GL_TEXTURE_2D);
+      mTextureEnabled = false;
+    }
+  }
+
+  private void drawRect(float x, float y, float w, float h) {
+    drawLine(x, y, x + w, y);
+    drawLine(x, y + h, x + w, y + h);
+    drawLine(x, y, x, y + h);
+    drawLine(x + w, y, x + w, y + h);
+  }
+
+  /**
+   * Draw frame around a rectangle, adjusting for line width
+   * 
+   * @param x
+   * @param y
+   * @param w
+   * @param h
+   */
+  public void drawFrame(float x, float y, float w, float h) {
+    float halfLineWidth = mLineWidth * .5f;
+    drawRect(x - halfLineWidth, y - halfLineWidth, w + mLineWidth, h + mLineWidth);
+  }
+
+  public void drawFrame(Rect r) {
+    drawFrame(r.x, r.y, r.width, r.height);
+  }
+
+  public void drawLine(float x1, float y1, float x2, float y2) {
+    setRenderState(RENDER_RGB);
+
+    // We want to plot the Minkowski sum of the line segment with a unit square
+    // rotated to be aligned with the line segment;
+    // the square has width equal to the line width
+
+    // Calculate the unit vector from p1 to p2; if undefined, assume line is
+    // horizontal
+    float dist = MyMath.distanceBetween(new Point(x1, y1), new Point(x2, y2));
+
+    // The 'radius' of the unit square representing our pen
+    float radius = mLineWidth * .5f;
+
+    float u = radius;
+    float v = 0;
+    if (dist > 0) {
+      float r = radius / dist;
+      u = (x2 - x1) * r;
+      v = -(y2 - y1) * r;
+    }
+
+    // The top left corner of the (rotated) unit square has coordinates
+    // (x,y) = (u-v, u+v), and each successive (ccw) corner is found
+    // by applying the substitution (x',y') = (-y, x)
+
+    gl.glBegin(GL_TRIANGLE_STRIP);
+    // bottom left
+    gl.glVertex2f(x1 - u + v, y1 - u - v);
+    // bottom right
+    gl.glVertex2f(x2 + u + v, y2 - u + v);
+    // top left
+    gl.glVertex2f(x1 - u - v, y1 + u - v);
+    // top right
+    gl.glVertex2f(x2 + u - v, y2 + u + v);
+
+    gl.glEnd();
+  }
+
+  private void paintStart() {
+
+    // set REPLACE mode, to ignore color
+    gl.glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    gl.glShadeModel(GL_FLAT); // not sure this is necessary
+
+    // textures are disabled
+    gl.glDisable(GL_TEXTURE_2D);
+
+    gl.glEnable(GL_BLEND);
+    gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // turn off backspace culling
+    gl.glDisable(GL_CULL_FACE);
+
+    mCurrentTextureId = 0;
+    mTextureEnabled = false;
+    mCurrentColor = null;
+  }
+
+  /**
+   * Plot sprite
+   * 
+   * @param atlas
+   *          atlas containing sprite
+   * @param spriteIndex
+   *          index within atlas
+   * @param x
+   *          position
+   * @param y
+   * @return sprite plotted
+   */
+  public Sprite plotSprite(Atlas atlas, int spriteIndex, float x, float y) {
+    Matrix tfm = Matrix.getTranslate(new Point(x, y));
+    return plotSprite(atlas, spriteIndex, tfm);
+  }
+
+  /**
+   * Plot sprite
+   * 
+   * @param atlas
+   *          atlas containing sprite
+   * @param spriteIndex
+   *          index within atlas
+   * @param tfm
+   *          transformation matrix to apply to vertices
+   * @return sprite plotted
+   */
+  public Sprite plotSprite(Atlas atlas, int spriteIndex, Matrix tfm) {
+    int texHandle = textureFor(atlas);
+    Sprite sprite = atlas.sprite(spriteIndex);
+    plotSprite(texHandle, atlas.imageSize(), sprite, tfm); // x, y);
+    return sprite;
+  }
+
+  public void selectTexture(int texHandle) {
+    if (mCurrentTextureId != texHandle) {
+      mCurrentTextureId = texHandle;
+      gl.glBindTexture(GL_TEXTURE_2D, texHandle);
+      err();
+    }
+  }
+
+  /**
+   * Plot sprite
+   * 
+   * @param texHandle
+   *          openGL texture
+   * @param textureSize
+   *          size of texture, in pixels
+   * @param sprite
+   *          sprite
+   * @param x
+   *          location
+   * @param y
+   */
+  public void plotSprite(int texHandle, IPoint textureSize, Sprite sprite,
+      Point location) {
+    Matrix tfm = Matrix.getTranslate(location);
+    plotSprite(texHandle, textureSize, sprite, tfm);
+  }
+
+  /**
+   * Plot sprite
+   * 
+   * @param texHandle
+   *          openGL texture
+   * @param textureSize
+   *          size of texture, in pixels
+   * @param sprite
+   *          sprite
+   * @param x
+   *          location
+   * @param y
+   */
+  public void plotSprite(int texHandle, IPoint textureSize, Sprite sprite,
+      Matrix tfm) {
+
+    setRenderState(RENDER_SPRITE);
+    selectTexture(texHandle);
+
+    err();
+
+    IRect imgRect = new IRect(sprite.bounds());
+    Rect aRect = new Rect(imgRect);
+
+    IPoint tr = sprite.translate();
+    aRect.translate(tr.x, tr.y);
+
+    ASSERT(TextureLoader.ceilingPower2(textureSize.x) == textureSize.x
+        && TextureLoader.ceilingPower2(textureSize.y) == textureSize.y);
+
+    float sx = 1f / textureSize.x;
+    float sy = 1f / textureSize.y;
+    aRect.x *= sx;
+    aRect.y *= sy;
+    aRect.width *= sx;
+    aRect.height *= sy;
+
+    FloatBuffer v = BufferUtils.createFloatBuffer(2 * 4);
+    FloatBuffer t = BufferUtils.createFloatBuffer(2 * 4);
+
+    Point tp = new Point();
+    tfm.apply(imgRect.x, imgRect.y, tp);
+    v.put(tp.x);
+    v.put(tp.y);
+
+    tfm.apply(imgRect.endX(), imgRect.y, tp);
+    v.put(tp.x);
+    v.put(tp.y);
+
+    tfm.apply(imgRect.endX(), imgRect.endY(), tp);
+    v.put(tp.x);
+    v.put(tp.y);
+
+    tfm.apply(imgRect.x, imgRect.endY(), tp);
+    v.put(tp.x);
+    v.put(tp.y);
+
+    v.rewind();
+
+    t.put(aRect.x);
+    t.put(aRect.y);
+    t.put(aRect.endX());
+    t.put(aRect.y);
+    t.put(aRect.endX());
+    t.put(aRect.endY());
+    t.put(aRect.x);
+    t.put(aRect.endY());
+
+    t.rewind();
+
+    gl.glVertexPointer(2, GL_FLOAT, 0, v);
+    err();
+    gl.glTexCoordPointer(2, GL_FLOAT, 0, t);
+    err();
+
+    gl.glDrawArrays(GL_QUADS, 0, 4);
+    err();
+
+    err();
+  }
+
+  private int textureFor(Atlas a) {
+    Integer iv = mAtlasToTextureIdMap.get(a);
+    if (iv == null) {
+      BufferedImage img = a.image();
+      iv = TextureLoader.getTexture(gl, img, null);
+      mAtlasToTextureIdMap.put(a, iv);
+    }
+    return iv.intValue();
+  }
+
+  private void err() {
+    int f = gl.glGetError();
+    if (f != 0) {
+      pr("GL error: " + f + "   " + stackTrace());
+    }
+  }
+
   // Value returned by glContext()
   protected GL2 gl;
 
@@ -229,4 +573,10 @@ public class GLPanel {
   private IPoint mPreviousRenderedSize = new IPoint();
   private float mZoomFactor = 1;
   private Point mOrigin = new Point();
+  private int mCurrentTextureId; // id of last selected texture, or 0 if none
+  private boolean mTextureEnabled; // true if GL_TEXTURE_2D enabled
+  private float mLineWidth = 1;
+  private int mRenderState; // RENDER_xxx
+  private Color mCurrentColor;
+  private Map<Atlas, Integer> mAtlasToTextureIdMap = new HashMap();
 }

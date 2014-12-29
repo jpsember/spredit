@@ -337,6 +337,31 @@ public class Streams {
     return path;
   }
 
+  /**
+   * Get an input stream to a data file, which is stored in the class folder (or
+   * one of its subfolders)
+   * 
+   * @param path
+   *          String : path to file
+   * @return BufferedInputStream
+   * @throws IOException
+   */
+  public static BufferedInputStream openResource(Class c, String path)
+      throws IOException {
+
+    BufferedInputStream out = null;
+    if (c == null) {
+      out = new BufferedInputStream(new FileInputStream(path));
+    } else {
+      InputStream is = c.getResourceAsStream(path);
+      if (is == null) {
+        throw new FileNotFoundException("openResource failed: " + path);
+      }
+      out = new BufferedInputStream(is);
+    }
+    return out;
+  }
+
   private static File sHomeDir;
 
 }

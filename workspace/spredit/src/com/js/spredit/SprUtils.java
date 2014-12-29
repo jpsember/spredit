@@ -189,7 +189,7 @@ public class SprUtils {
    */
   private static void addAliasEntries(TexProject project, TreeMap entries,
       File f) throws IOException {
-    final boolean db = false;
+    final boolean db = true;
 
     if (db)
       pr("addAliasEntries " + f);
