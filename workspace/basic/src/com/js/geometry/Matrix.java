@@ -78,6 +78,17 @@ public class Matrix {
     return m;
   }
 
+  public static Matrix getRotate(float angleInRadians) {
+    Matrix matrix = new Matrix();
+
+    float c = MyMath.cos(angleInRadians), s = MyMath.sin(angleInRadians);
+    matrix.a = c;
+    matrix.c = -s;
+    matrix.b = s;
+    matrix.d = c;
+    return matrix;
+  }
+
   public static Matrix getScale(float scaleFactor) {
     Matrix m = new Matrix();
     m.a = scaleFactor;

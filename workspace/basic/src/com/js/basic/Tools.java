@@ -1090,6 +1090,17 @@ public final class Tools {
   }
 
   /**
+   * Remove a contiguous sequence of elements from a list
+   */
+  public static <T> void remove(List<T> list, int start, int count) {
+    list.subList(start, start + count).clear();
+  }
+
+  public static <T> T getMod(List<T> list, int index) {
+    return list.get(MyMath.myMod(index, list.size()));
+  }
+
+  /**
    * Remove an item from a list, and fill gap with last element
    * 
    * @param list

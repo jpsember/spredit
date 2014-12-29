@@ -218,6 +218,10 @@ public final class MyMath {
     return sqrtf(squaredMagnitudeOfRay(s2.x - s1.x, s2.y - s1.y));
   }
 
+  public static float distanceBetween(IPoint s1, IPoint s2) {
+    return sqrtf(squaredMagnitudeOfRay(s2.x - s1.x, s2.y - s1.y));
+  }
+
   public static float pointUnitLineSignedDistance(Point pt, Point s1, Point s2) {
     // Translate so s1 is at origin
     float sx = s2.x - s1.x;

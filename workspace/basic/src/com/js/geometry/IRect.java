@@ -30,6 +30,10 @@ public class IRect {
     return new Rectangle(x, y, width, height);
   }
 
+  public Rect toRect() {
+    return new Rect(this);
+  }
+
   public int midX() {
     return (x + width / 2);
   }

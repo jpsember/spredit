@@ -77,6 +77,10 @@ public final class IPoint {
     return new IPoint(x, y);
   }
 
+  public Point toPoint() {
+    return new Point(x, y);
+  }
+
   public int x;
   public int y;
 }
