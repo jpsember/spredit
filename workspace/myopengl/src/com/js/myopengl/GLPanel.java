@@ -135,7 +135,7 @@ public class GLPanel {
   }
 
   public void fillRect(Rect r) {
-    fillRect(r.x, r.y, r.endX(), r.endY());
+    fillRect(r.x, r.y, r.width, r.height);
   }
 
   public void fillRect(float x, float y, float width, float height) {

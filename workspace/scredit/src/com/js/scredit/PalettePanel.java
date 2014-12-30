@@ -577,6 +577,6 @@ public class PalettePanel extends JPanel {
   int state;
   private Map favColorMap = new HashMap();
   private BufferedImage images[] = new BufferedImage[PANELS];
-  private Color selectedColor;
+  private Color selectedColor = Color.blue;
   private int[] favColors;
 }

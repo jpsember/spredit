@@ -22,24 +22,17 @@ public class RectangleObject extends EdObject {
     cornerA = Grid.snapToGrid(cornerA, true);
     cornerB = Grid.snapToGrid(cornerB, true);
 
-    setColorValue(color);
+    setColor(color);
 
-    corner0 = new Point(Math.min(cornerA.x, cornerB.x), Math.min(cornerA.y,
-        cornerB.y));
-    corner2 = new Point(Math.max(cornerA.x, cornerB.x), Math.max(cornerA.y,
-        cornerB.y));
+    mBottomLeftCorner = new Point(Math.min(cornerA.x, cornerB.x), Math.min(
+        cornerA.y, cornerB.y));
+    mTopRightCorner = new Point(Math.max(cornerA.x, cornerB.x), Math.max(
+        cornerA.y, cornerB.y));
   }
 
-  // public RectangleObject(int color, Point origin, float halfWidth,
-  // float halfHeight) {
-  // setColorValue(color);
-  // this.halfWidth = Math.abs(halfWidth);
-  // this.halfHeight = Math.abs(halfHeight);
-  // tfm.setLocation(origin);
-  // }
-
-  private void setColorValue(Color c) {
-    this.color = c;
+  private void setColor(Color color) {
+    ASSERT(color != null);
+    this.mColor = color;
   }
 
   @Override
@@ -52,32 +45,17 @@ public class RectangleObject extends EdObject {
     }
     nc1 = new Point(nc0.x + width(), nc0.y + height());
 
-    return new RectangleObject(color, nc0, nc1);
-    //
-    // Point nc0 = horz ? newLocation :
-    //
-    // EdObject newObj = (EdObject) this.clone();
-    // newObj.setLocation(newLocation);
-    // return newObj;
+    return new RectangleObject(mColor, nc0, nc1);
   }
 
   public EdObject snapToGrid() {
-    final boolean db = false;
-
-    if (db)
-      pr("snapToGrid " + this);
-
-    Point pt1 = corner0; // getCorner(0, true);
-    Point pt2 = corner2; // getCorner(2, true);
+    Point pt1 = mBottomLeftCorner;
+    Point pt2 = mTopRightCorner;
     Point spt1 = Grid.snapToGrid(pt1, false);
     Point spt2 = Grid.snapToGrid(pt2, false);
     if (spt1 == pt1 && spt2 == pt2)
       return this;
-    if (db)
-      pr(" spt1=" + spt1 + ", spt2=" + spt2);
-
     return constructNew(spt1, spt2);
-
   }
 
   /**
@@ -91,24 +69,7 @@ public class RectangleObject extends EdObject {
    * @return
    */
   private RectangleObject constructNew(Point spt1, Point spt2) {
-    RectangleObject r = new RectangleObject(getColor(), spt1, spt2); // origin,
-                                                                     // hWidth,
-                                                                     // hHeight);
-    //
-    // Point origin = Point.midPoint(spt1, spt2);
-    // float phi = MyMath.polarAngle(origin, spt2) - this.rotation();
-    // float radius = Point.distance(origin, spt2);
-    // float hWidth = MyMath.cos(phi) * radius;
-    // float hHeight = MyMath.sin(phi) * radius;
-    //
-    // RectangleObject r = new RectangleObject(color(), origin, hWidth,
-    // hHeight);
-    // r.setRotation(this.rotation());
-    // pt1, pt2.x - pt1.x, pt2.y
-    // - pt1.y);
-    // //new Rect(spt1, spt2));
-    // r.tfm.setRotation(tfm.rotation());
-    // r.tfm.setScale(tfm.scale());
+    RectangleObject r = new RectangleObject(getColor(), spt1, spt2);
     r.setSelected(this.isSelected());
     return r;
   }
@@ -116,81 +77,35 @@ public class RectangleObject extends EdObject {
   @Override
   public EdObject applyColor(Color color) {
     RectangleObject ret = this;
-    if (!color.equals(this.color)) {
+    if (!color.equals(this.mColor)) {
       ret = (RectangleObject) this.clone();
-      ret.setColorValue(color);
+      ret.setColor(color);
     }
     return ret;
   }
 
   public Color getColor() {
-    return color;
+    return mColor;
   }
 
-  public static final int CODE = 4; // code for polygon object
+  public static final int CODE = 4; // code for rectangle object
 
   /**
    * Clone the object
    */
   public Object clone() {
     RectangleObject e = (RectangleObject) super.clone();
-    // e.tfm = new ObjTransform(tfm);
-
-    // reset some lazy-initialized fields
-    e.recalcLazy();
     return e;
   }
 
   public String toString() {
     return "Rectangle";
-    // StringBuilder sb = new StringBuilder();
-    // sb.append("Rectangle");
-    // sb.append(" origin=" + tfm.location());
-    // sb.append(" w/2=" + f(halfWidth) + " h/2=" + f(halfHeight));
-    // return sb.toString();
   }
 
   @Override
   public boolean contains(Point pt) {
     return boundingRect().contains(pt);
-    // Point rpt = toRectSpace(pt);
-    // return Math.abs(rpt.x) <= halfWidth && Math.abs(rpt.y) <= halfHeight;
   }
-
-  // @Override
-  // public boolean isGrabPoint(Point worldPt) {
-  // final boolean db = false;
-  //
-  // Point pt = toRectSpace(worldPt);
-  // float dx = Math.abs(pt.x) - halfWidth;
-  // float dy = Math.abs(pt.y) - halfHeight;
-  // dx = Math.max(0, dx);
-  // dy = Math.max(0, dy);
-  // float dist = MyMath.sqrt(dx * dx + dy * dy);
-  //
-  // if (db)
-  // pr("isGrabPoint " + worldPt + "(" + this + ") pt=" + pt + " dist="
-  // + f(dist));
-  //
-  // dist *= scale();
-  // if (db)
-  // pr("  adjust for rectangle scale=" + dist);
-  //
-  // dist *= zoomFactor();
-  // if (db)
-  // pr("  adjust for zoom factor=" + dist);
-  //
-  // return dist < 4;
-  //
-  // }
-
-  // public Point toRectSpace(Point worldPt) {
-  // Point pt = tfm.inverse().apply(worldPt);
-  // return pt;
-  // }
-  // public Point toRectSpace(IPoint worldPt) {
-  // return toRectSpace(new Point(worldPt));
-  // }
 
   @Override
   public EdObjectFactory getFactory() {
@@ -199,36 +114,16 @@ public class RectangleObject extends EdObject {
 
   @Override
   public void render(GLPanel panel) {
-    // DArray a = new DArray();
+    ASSERT(mColor != null);
 
-    // if (halfWidth == 0 || halfHeight == 0) {
-    // drawLine(tfm.location(), tfm.location());
-    // } else
-    {
+    Rect r = boundingRect();
+    panel.setRenderColor(mColor);
+    panel.fillRect(r);
 
-      // for (int i = 0; i < 4; i++)
-      // a.add(getCorner(i, true));
-      //
-      // PolygonObject p = new PolygonObject(color, a);
-
-      if (color != null) {
-        panel.setRenderColor(color);
-        panel.fillRect(boundingRect());
-        // p.render();
-      }
-
-      if (color == null || isSelected()) {
-        panel.setRenderColor(isSelected() ? Color.YELLOW : Color.DARK_GRAY);
-
-        panel.lineWidth((isSelected() ? 2 : 1) / zoomFactor());
-
-        for (int i = 0; i < 4; i++) {
-          Point p0 = getCorner(i);
-          Point p1 = getCorner(i + 1);
-          panel.drawLine(p0, p1);
-        }
-      }
-
+    if (isSelected()) {
+      panel.setRenderColor(Color.YELLOW);
+      panel.lineWidth(2 / zoomFactor());
+      panel.drawFrame(r);
     }
   }
 
@@ -246,11 +141,6 @@ public class RectangleObject extends EdObject {
    * @return new rectangle
    */
   public RectangleObject setElementPosition(int elem, Point pos) {
-    final boolean db = false;
-
-    if (db)
-      pr("setElementPosition " + elem + " pos=" + pos);
-
     Point opp = null;
 
     switch (elem) {
@@ -259,9 +149,6 @@ public class RectangleObject extends EdObject {
     case 2:
     case 3:
       opp = getCorner(elem + 2);
-      if (db)
-        pr(" opp=" + opp);
-
       break;
 
     case 4:
@@ -278,39 +165,8 @@ public class RectangleObject extends EdObject {
       pos.y = curr.y;
     }
       break;
-    // {
-    // opp = getCorner(0, false);
-    // Point curr = getCorner(2, false);
-    // pos.x = curr.x;
-    // }
-    // break;
-    // case 7:
-    // {
-    // opp = getCorner(1, false);
-    // Point curr = getCorner(3, false);
-    // pos.y = curr.y;
-    // }
-    // break;
     }
     return constructNew(pos, opp);
-    //
-    // Point spt1 = tfm.matrix().apply(pos);
-    // Point spt2 = tfm.matrix().apply(opp);
-    // return constructNew(spt1,spt2);
-    //
-    // // calc new origin
-    // Point localOrigin = Point.midPoint(pos,opp);
-    //
-    //
-    //
-    // pos.add(location());
-    // opp.add(location());
-    // ret = new RectangleObject(color, pos, opp);
-    // ret.setSelected(this.isSelected());
-    // ret.setScale(this.scale());
-    // ret.setRotation(this.rotation());
-    // return ret;
-
   }
 
   public static EdObjectFactory FACTORY = new RectangleFactory();
@@ -320,28 +176,14 @@ public class RectangleObject extends EdObject {
     @Override
     public MouseOper isEditingSelectedObject(int slot, EdObject obj,
         IPoint mousePt) {
-
-      final boolean db = false;
-
       MouseOper ret = null;
-
-      if (db)
-        pr("isEditingSelectedObject (rectangle) " + obj + "? mousePt="
-            + mousePt + " slot=" + slot);
       RectangleObject p = (RectangleObject) obj;
-
-      Point pt = new Point(mousePt); // mousePt; //p.toRectSpace(mousePt);
-
-      float tolerance = 8 / zoomFactor(); // * p.scale() / zoomFactor();
-
+      Point pt = new Point(mousePt);
+      float tolerance = 8 / zoomFactor();
       int edElement = -1;
-
       for (int c = 0; c < 4; c++) {
         Point corn = p.getCorner(c);
         float dist = MyMath.distanceBetween(corn, pt);
-        if (db)
-          pr("distance from corner " + c + " is " + dist);
-
         if (dist < tolerance) {
           edElement = c;
           break;
@@ -352,8 +194,6 @@ public class RectangleObject extends EdObject {
           Point ep0 = p.getCorner(edge);
           Point ep1 = p.getCorner((edge + 1) & 3);
           float dist = MyMath.ptDistanceToSegment(pt, ep0, ep1, null);
-          if (db)
-            pr("distance from edge " + edge + " is " + dist);
           if (dist < tolerance) {
             edElement = edge + 4;
             break;
@@ -377,8 +217,8 @@ public class RectangleObject extends EdObject {
       RectangleObject so = (RectangleObject) obj;
       JSONTools.put(map, so.getColor());
       ArrayList<Point> points = new ArrayList();
-      points.add(so.corner0);
-      points.add(so.corner2);
+      points.add(so.mBottomLeftCorner);
+      points.add(so.mTopRightCorner);
       map.put("points", Point.toJSON(points));
     }
 
@@ -396,11 +236,6 @@ public class RectangleObject extends EdObject {
     /**
      * Write Rectangle to ScriptsFile. Converts it to a polygon, and writes it
      * as that.
-     * 
-     * @param sf
-     *          ScriptsFile to write to
-     * @param obj
-     *          RectangleObject
      */
     public void write(ScriptsFile sf, EdObject obj) throws IOException {
 
@@ -433,29 +268,27 @@ public class RectangleObject extends EdObject {
   }
 
   public float width() {
-    return corner2.x - corner0.x;
+    return mTopRightCorner.x - mBottomLeftCorner.x;
   }
 
   public float height() {
-    return corner2.y - corner0.y;
+    return mTopRightCorner.y - mBottomLeftCorner.y;
   }
 
   @Override
   public void setLocation(Point pt) {
     float w = width();
     float h = height();
-    corner0 = new Point(pt);
-    corner2 = new Point(pt.x + w, pt.y + h);
-    // tfm.setLocation(new Point(pt));
-    recalcLazy();
+    mBottomLeftCorner = new Point(pt);
+    mTopRightCorner = new Point(pt.x + w, pt.y + h);
   }
 
   @Override
   public String getInfoMsg() {
     StringBuilder sb = new StringBuilder();
 
-    IPoint c0 = new IPoint(corner0);
-    IPoint c2 = new IPoint(corner2);
+    IPoint c0 = new IPoint(mBottomLeftCorner);
+    IPoint c2 = new IPoint(mTopRightCorner);
 
     sb.append("(");
     sb.append(c0.x);
@@ -473,42 +306,31 @@ public class RectangleObject extends EdObject {
     return sb.toString();
   }
 
-  public Point getCorner(int c) { // , boolean toWorldSpace) {
+  public Point getCorner(int c) {
     c = MyMath.myMod(c, 4);
 
-    float x = corner0.x;
-    // halfWidth;
-    float y = corner0.y; // halfHeight;
+    float x = mBottomLeftCorner.x;
+    float y = mBottomLeftCorner.y;
     if (c == 1 || c == 2)
-      x = corner2.x;
+      x = mTopRightCorner.x;
     if (c >= 2)
-      y = corner2.y;
+      y = mTopRightCorner.y;
     Point pt = new Point(x, y);
-    // if (toWorldSpace)
-    // pt = tfm.matrix().apply(pt);
     return pt;
   }
 
   @Override
   public Point location() {
-    return new Point(corner0);
-    // return new Point(tfm.location());
+    return new Point(mBottomLeftCorner);
   }
 
   @Override
   public void setRotation(float angle) {
-    // tfm.setRotation(angle);
-    // recalcLazy();
-    //
-  }
-
-  private void recalcLazy() {
-    tfmBounds = null;
   }
 
   @Override
   public float rotation() {
-    return 0; // tfm.rotation();
+    return 0;
   }
 
   @Override
@@ -522,30 +344,14 @@ public class RectangleObject extends EdObject {
 
   @Override
   public Rect boundingRect() {
-    if (tfmBounds == null) {
-      tfmBounds = new Rect(corner0, corner2);
-      // DArray a = new DArray();
-      // for (int i = 0; i < 4; i++)
-      // a.add(getCorner(i, true));
-      // tfmBounds = Rect.boundsForPoints(a);
-    }
-    return tfmBounds;
+    return new Rect(mBottomLeftCorner, mTopRightCorner);
   }
 
   public boolean isWellDefined() {
-    return corner2.x > corner0.x && corner2.y > corner0.y; // halfWidth *
-                                                           // halfHeight > 0;
+    return mTopRightCorner.x > mBottomLeftCorner.x
+        && mTopRightCorner.y > mBottomLeftCorner.y;
   }
 
-  private Point corner0, corner2;
-
-  // // radius of rectangle in each dimension
-  // private float halfWidth, halfHeight;
-  //
-  // private ObjTransform tfm = new ObjTransform();
-
-  // axis-aligned bounding rect of transformed rectangle
-  private Rect tfmBounds;
-
-  private Color color; // color and shade
+  private Point mBottomLeftCorner, mTopRightCorner;
+  private Color mColor;
 }
