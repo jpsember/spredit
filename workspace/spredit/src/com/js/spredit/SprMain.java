@@ -90,8 +90,6 @@ public class SprMain implements IApplication {
       }
 
       if (runGUI) {
-        AppTools.setAppName(APP_NAME);
-
         // Schedule a job for the event-dispatching thread:
         // calling an application object's run() method.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -176,7 +174,6 @@ public class SprMain implements IApplication {
     config = new ConfigSet(null);
     config.add(apputil.MyFrame.CONFIG);
     config.add(SpriteEditor.CONFIG);
-    // config.add(AtlasDisplay.CONFIG);
     try {
       config.readFrom(AppTools.getDefaultsPath("spredit"));
     } catch (Throwable e) {
@@ -184,30 +181,27 @@ public class SprMain implements IApplication {
     }
 
     MyFrame frame = new MyFrame("SPRMAIN");
+    warning("is this necessary?");
     frame.setTitle(APP_NAME);
-    AppTools.setFrame(frame, app());
+
+    AppTools.setApplication(app(), frame);
 
     SpriteEditor.init((JComponent) frame.getContentPane());
 
     frame.setVisible(true);
   }
 
-  private static ConfigSet config;
+  @Override
+  public String getName() {
+    return APP_NAME;
+  }
 
+  @Override
   public boolean exitProgram() {
-    final boolean db = false;
-    if (db)
-      pr("exitProgram");
-    boolean quit = false;
-    do {
-
-      if (!SpriteEditor.doCloseProject())
-        break;
-
-      writeDefaults();
-      quit = true;
-    } while (false);
-    return quit;
+    if (!SpriteEditor.doCloseProject())
+      return false;
+    writeDefaults();
+    return true;
   }
 
   private static void writeDefaults() {
@@ -217,10 +211,6 @@ public class SprMain implements IApplication {
       AppTools.showError("writing defaults file", e);
     }
   }
-
-  // private static int scaleUp(int value, float scale) {
-  // return Math.round(value / scale);
-  // }
 
   private static void buildFont() throws IOException {
     final boolean db = false;
@@ -353,6 +343,7 @@ public class SprMain implements IApplication {
     return resolutions;
   }
 
+  private static ConfigSet config;
   private static IPoint atlasSize;
   private static File buildPath;
   private static String fontPath;

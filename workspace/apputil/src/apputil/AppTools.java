@@ -11,23 +11,37 @@ import static com.js.basic.Tools.*;
 
 public class AppTools {
 
-  private static final boolean SWING_FC = true;
+  public static void setApplication(IApplication app,
+      JFrame frame) {
+    sFrame = frame;
+    sApplication = app;
 
-  private static boolean isMac;
-
-  public static void setAppName(String app) {
     String lcOSName = System.getProperty("os.name").toLowerCase();
-    isMac = lcOSName.startsWith("mac os x");
-    if (isMac) {
-      // if (true) {
-      // warn("not using screen menubar");
-      // } else
-      MacUtils.useScreenMenuBar(app);
+    sIsMac = lcOSName.startsWith("mac os x");
+    if (sIsMac) {
+      MacUtils.useScreenMenuBar(app.getName());
     }
+
+    if (!isMac()) {
+      // From
+      // http://java.sun.com/products/jfc/tsc/articles/mixing/#issues:
+      JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+    }
+
+    // disable the close button, since we want to verify close
+    sFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    sFrame.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        if (sApplication.exitProgram()) {
+          sFrame.setVisible(false);
+          sFrame.dispose();
+        }
+      }
+    });
   }
 
   public static boolean isMac() {
-    return isMac;
+    return sIsMac;
   }
 
   public static void stringToLabel(String s, StringBuilder sb) {
@@ -45,33 +59,17 @@ public class AppTools {
     sb.append('"');
   }
 
-  private static Font monoFont;
-
   public static Font getFixedWidthFont() {
-    if (monoFont == null) {
-      monoFont = new Font("Monaco", Font.PLAIN, 16);
-      if (false) {
-        GraphicsEnvironment ge;
-        ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
-        // Get the font names from the graphics environment
-        String[] fontNames = ge.getAvailableFontFamilyNames();
-
-        for (int index = 0; index < fontNames.length; index++) {
-          System.out.println(fontNames[index]);
-        }
-      }
+    if (sMonotoneFontNormal == null) {
+      sMonotoneFontNormal = new Font("Monaco", Font.PLAIN, 16);
     }
-    return monoFont;
-
+    return sMonotoneFontNormal;
   }
 
-  private static Font monoFontSmall;
-
   public static Font getSmallFixedWidthFont() {
-    if (monoFontSmall == null)
-      monoFontSmall = new Font("Monaco", Font.PLAIN, 12);
-    return monoFontSmall;
+    if (sMonotoneFontSmall == null)
+      sMonotoneFontSmall = new Font("Monaco", Font.PLAIN, 12);
+    return sMonotoneFontSmall;
   }
 
   public static String stringToLabel(String s) {
@@ -103,39 +101,9 @@ public class AppTools {
         JOptionPane.ERROR_MESSAGE);
   }
 
-  private static IApplication theApp;
-
-  // public static IApplication app() {return theApp;}
-  public static void setFrame(JFrame f, IApplication app) {
-    frame = f;
-    theApp = app;
-    if (!isMac()) {
-      // // From
-      // http://java.sun.com/products/jfc/tsc/articles/mixing/#issues:
-      JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-    }
-
-    if (frame != null && theApp != null) {
-      // disable the close button, since we want to verify close
-      frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-      frame.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent e) {
-          if (theApp.exitProgram()) {
-            frame.setVisible(false);
-            frame.dispose();
-          }
-        }
-      });
-
-    }
-
-  }
-
   public static JFrame frame() {
-    return frame;
+    return sFrame;
   }
-
-  private static JFrame frame;
 
   public static File chooseFileToSave(String prompt, MyFileFilter fileFilter,
       File defaultFile) {
@@ -149,9 +117,9 @@ public class AppTools {
     File f = null;
     do {
 
-      if (!SWING_FC && !AppTools.isMac()) {
+      if (AppTools.isMac()) {
 
-        FileDialog d = new FileDialog(frame, prompt, FileDialog.SAVE);
+        FileDialog d = new FileDialog(sFrame, prompt, FileDialog.SAVE);
 
         if (defaultFile != null) {
           d.setDirectory(defaultFile.getParent());
@@ -189,7 +157,7 @@ public class AppTools {
   // private static final boolean USE_SWING_FILECHOOSERS = false;
 
   private static void enableMenuBar(boolean f) {
-    JMenuBar mb = frame.getJMenuBar();
+    JMenuBar mb = sFrame.getJMenuBar();
     if (mb != null)
       mb.setEnabled(f);
   }
@@ -197,60 +165,39 @@ public class AppTools {
   public static File chooseFileToOpen(String prompt, MyFileFilter fileFilter,
       File defaultFile) {
 
-    final boolean db = false;
-
     enableMenuBar(false);
 
-    File f = null;
+    File chosenFile = null;
     do {
-      if (!SWING_FC && !AppTools.isMac()) {
-        //
-        // if (!USE_SWING_FILECHOOSERS) {
-        FileDialog d = new FileDialog(frame, prompt, FileDialog.LOAD);
+      if (AppTools.isMac()) {
+        FileDialog fileChooser = new FileDialog(sFrame, prompt, FileDialog.LOAD);
         if (defaultFile != null) {
-          d.setDirectory(defaultFile.getParent());
-          d.setFile(defaultFile.getName());
+          fileChooser.setDirectory(defaultFile.getParent());
+          fileChooser.setFile(defaultFile.getName());
         }
-        d.setFilenameFilter(fileFilter);
-        if (db)
-          pr("set filefilter to " + fileFilter);
+        fileChooser.setFilenameFilter(fileFilter);
+        fileChooser.setVisible(true);
 
-        d.setVisible(true);
-
-        // do {
-        String dir = d.getDirectory();
-        String s = d.getFile();
-        if (db)
-          pr("getFile is " + dir + ":" + s);
-
+        String dir = fileChooser.getDirectory();
+        String s = fileChooser.getFile();
         if (dir == null || s == null)
           break;
-        f = new File(dir, s);
+        chosenFile = new File(dir, s);
       } else {
-
-        JFileChooser fc = new JFileChooser(defaultFile);
-        fc.setFileFilter(fileFilter);
-        int result = fc.showOpenDialog(frame());
-
+        JFileChooser fileChooser = new JFileChooser(defaultFile);
+        fileChooser.setFileFilter(fileFilter);
+        int result = fileChooser.showOpenDialog(frame());
         if (result != JFileChooser.APPROVE_OPTION)
           break;
-        f = fc.getSelectedFile();
+        chosenFile = fileChooser.getSelectedFile();
       }
-
-      if (db)
-        pr(" file = " + f);
-
-      if (!f.exists() || !fileFilter.accept(f)) {
-        f = null;
+      if (!chosenFile.exists() || !fileFilter.accept(chosenFile)) {
+        chosenFile = null;
         break;
       }
-      if (db)
-        pr("returning " + f);
-
     } while (false);
     enableMenuBar(true);
-
-    return f;
+    return chosenFile;
   }
 
   public static File incrementFile(File f) {
@@ -296,5 +243,11 @@ public class AppTools {
   public static void runAsCmdLine() {
     System.setProperty("java.awt.headless", "true");
   }
+
+  private static boolean sIsMac;
+  private static JFrame sFrame;
+  private static IApplication sApplication;
+  private static Font sMonotoneFontNormal;
+  private static Font sMonotoneFontSmall;
 
 }
