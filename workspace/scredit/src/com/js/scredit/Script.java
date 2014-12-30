@@ -75,17 +75,12 @@ public class Script {
           defaults.put(key, defaultsMap.get(key));
         }
       }
-
-      // stack for Group parsing
-      // ArrayList<GroupObject> groupStack = new ArrayList();
-
       boolean problem = false;
       JSONArray itemsList = fileMap.getJSONArray(ITEMS_TAG);
       int cursor = 0;
       while (cursor < itemsList.length()) {
         String itemTag = itemsList.getString(cursor++);
         JSONObject itemMap = itemsList.getJSONObject(cursor++);
-
         EdObjectFactory f = factoryFor(itemTag);
         if (f == null) {
           if (!problem) {
@@ -95,46 +90,8 @@ public class Script {
           }
           continue;
         }
-
         EdObject obj = f.parse(this, itemMap);
-        //
-        //
-        // DefScanner s2 = new DefScanner(itemFields);
-        // EdObject obj;
-        // try {
-        // obj = f.parse(this, s2);
-        // } catch (ScanException e) {
-        // AppTools.showError("Problem reading script " + path, e);
-        // break;
-        // }
-        // if (obj == null)
-        // continue;
-        //
-        // // if we just started reading a group, push it onto the stack
-        // if (obj instanceof GroupObject) {
-        // groupStack.add((GroupObject) obj);
-        // obj = null;
-        // } else {
-        // // if we are currently reading a group, add parsed object to it
-        // if (!groupStack.isEmpty()) {
-        // GroupObject g = last(groupStack);
-        // g.addParsedObject(obj);
-        //
-        // // if the group is now complete, pop it from the stack and
-        // // treat it as the object we read
-        // if (g.parseComplete()) {
-        // pop(groupStack);
-        // obj = g;
-        // } else {
-        // // otherwise, we're not done reading the group; pretend we
-        // // haven't read an object yet
-        // obj = null;
-        // }
-        // }
-        // }
-        //
-        // if (obj != null) {
-        items.add(obj);
+        mObjects.add(obj);
       }
     } catch (JSONException e) {
       die(e);
@@ -156,8 +113,8 @@ public class Script {
 
       {
         JSONArray scriptItems = new JSONArray();
-        for (int i = 0; i < items.size(); i++) {
-          EdObject obj = items.get(i);
+        for (int i = 0; i < mObjects.size(); i++) {
+          EdObject obj = mObjects.get(i);
           EdObjectFactory f = obj.getFactory();
           JSONObject itemMap = new JSONObject();
           f.write(this, itemMap, obj);
@@ -190,11 +147,11 @@ public class Script {
   }
 
   public void setItems(ObjArray items) {
-    this.items = items;
+    this.mObjects = items;
   }
 
   public ObjArray items() {
-    return items;
+    return mObjects;
   }
 
   public ScriptProject project() {
@@ -215,7 +172,7 @@ public class Script {
   private File path;
   // Use a TreeMap so keys are kept in sorted order
   private Map defaults = new TreeMap();
-  private ObjArray items = new ObjArray();
+  private ObjArray mObjects = new ObjArray();
   private ScriptProject project;
 
 }

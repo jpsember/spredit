@@ -122,10 +122,12 @@ public class Point {
   public static ArrayList<Point> parseListFromJSON(JSONArray array)
       throws JSONException {
     ArrayList<Point> list = new ArrayList();
-    for (int i = 0; i < array.length(); i++) {
-      int c = 0;
-      float x = (float) array.getDouble(c++);
-      float y = (float) array.getDouble(c++);
+    if (array.length() % 2 != 0)
+      throw new JSONException("malformed array");
+    int cursor = 0;
+    while (cursor < array.length()) {
+      float x = (float) array.getDouble(cursor++);
+      float y = (float) array.getDouble(cursor++);
       list.add(new Point(x, y));
     }
     return list;

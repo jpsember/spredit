@@ -47,8 +47,6 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
   }
 
   private void paintContents() {
-    final boolean db = false;
-
     // clear background (or plot layers)
     final int MAX_FADED = 3;
     int[] fadeLayers = new int[MAX_FADED];
@@ -56,8 +54,6 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
     // int fadeLayer = -1;
     {
       LayerSet layers = ScriptEditor.layers();
-
-      // final boolean db = false;
 
       if (ScriptEditor.faded()) {
 

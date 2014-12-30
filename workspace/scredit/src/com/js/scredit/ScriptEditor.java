@@ -150,21 +150,12 @@ public class ScriptEditor {
   /**
    * Read script into current layer
    * 
-   * @param f
-   *          file
    * @return true if successful
    */
   private static boolean open(File f) {
-    final boolean db = false;
-
-    if (db)
-      pr("ScriptEditor.open(File=" + f + ")");
-
     boolean success = false;
     do {
       if (!flush(true)) {
-        if (db)
-          pr("failed to flush");
         break;
       }
 
@@ -174,13 +165,9 @@ public class ScriptEditor {
                 .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
       }
       if (f == null) {
-        if (db)
-          pr(" no file specified");
         break;
       }
       if (notInProject(f)) {
-        if (db)
-          pr(" not in project");
         break;
       }
       close();
@@ -191,8 +178,6 @@ public class ScriptEditor {
       if (slot >= 0) {
         layers.useCopyOf(slot);
         success = true;
-        if (db)
-          pr(" using copy of file open in another layer");
       } else {
 
         try {
@@ -209,9 +194,6 @@ public class ScriptEditor {
       }
     } while (false);
     updateLastScriptDisabled = false;
-    if (db)
-      pr(" success=" + success);
-
     return success;
   }
 
@@ -230,38 +212,17 @@ public class ScriptEditor {
         ss.setFile(i, f);
       }
     }
-
     return ss.encode();
-    //
-    //
-    // DefBuilder sb = new DefBuilder();
-    // sb.append(layers.size());
-    // sb.append(layers.currentSlot());
-    // sb.append(layers.foregroundStart());
-    // for (int i = 0; i < layers.size(); i++) {
-    // ScriptEditor ed = layers.layer(i);
-    // File f = ed.path();
-    // sb.append(f != null);
-    // if (f != null)
-    // sb.append(new RelPath(project.directory(), f));
-    // }
-    // return sb.toString();
   }
 
   private static void decodeLayers(ScriptSet set) {
     layers.reset();
-    // if (s != null)
     {
-      // DefScanner sc = new DefScanner(s);
-      // int sz = sc.sInt();
-      // int curr = sc.sInt();
-      // int fg = sc.sInt();
       for (int i = 0; i < set.size(); i++) {
         if (i > 0)
-          layers.insert(true); // layers.insert(i > 0);
+          layers.insert(true);
         File f = set.file(i);
         if (f != null) {
-          // File f = sc.sPath(project.directory());
           updateLastScriptDisabled = true;
           if (!open(f)) {
             AppTools.showMsg("Unable to open " + f);
@@ -310,9 +271,6 @@ public class ScriptEditor {
   }
 
   public void render(GLPanel panel, boolean toBgnd) {
-
-    // item #0 is drawn first
-
     for (int i = 0; i < items.size(); i++) {
 
       panel.lineWidth(1.5f / zoomFactor());
@@ -326,35 +284,6 @@ public class ScriptEditor {
       } else
         obj.render(panel);
     }
-  }
-
-  /**
-   * Determine frontmost item under mouse, giving priority to selected items
-   * 
-   * @param mouseLoc
-   * @return index of item, or -1
-   * @deprecated moved to MouseOperMoveItems
-   * 
-   */
-  public static int itemAtMouse(IPoint iMouseLoc) {
-    Point mouseLoc = new Point(iMouseLoc);
-    int foundItem = -1;
-    EdObject foundObj = null;
-
-    ObjArray items = items();
-    for (int i = 0; i < items.size(); i++) {
-      EdObject obj = items.get(i);
-
-      if (!obj.isSelected() && foundObj != null && foundObj.isSelected())
-        continue;
-
-      if (obj.isGrabPoint(mouseLoc)) {
-        // contains(mouseLoc)) {
-        foundObj = obj;
-        foundItem = i;
-      }
-    }
-    return foundItem;
   }
 
   /**

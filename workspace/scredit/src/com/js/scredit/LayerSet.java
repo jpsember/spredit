@@ -18,15 +18,16 @@ public class LayerSet {
   public static interface ICallback {
     /**
      * Called by useLayer()
-     * @param editor active editor
+     * 
+     * @param editor
+     *          active editor
      */
     public void useEditor(ScriptEditor editor);
   }
 
   /**
-   * Delete current layer, and move to following one 
-   *  (or preceding, if deleting last layer);
-   * first layer cannot be deleted
+   * Delete current layer, and move to following one (or preceding, if deleting
+   * last layer); first layer cannot be deleted
    */
   public void delete() {
     if (db)
@@ -42,6 +43,7 @@ public class LayerSet {
 
   /**
    * Determine if current layer is a background layer
+   * 
    * @return true if so
    */
   public boolean isBackground() {
@@ -50,8 +52,9 @@ public class LayerSet {
 
   /**
    * Insert an orphan
-   * @param afterCurrentPos if true, inserts it after current layer; otherwise,
-   *   before
+   * 
+   * @param afterCurrentPos
+   *          if true, inserts it after current layer; otherwise, before
    */
   public void insert(boolean afterCurrentPos) {
     if (db)
@@ -72,6 +75,7 @@ public class LayerSet {
     select(MyMath.myMod(currentSlot + 1, size()));
 
   }
+
   /**
    * Move to layer preceding active one
    */
@@ -81,15 +85,18 @@ public class LayerSet {
 
   /**
    * Get index of current layer
+   * 
    * @return
    */
   public int currentSlot() {
     return currentSlot;
   }
-  
+
   /**
    * Specify current layer
-   * @param slot slot of layer to make current
+   * 
+   * @param slot
+   *          slot of layer to make current
    */
   public void select(int slot) {
     currentSlot = slot;
@@ -98,7 +105,9 @@ public class LayerSet {
 
   /**
    * Replace current layer with a copy of another layer
-   * @param slot slot containing other layer
+   * 
+   * @param slot
+   *          slot containing other layer
    */
   public void useCopyOf(int slot) {
     layers.set(currentSlot, layers.get(slot));
@@ -114,7 +123,9 @@ public class LayerSet {
 
   /**
    * Get editor
-   * @param slot slot 
+   * 
+   * @param slot
+   *          slot
    * @return editor editor within slot
    */
   public ScriptEditor layer(int slot) {
@@ -123,7 +134,9 @@ public class LayerSet {
 
   /**
    * Determine first slot containing a particular editor
-   * @param f file associated with editor
+   * 
+   * @param f
+   *          file associated with editor
    * @return first slot containing file, or -1 if none
    */
   public int indexOf(File f) {
@@ -156,12 +169,11 @@ public class LayerSet {
     doCallback();
   }
 
- 
-
   /**
-  * Get number of layers
-  * @return number of layers
-  */
+   * Get number of layers
+   * 
+   * @return number of layers
+   */
   public int size() {
     return layers.size();
   }
@@ -173,10 +185,11 @@ public class LayerSet {
   }
 
   /**
-   * Move foreground/background partition to
-   * include/exclude current layer
-   * @param f if true, ensures current layer is background;
-   *   else, ensures current layer is foreground
+   * Move foreground/background partition to include/exclude current layer
+   * 
+   * @param f
+   *          if true, ensures current layer is background; else, ensures
+   *          current layer is foreground
    */
   public void setBackground(boolean f) {
     if (currentSlot < foregroundStart) {
@@ -190,18 +203,33 @@ public class LayerSet {
 
   /**
    * Determine slot of first foreground layer
+   * 
    * @return slot of first foreground editor
    */
   public int foregroundStart() {
     return foregroundStart;
   }
-  
+
   /**
    * Set background/foreground partition
-   * @param fg slot of first foreground layer
+   * 
+   * @param fg
+   *          slot of first foreground layer
    */
   public void setForeground(int fg) {
     foregroundStart = MyMath.clamp(fg, 0, size());
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("LayerSet");
+    sb.append(" size:" + layers.size());
+    sb.append(" current slot:" + currentSlot);
+    sb.append(" foreground:" + foregroundStart);
+    for (ScriptEditor editor : layers) {
+      sb.append("\n  editor: " + editor);
+    }
+    return sb.toString();
   }
 
   private int foregroundStart;
