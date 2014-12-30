@@ -504,12 +504,9 @@ public class PolygonObject extends EdObject {
 
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
-      unimp("parse color");
-      // int color = s.sInt();
       JSONArray srcPoints = map.getJSONArray("vertices");
-      // int nPts = s.sInt();
       ArrayList<Point> a = Point.parseListFromJSON(srcPoints);
-      PolygonObject so = new PolygonObject(Color.blue, a);
+      PolygonObject so = new PolygonObject(JSONTools.getColor(map), a);
       return so;
     }
 
@@ -518,7 +515,7 @@ public class PolygonObject extends EdObject {
         throws JSONException {
 
       PolygonObject so = (PolygonObject) obj;
-      unimp("encode color");
+      JSONTools.put(map, obj.getColor());
       ArrayList<Point> pts = new ArrayList();
       for (int i = 0; i < so.nPoints(); i++)
         pts.add(so.getPoint(i));

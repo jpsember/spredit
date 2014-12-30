@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.basic.JSONTools;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -374,7 +375,7 @@ public class RectangleObject extends EdObject {
         throws JSONException {
 
       RectangleObject so = (RectangleObject) obj;
-      unimp("write color");
+      JSONTools.put(map, so.getColor());
       ArrayList<Point> points = new ArrayList();
       points.add(so.corner0);
       points.add(so.corner2);
@@ -383,12 +384,12 @@ public class RectangleObject extends EdObject {
 
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
-      unimp("parse color");
       ArrayList<Point> points = Point.parseListFromJSON(map
           .getJSONArray("points"));
       Point ptA = points.get(0);
       Point ptB = points.get(1);
-      RectangleObject so = new RectangleObject(Color.blue, ptA, ptB);
+      RectangleObject so = new RectangleObject(JSONTools.getColor(map), ptA,
+          ptB);
       return so;
     }
 
