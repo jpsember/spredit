@@ -6,7 +6,7 @@ import java.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 
 import apputil.*;
 import static com.js.basic.Tools.*;
@@ -54,7 +54,7 @@ public class TexProject {
 
     this.baseDir = f.getParentFile();
     this.projectFile = f;
-    this.name = Streams.removeExt(f.getName());
+    this.name = Files.removeExt(f.getName());
 
     if (db)
       pr("baseDir=" + baseDir + "\nname=" + name);
@@ -73,7 +73,7 @@ public class TexProject {
   }
 
   private void read() throws IOException, JSONException {
-    String content = Streams.readTextFile(projectFile.getPath());
+    String content = Files.readTextFile(projectFile.getPath());
     defaults = new JSONObject(content);
   }
 
@@ -106,7 +106,7 @@ public class TexProject {
 
   public void flush() throws IOException {
     String content = defaults.toString();
-    Streams.writeIfChanged(projectFile, content);
+    Files.writeIfChanged(projectFile, content);
   }
 
   public String toString() {
@@ -120,7 +120,7 @@ public class TexProject {
    */
   public File atlasFile() {
     if (atlasFile == null)
-      atlasFile = Streams.changeExtension(projectFile, Atlas.ATLAS_EXT);
+      atlasFile = Files.changeExtension(projectFile, Atlas.ATLAS_EXT);
     return atlasFile;
   }
 
@@ -161,7 +161,7 @@ public class TexProject {
     String s = rp.toString();
 
     StringBuilder sb = new StringBuilder();
-    s = Streams.removeExt(s);
+    s = Files.removeExt(s);
 
     for (int i = 1; i < s.length(); i++) {
       char c = Character.toUpperCase(s.charAt(i));

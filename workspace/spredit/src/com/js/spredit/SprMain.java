@@ -7,7 +7,7 @@ import static com.js.basic.Tools.*;
 import javax.swing.*;
 
 import com.js.basic.CmdLineArgs;
-import com.js.basic.Streams;
+import com.js.basic.Files;
 import com.js.geometry.IPoint;
 
 import apputil.*;
@@ -72,7 +72,7 @@ public class SprMain implements IApplication {
       if (ca.hasValue("build")) {
         runGUI = false;
         String p = ca.getString("build");
-        p = Streams.addExtension(p, TexProject.SRC_EXT);
+        p = Files.addExtension(p, TexProject.SRC_EXT);
         buildPath = new File(p).getAbsoluteFile();
       }
 
@@ -256,7 +256,7 @@ public class SprMain implements IApplication {
       int[] fd = fimg.getFontInfo();
       fimg = null;
 
-      fontPath = Streams.addExtension(fontPath, Atlas.ATLAS_EXT);
+      fontPath = Files.addExtension(fontPath, Atlas.ATLAS_EXT);
       File fp = new File(fontPath);
 
       fp = SprUtils.addResolutionSuffix(fp, res, slot);

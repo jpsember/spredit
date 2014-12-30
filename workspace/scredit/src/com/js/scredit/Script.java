@@ -66,7 +66,7 @@ public class Script {
   private static final String ITEMS_TAG = "ITEMS";
 
   private void read() throws IOException {
-    String content = Streams.readTextFile(path.getPath());
+    String content = Files.readTextFile(path.getPath());
     try {
       JSONObject fileMap = new JSONObject(content);
       {
@@ -131,7 +131,7 @@ public class Script {
     if (path == null)
       throw new IllegalStateException("path undefined");
 
-    Streams.writeIfChanged(path, content);
+    Files.writeIfChanged(path, content);
   }
 
   public File path() {

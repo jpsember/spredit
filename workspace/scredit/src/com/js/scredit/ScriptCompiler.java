@@ -25,7 +25,8 @@ public class ScriptCompiler {
 
   private ScriptCompiler(File sourceFile) {
     this.sourceFile = sourceFile.getAbsoluteFile();
-    this.outputFile = Streams.changeExtension(sourceFile,
+    this.outputFile = Files
+        .changeExtension(sourceFile,
         SCRIPTFILE_COMPILED_EXT);
   }
 
@@ -93,10 +94,10 @@ public class ScriptCompiler {
       pr("writeSymFile corresponding to " + sourceFile);
 
     File symPath = sourceFile.getParentFile();
-    String scriptSetName = Streams.removeExt(sourceFile.getName());
+    String scriptSetName = Files.removeExt(sourceFile.getName());
     scriptSetName = scriptSetName + "_scripts";
 
-    symPath = new File(symPath, Streams.addExtension(scriptSetName, "h"));
+    symPath = new File(symPath, Files.addExtension(scriptSetName, "h"));
 
     StringBuilder sb = new StringBuilder();
     String equName = scriptSetName.toUpperCase() + "_EQU";
@@ -123,7 +124,7 @@ public class ScriptCompiler {
     if (db)
       pr("writing to path:[" + symPath + "] if changed");
 
-    Streams.writeIfChanged(symPath, sb.toString());
+    Files.writeIfChanged(symPath, sb.toString());
   }
 
   private static void appendSymbol(StringBuilder sb, String prefix,
@@ -145,7 +146,7 @@ public class ScriptCompiler {
       pr("processScriptSet: " + f);
 
     ScriptSet ss = new ScriptSet(project.directory(), new JSONObject(
-        Streams.readTextFile(f.toString())));
+        Files.readTextFile(f.toString())));
     for (int i = 0; i < ss.size(); i++) {
       File f2 = ss.file(i);
       if (f2 != null)

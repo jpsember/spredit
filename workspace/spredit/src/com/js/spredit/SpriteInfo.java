@@ -13,7 +13,7 @@ import com.js.myopengl.*;
 import apputil.*;
 import tex.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
@@ -29,7 +29,7 @@ public class SpriteInfo {
 
   private void readMeta() {
     try {
-      mLastFileContents = Streams.readTextFile(mMetaPath.toString());
+      mLastFileContents = Files.readTextFile(mMetaPath.toString());
       JSONObject map = new JSONObject(mLastFileContents);
       setCenterpoint(Point.parseJSON(map.getJSONArray("CP")));
       setCropRect(IRect.parseJSON(map.getJSONArray("CLIP")));
@@ -139,7 +139,7 @@ public class SpriteInfo {
     String str = map.toString();
     if (!str.equals(mLastFileContents)) {
       try {
-        Streams.writeTextFile(mMetaPath, str);
+        Files.writeTextFile(mMetaPath, str);
         mLastFileContents = str;
       } catch (IOException e) {
         AppTools.showError("writing SpriteInfo", e);
@@ -231,8 +231,8 @@ public class SpriteInfo {
       if (!metaDir.mkdir())
         throw new IOException("unable to create meta directory");
     }
-    String imgName = Streams.removeExt(mImgPath.getName());
-    return new File(metaDir, Streams.addExtension(imgName, META_SPRITE_EXT));
+    String imgName = Files.removeExt(mImgPath.getName());
+    return new File(metaDir, Files.addExtension(imgName, META_SPRITE_EXT));
   }
 
   public Sprite sprite() {
@@ -311,7 +311,7 @@ public class SpriteInfo {
                   throw new IOException("unable to create meta directory");
               }
 
-              thumbPath = new File(thumbDir, Streams.addExtension(mSprite.id(),
+              thumbPath = new File(thumbDir, Files.addExtension(mSprite.id(),
                   THUMB_EXT));
             }
             // if disk thumb version exists, and is not older than disk

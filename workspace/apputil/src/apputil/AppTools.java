@@ -5,7 +5,7 @@ import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 
 import static com.js.basic.Tools.*;
 
@@ -229,8 +229,8 @@ public class AppTools {
 
   public static File incrementFile(File f) {
     String name = f.getName();
-    String ext = Streams.getExtension(name);
-    name = Streams.removeExt(name);
+    String ext = Files.getExtension(name);
+    name = Files.removeExt(name);
 
     if (name.length() == 0)
       throw new IllegalArgumentException(f.toString());

@@ -7,7 +7,7 @@ import java.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 
 import apputil.*;
 import tex.*;
@@ -54,14 +54,14 @@ public class ScriptProject {
       // they are at least deterministically ordered, then this 'write only if
       // changed' test is still useful.
       String content = getDefaults().toString(2);
-      Streams.writeIfChanged(mProjectFile, content);
+      Files.writeIfChanged(mProjectFile, content);
     } catch (JSONException e) {
       die(e);
     }
   }
 
   private void read() throws IOException, JSONException {
-    String content = Streams.readTextFile(mProjectFile.getPath());
+    String content = Files.readTextFile(mProjectFile.getPath());
     mProjectDefaults = new JSONObject(content);
     mRecentScripts.decode(getDefaults().optJSONObject(KEY_RECENTSCRIPTS));
     mRecentAtlases.decode(getDefaults().optJSONObject(KEY_RECENTATLASES));

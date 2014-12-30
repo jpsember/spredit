@@ -3,7 +3,7 @@ package apputil;
 import java.io.*;
 import java.util.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 
 import static com.js.basic.Tools.*;
 
@@ -12,7 +12,7 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter implements
 
   public File fixExtension(File f) {
     if (extension != null) {
-      f = Streams.changeExtension(f, extension);
+      f = Files.changeExtension(f, extension);
     }
     return f;
   }

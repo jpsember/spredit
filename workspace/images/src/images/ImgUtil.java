@@ -7,7 +7,7 @@ import javax.imageio.*;
 import javax.imageio.stream.*;
 import static com.js.basic.Tools.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 import com.js.geometry.IPoint;
 import com.js.geometry.IRect;
 import com.sun.image.codec.jpeg.JPEGCodec;
@@ -142,7 +142,7 @@ public class ImgUtil {
    *          path to write to
    */
   public static void write(byte[] img, File dest) throws IOException {
-    OutputStream os = Streams.outputStream(dest.getPath());
+    OutputStream os = Files.outputStream(dest.getPath());
     try {
       os.write(img);
     } finally {
@@ -158,7 +158,7 @@ public class ImgUtil {
    * @throws IOException
    */
   public static void writeJPG(BufferedImage img, File dest) throws IOException {
-    dest = Streams.changeExtension(dest, JPEG_EXT);
+    dest = Files.changeExtension(dest, JPEG_EXT);
     ImageIO.write(img, "jpg", dest); // was "jpeg"
   }
 

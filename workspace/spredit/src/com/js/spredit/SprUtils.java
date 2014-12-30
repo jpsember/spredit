@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 import javax.swing.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 
 import tex.*;
 import apputil.*;
@@ -16,13 +16,13 @@ public class SprUtils {
     if (slot != 0) {
       String s = file.toString();
       String ext = null;
-      if (Streams.hasExtension(s)) {
-        ext = Streams.getExtension(s);
-        s = Streams.removeExt(s);
+      if (Files.hasExtension(s)) {
+        ext = Files.getExtension(s);
+        s = Files.removeExt(s);
       }
       s = s + "_" + slot;
       if (ext != null)
-        s = Streams.addExtension(s, ext);
+        s = Files.addExtension(s, ext);
       file = new File(s);
     }
     return file;
@@ -122,8 +122,8 @@ public class SprUtils {
    */
   public static File incrementFile(File f) {
     String name = f.getName();
-    String ext = Streams.getExtension(name);
-    name = Streams.removeExt(name);
+    String ext = Files.getExtension(name);
+    name = Files.removeExt(name);
 
     if (name.length() == 0)
       throw new IllegalArgumentException(f.toString());

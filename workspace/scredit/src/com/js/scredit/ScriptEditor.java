@@ -1511,7 +1511,7 @@ public class ScriptEditor {
       try {
 
         ScriptSet ss = new ScriptSet(mProject.directory(), new JSONObject(
-            Streams.readTextFile(f.toString())));
+            Files.readTextFile(f.toString())));
 
         decodeLayers(ss);
         setRecentSetPath(f);
@@ -1550,7 +1550,7 @@ public class ScriptEditor {
       setRecentSetPath(f);
 
       try {
-        Streams.writeIfChanged(f, encodeLayers().toString(2)); // def.toString());
+        Files.writeIfChanged(f, encodeLayers().toString(2)); // def.toString());
       } catch (Throwable e) {
         AppTools.showError("writing script set", e);
       }

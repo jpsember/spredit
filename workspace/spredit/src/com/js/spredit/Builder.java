@@ -11,7 +11,7 @@ import java.io.*;
 import java.util.*;
 import tex.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 import com.js.geometry.IPoint;
 import com.js.geometry.IRect;
 import com.js.geometry.MyMath;
@@ -292,7 +292,7 @@ public class Builder {
       atlas.write(f);
 
       if (false) {
-        File pngPath = Streams.changeExtension(f, "png");
+        File pngPath = Files.changeExtension(f, "png");
         warning("writing atlas to " + pngPath);
         ImgUtil.writePNG(atlas.image(), pngPath);
       }

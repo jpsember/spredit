@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import org.json.*;
 
-import com.js.basic.Streams;
+import com.js.basic.Files;
 
 import static com.js.basic.Tools.*;
 
@@ -77,7 +77,7 @@ public class ConfigSet {
   public ConfigSet save() throws IOException {
     try {
       String s = constructJSONString();
-      Streams.writeIfChanged(mFile, s);
+      Files.writeIfChanged(mFile, s);
     } catch (JSONException e) {
       die(e);
     }
@@ -88,7 +88,7 @@ public class ConfigSet {
     JSONObject map = new JSONObject();
 
     if (mFile.exists()) {
-      String s = Streams.readTextFile(mFile.getPath());
+      String s = Files.readTextFile(mFile.getPath());
       map = new JSONObject(s);
     }
     for (Interface ic : configs)

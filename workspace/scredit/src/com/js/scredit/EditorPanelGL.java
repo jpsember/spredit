@@ -6,9 +6,10 @@ import java.awt.Color;
 import java.io.*;
 import apputil.*;
 
-import com.js.basic.Streams;
 import com.js.myopengl.*;
 import tex.*;
+
+import com.js.basic.Files;
 import com.js.geometry.*;
 
 public class EditorPanelGL extends GLPanel implements IEditorView {
@@ -27,7 +28,7 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
       System.out.println("attempting to open workfont.atl");
       InputStream s;
       try {
-        s = Streams.openResource(ScrMain.class, "workfont.atl");
+        s = Files.openResource(ScrMain.class, "workfont.atl");
         sOurFont = new Atlas(s);
       } catch (IOException e) {
         throw new RuntimeException(e);
