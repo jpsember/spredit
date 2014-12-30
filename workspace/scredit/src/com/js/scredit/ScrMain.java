@@ -47,17 +47,15 @@ public class ScrMain implements IApplication {
   @Override
   public void createAndShowGUI(JFrame frame) {
 
-    config = new ConfigSet(null);
-    config.add(apputil.MyFrame.CONFIG);
-    config.add(ScriptEditor.CONFIG);
-    config.add(Grid.CONFIG);
-
     try {
-      config.readFrom(AppTools.getDefaultsPath(getName()));
-    } catch (IOException e) {
+      config = new ConfigSet(AppTools.getDefaultsPath(getName())) //
+          .add(apputil.MyFrame.CONFIG) //
+          .add(ScriptEditor.CONFIG) //
+          .add(Grid.CONFIG) //
+          .restore();
+    } catch (Throwable e) {
       AppTools.showError("reading defaults", e);
     }
-
     ScriptEditor.init((JComponent) frame.getContentPane());
   }
 
@@ -81,7 +79,7 @@ public class ScrMain implements IApplication {
 
   private void writeDefaults() {
     try {
-      config.writeTo(AppTools.getDefaultsPath(getName()));
+      config.save();
     } catch (IOException e) {
       AppTools.showError("writing defaults file", e);
     }

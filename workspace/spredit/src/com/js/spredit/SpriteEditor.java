@@ -66,7 +66,7 @@ public class SpriteEditor {
     // openProject(lastProjectPath);
   }
 
-  public static IConfig CONFIG = new IConfig() {
+  public static ConfigSet.Interface CONFIG = new ConfigSet.Interface() {
     private static final String OUR_TAG = "SpriteEditor";
     private static final String PROJECTS_TAG = "RecentProjects";
     private static final String CPT_TAG = "ShowCenterpoint";

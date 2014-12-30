@@ -9,27 +9,66 @@ import com.js.basic.Streams;
 
 import static com.js.basic.Tools.*;
 
+/**
+ * <pre>
+ * 
+ * For persisting application preferences to the file system
+ * 
+ * Usage:
+ * 
+ * 1) Construct, add listeners, and restore from file system:
+ * 
+ * ConfigSet configSet = new ConfigSet(...File...)  
+ * .add(...ConfigSet.Interface...)
+ * .add(...ConfigSet.Interface...) 
+ * .restore();
+ * 
+ * 2) Save:
+ * 
+ * configSet.save();
+ * 
+ * </pre>
+ */
 public class ConfigSet {
 
-  public ConfigSet(IConfig c) {
-    if (c != null)
-      add(c);
+  public interface Interface {
+    /**
+     * Give client an opportunity to restore configuration state from JSON
+     * object
+     * 
+     * @param map
+     * @throws JSONException
+     */
+    public void readFrom(JSONObject map) throws JSONException;
+
+    /**
+     * Give client an opportunity to save configuration state to JSON object
+     * 
+     * @param map
+     * @throws JSONException
+     */
+    public void writeTo(JSONObject map) throws JSONException;
   }
 
-  public void add(IConfig c) {
+  public ConfigSet(File file) {
+    mFile = file;
+  }
+
+  public ConfigSet add(Interface c) {
     configs.add(c);
+    return this;
   }
 
-  public String writeTo(File f) throws IOException {
+  public ConfigSet save() throws IOException {
     String s = write();
-    Streams.writeIfChanged(f, s);
-    return s;
+    Streams.writeIfChanged(mFile, s);
+    return this;
   }
 
-  public String write() {
+  private String write() {
     JSONObject map = new JSONObject();
     try {
-      for (IConfig ic : configs)
+      for (Interface ic : configs)
         ic.writeTo(map);
     } catch (JSONException e) {
       die(e);
@@ -37,23 +76,18 @@ public class ConfigSet {
     return map.toString();
   }
 
-  public void readFrom(File f) throws IOException {
-    String s = "{}";
-    if (f.exists()) {
-      s = Streams.readTextFile(f.getPath());
-    }
-    unimp("this checked exception nonsense is really annoying");
-    try {
-      readFrom(new JSONObject(s));
-    } catch (JSONException e) {
-      die(e);
-    }
-  }
+  public ConfigSet restore() throws IOException, JSONException {
+    JSONObject map = new JSONObject();
 
-  public void readFrom(JSONObject map) throws JSONException {
-    for (IConfig ic : configs)
+    if (mFile.exists()) {
+      String s = Streams.readTextFile(mFile.getPath());
+      map = new JSONObject(s);
+    }
+    for (Interface ic : configs)
       ic.readFrom(map);
+    return this;
   }
 
-  private ArrayList<IConfig> configs = new ArrayList();
+  private ArrayList<Interface> configs = new ArrayList();
+  private File mFile;
 }

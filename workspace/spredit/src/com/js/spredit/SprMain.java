@@ -152,11 +152,11 @@ public class SprMain implements IApplication {
 
   @Override
   public void createAndShowGUI(JFrame frame) {
-    config = new ConfigSet(null);
-    config.add(apputil.MyFrame.CONFIG);
-    config.add(SpriteEditor.CONFIG);
     try {
-      config.readFrom(AppTools.getDefaultsPath("spredit"));
+      config = new ConfigSet(AppTools.getDefaultsPath("spredit")) //
+          .add(apputil.MyFrame.CONFIG) //
+          .add(SpriteEditor.CONFIG) //
+          .restore();
     } catch (Throwable e) {
       AppTools.showError("reading defaults file", e);
     }
@@ -184,7 +184,7 @@ public class SprMain implements IApplication {
 
   private void writeDefaults() {
     try {
-      config.writeTo(AppTools.getDefaultsPath(getName()));
+      config.save();
     } catch (IOException e) {
       AppTools.showError("writing defaults file", e);
     }

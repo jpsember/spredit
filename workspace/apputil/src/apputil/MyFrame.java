@@ -110,7 +110,7 @@ public class MyFrame extends JFrame {
     return framesMap;
   }
 
-  public static final IConfig CONFIG = new IConfig() {
+  public static final ConfigSet.Interface CONFIG = new ConfigSet.Interface() {
     private static final String TAG = "FRAMES";
 
     @Override

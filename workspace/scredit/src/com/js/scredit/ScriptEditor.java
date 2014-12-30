@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import tex.*;
 import apputil.*;
+
 import com.js.basic.*;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
@@ -2186,7 +2187,7 @@ public class ScriptEditor {
   // }
   private static final String NOSAVENECESSARY_TAG = "NOSAVEPROMPT";
 
-  public static IConfig CONFIG = new IConfig() {
+  public static ConfigSet.Interface CONFIG = new ConfigSet.Interface() {
     private static final String PROJECTS_TAG = "RECENTPROJECTS";
 
     @Override

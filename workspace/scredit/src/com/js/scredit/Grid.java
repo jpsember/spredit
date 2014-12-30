@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import apputil.*;
+
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 
@@ -57,7 +58,7 @@ public class Grid {
     intGridActive.setSelected(f);
   }
 
-  public static IConfig CONFIG = new IConfig() {
+  public static ConfigSet.Interface CONFIG = new ConfigSet.Interface() {
     @Override
     public void readFrom(JSONObject map) throws JSONException {
       JSONArray list = map.optJSONArray("grid");
