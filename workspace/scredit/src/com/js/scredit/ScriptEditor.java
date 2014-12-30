@@ -171,9 +171,6 @@ public class ScriptEditor {
       // clearCurrentSet();
 
       if (f == null) {
-        if (db)
-          pr(" using file chooser");
-
         f = AppTools.chooseFileToOpen("Open Script", Script.FILES_AND_DIRS,
             project.replaceIfMissing(project.recentScripts().current()));
       }

@@ -185,6 +185,13 @@ public class AppTools {
   public static File chooseFileToOpen(String prompt, MyFileFilter fileFilter,
       File defaultFile) {
 
+    // Note: I took this out of MacUtils class; it was disallowing selecting
+    // files.
+    // Maybe we want to enable/disable this each time, based on whether
+    // selecting files or dirs.
+    //
+    // System.setProperty("apple.awt.fileDialogForDirectories", "true");
+
     enableMenuBar(false);
 
     File chosenFile = null;

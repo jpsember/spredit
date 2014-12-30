@@ -20,7 +20,6 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter implements
   public MyFileFilter(String description, String extension, boolean allowDirs,
       File rootDir) {
     this(description, null, extension, allowDirs, rootDir);
-
   }
 
   public MyFileFilter(String description, String prefix, String extension,
@@ -36,14 +35,6 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter implements
     if (rootDir != null)
       rootDirPrefix = rootDir.getAbsolutePath() + File.separator;
   }
-
-  private String prefix;
-  private String description;
-  private String perExtension;
-  private String extension;
-  private boolean allowDirs;
-  private File rootDir;
-  private String rootDirPrefix;
 
   public boolean isRootDescendant(File f) {
     if (rootDir == null)
@@ -102,9 +93,17 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter implements
   public File[] list(File dir) {
     if (!dir.isDirectory())
       throw new IllegalArgumentException();
-   File[] fs = dir.listFiles((FilenameFilter) this);
-   Arrays.sort(fs);
-   return fs;
-   
+    File[] fs = dir.listFiles((FilenameFilter) this);
+    Arrays.sort(fs);
+    return fs;
+
   }
+
+  private String prefix;
+  private String description;
+  private String perExtension;
+  private String extension;
+  private boolean allowDirs;
+  private File rootDir;
+  private String rootDirPrefix;
 }
