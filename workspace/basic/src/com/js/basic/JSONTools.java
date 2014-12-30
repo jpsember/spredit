@@ -27,7 +27,7 @@ public class JSONTools {
    * Get Iterable from Set<String>
    */
   public static Iterable<String> iterable(Set<String> set) {
-    return toList((Iterator<String>) set);
+    return toList(set.iterator());
   }
 
   public static JSONObject parseMap(String source) throws JSONException {

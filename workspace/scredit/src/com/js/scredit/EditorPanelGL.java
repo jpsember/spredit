@@ -40,7 +40,6 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
   public void render() {
     unimp("set font");
     // setFont(ourFont);
-    warning("fig bug: see text file on desktop");
     setZoom(ScriptEditor.zoomFactor());
     setOrigin(ScriptEditor.focus().toPoint());
     super.render();

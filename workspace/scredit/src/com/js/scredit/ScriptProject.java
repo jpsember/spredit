@@ -94,7 +94,7 @@ public class ScriptProject {
     JSONObject projectMap = new JSONObject();
     try {
       for (String key : JSONTools.iterable(defaults.keySet())) {
-        projectMap.put(key, projectMap.get(key));
+        projectMap.put(key, defaults.get(key));
       }
     } catch (JSONException e) {
       die(e);
