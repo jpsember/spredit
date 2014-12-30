@@ -11,33 +11,50 @@ import static com.js.basic.Tools.*;
 
 public class AppTools {
 
-  public static void setApplication(IApplication app,
-      JFrame frame) {
-    sFrame = frame;
-    sApplication = app;
+  public static void startApplication(IApplication app) {
+    setApplication(app);
+    startGUI();
+  }
 
+  private static void setApplication(IApplication app) {
+    sApplication = app;
     String lcOSName = System.getProperty("os.name").toLowerCase();
     sIsMac = lcOSName.startsWith("mac os x");
     if (sIsMac) {
       MacUtils.useScreenMenuBar(app.getName());
     }
+  }
 
-    if (!isMac()) {
-      // From
-      // http://java.sun.com/products/jfc/tsc/articles/mixing/#issues:
-      JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-    }
+  private static void startGUI() {
+    // Schedule a job for the event-dispatching thread:
+    // calling an application object's run() method.
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
 
-    // disable the close button, since we want to verify close
-    sFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    sFrame.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        if (sApplication.exitProgram()) {
-          sFrame.setVisible(false);
-          sFrame.dispose();
+        if (!isMac()) {
+          // From
+          // http://java.sun.com/products/jfc/tsc/articles/mixing/#issues:
+          JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         }
+
+        // disable the close button, since we want to verify close
+        final JFrame frame = frame();
+
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+          public void windowClosing(WindowEvent e) {
+            if (sApplication.exitProgram()) {
+              frame.setVisible(false);
+              frame.dispose();
+            }
+          }
+        });
+
+        sApplication.createAndShowGUI(frame);
+        frame.setVisible(true);
       }
     });
+
   }
 
   public static boolean isMac() {
@@ -80,7 +97,6 @@ public class AppTools {
 
   public static void showMsg(String msg) {
     unimp("don't use swing to show messages: " + msg);
-
     JOptionPane.showMessageDialog(frame(), msg, "Hey!",
         JOptionPane.INFORMATION_MESSAGE);
   }
@@ -102,6 +118,10 @@ public class AppTools {
   }
 
   public static JFrame frame() {
+    if (sFrame == null) {
+      sFrame = sApplication.getFrame();
+      sFrame.setTitle(sApplication.getName());
+    }
     return sFrame;
   }
 
@@ -242,6 +262,10 @@ public class AppTools {
 
   public static void runAsCmdLine() {
     System.setProperty("java.awt.headless", "true");
+  }
+
+  public static IApplication app() {
+    return sApplication;
   }
 
   private static boolean sIsMac;

@@ -15,15 +15,6 @@ import tex.*;
 
 public class SprMain implements IApplication {
 
-  public static IApplication app() {
-    if (theApp == null)
-      theApp = new SprMain();
-    return theApp;
-  }
-
-  private static final String APP_NAME = "SprEdit";
-  private static IApplication theApp;
-
   public static void main(String[] args) {
     try {
       CmdLineArgs ca = new CmdLineArgs();
@@ -90,13 +81,7 @@ public class SprMain implements IApplication {
       }
 
       if (runGUI) {
-        // Schedule a job for the event-dispatching thread:
-        // calling an application object's run() method.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            createAndShowGUI();
-          }
-        });
+        AppTools.startApplication(new SprMain());
       } else {
         AppTools.runAsCmdLine();
 
@@ -165,12 +150,8 @@ public class SprMain implements IApplication {
     }
   }
 
-  /**
-   * Create the GUI and show it. For thread safety, this method should be
-   * invoked from the event-dispatching thread.
-   */
-  private static void createAndShowGUI() {
-
+  @Override
+  public void createAndShowGUI(JFrame frame) {
     config = new ConfigSet(null);
     config.add(apputil.MyFrame.CONFIG);
     config.add(SpriteEditor.CONFIG);
@@ -180,20 +161,17 @@ public class SprMain implements IApplication {
       AppTools.showError("reading defaults file", e);
     }
 
-    MyFrame frame = new MyFrame("SPRMAIN");
-    warning("is this necessary?");
-    frame.setTitle(APP_NAME);
-
-    AppTools.setApplication(app(), frame);
-
     SpriteEditor.init((JComponent) frame.getContentPane());
-
-    frame.setVisible(true);
   }
 
   @Override
   public String getName() {
-    return APP_NAME;
+    return "SprEdit";
+  }
+
+  @Override
+  public JFrame getFrame() {
+    return new MyFrame(getName());
   }
 
   @Override
@@ -204,9 +182,9 @@ public class SprMain implements IApplication {
     return true;
   }
 
-  private static void writeDefaults() {
+  private void writeDefaults() {
     try {
-      config.writeTo(AppTools.getDefaultsPath("spredit"));
+      config.writeTo(AppTools.getDefaultsPath(getName()));
     } catch (IOException e) {
       AppTools.showError("writing defaults file", e);
     }
@@ -355,4 +333,5 @@ public class SprMain implements IApplication {
   private static File atlasFile;
   private static float[] resolutions;
   private static CmdLineArgs sArgs;
+
 }

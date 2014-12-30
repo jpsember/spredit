@@ -2,16 +2,11 @@ package com.js.scredit;
 
 import java.io.*;
 import javax.swing.*;
+
 import apputil.*;
 import com.js.basic.*;
 
 public class ScrMain implements IApplication {
-
-  public static IApplication app() {
-    if (theApp == null)
-      theApp = new ScrMain();
-    return theApp;
-  }
 
   public static void main(String[] args) {
     try {
@@ -42,24 +37,15 @@ public class ScrMain implements IApplication {
         AppTools.runAsCmdLine();
         ScriptCompiler.build(scriptListPath);
       } else {
-        // Schedule a job for the event-dispatching thread:
-        // calling an application object's run() method.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            createAndShowGUI();
-          }
-        });
+        AppTools.startApplication(new ScrMain());
       }
     } catch (Throwable e) {
       e.printStackTrace();
     }
   }
 
-  /**
-   * Create the GUI and show it. For thread safety, this method should be
-   * invoked from the event-dispatching thread.
-   */
-  private static void createAndShowGUI() {
+  @Override
+  public void createAndShowGUI(JFrame frame) {
 
     config = new ConfigSet(null);
     config.add(apputil.MyFrame.CONFIG);
@@ -67,22 +53,17 @@ public class ScrMain implements IApplication {
     config.add(Grid.CONFIG);
 
     try {
-      config.readFrom(AppTools.getDefaultsPath(DEFAULTS_TAG));
+      config.readFrom(AppTools.getDefaultsPath(getName()));
     } catch (IOException e) {
       AppTools.showError("reading defaults", e);
     }
 
-    MyFrame frame = new MyFrame("APP");
-
-    AppTools.setApplication(app(), frame);
-
     ScriptEditor.init((JComponent) frame.getContentPane());
-    frame.setVisible(true);
   }
 
   @Override
   public String getName() {
-    return APP_NAME;
+    return "ScrEdit";
   }
 
   @Override
@@ -93,17 +74,19 @@ public class ScrMain implements IApplication {
     return true;
   }
 
-  private static void writeDefaults() {
+  @Override
+  public JFrame getFrame() {
+    return new MyFrame(getName());
+  }
+
+  private void writeDefaults() {
     try {
-      config.writeTo(AppTools.getDefaultsPath(DEFAULTS_TAG));
+      config.writeTo(AppTools.getDefaultsPath(getName()));
     } catch (IOException e) {
       AppTools.showError("writing defaults file", e);
     }
   }
 
   private static ConfigSet config;
-  private static final String DEFAULTS_TAG = "scredit";
-  private static IApplication theApp;
-  private static final String APP_NAME = "ScrEdit";
 
 }

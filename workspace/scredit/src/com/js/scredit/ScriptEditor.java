@@ -597,7 +597,7 @@ public class ScriptEditor {
       m.addMenu("ScrEdit");
       m.addItem("Quit", KeyEvent.VK_Q, CTRL, new ItemHandler() {
         public void go() {
-          if (ScrMain.app().exitProgram())
+          if (AppTools.app().exitProgram())
             System.exit(0);
         }
       });
@@ -1771,25 +1771,8 @@ public class ScriptEditor {
 
   public static void init(JComponent p) {
 
-    if (AppTools.isMac()) {
-      MacUtils.setQuitHandler(ScrMain.app());
-      // Application a = com.apple.eawt.Application.getApplication();
-      // a.disableSuddenTermination();
-      // a.setQuitHandler(new QuitHandler() {
-      // @Override
-      // public void handleQuitRequestWith(QuitEvent evt, QuitResponse response)
-      // {
-      // if (ScrMain.exitProgram())
-      // response.performQuit();
-      // else
-      // response.cancelQuit();
-      // }
-      // });
-    }
-
     JPanel ac = new JPanel(new BorderLayout());
     p.add(ac, BorderLayout.EAST);
-    // ac.add(new JLabel("Fark"),BorderLayout.NORTH);
 
     atlasPanel = new AtlasPanel();
     ac.add(atlasPanel, BorderLayout.CENTER);

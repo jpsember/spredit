@@ -26,11 +26,6 @@ public class SpriteEditor {
 
   public static void init(JComponent c) {
 
-    if (AppTools.isMac()) {
-
-      MacUtils.setQuitHandler(SprMain.app());
-    }
-
     MouseOper.add(new MoveFocusOper());
     for (int i = 0; i < 4; i++)
       MouseOper.add(new CornerOper(i));
@@ -297,7 +292,7 @@ public class SpriteEditor {
       m.addMenu("ScrEdit");
       m.addItem("Quit", KeyEvent.VK_Q, CTRL, new ItemHandler() {
         public void go() {
-          if (SprMain.app().exitProgram())
+          if (AppTools.app().exitProgram())
             System.exit(0);
         }
       });
@@ -336,7 +331,6 @@ public class SpriteEditor {
 
     // -----------------------------------
     m.addMenu("Sprite", projectMustBeOpenHandler);
-
 
     // m.addItem("Increase Resolution", KeyEvent.VK_EQUALS, SHIFT,
     // new ItemHandler() {
@@ -819,8 +813,7 @@ public class SpriteEditor {
           break;
 
         IRect clip = spriteInfo.cropRect();
-        float dist = clip.distanceFrom(startPt)
-            * spritePanel.getZoom();
+        float dist = clip.distanceFrom(startPt) * spritePanel.getZoom();
 
         if (dist > HOT_DIST)
           break;
