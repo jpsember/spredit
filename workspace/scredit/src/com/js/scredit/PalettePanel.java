@@ -7,6 +7,8 @@ import java.awt.image.*;
 //import java.io.*;
 import java.util.*;
 import javax.swing.*;
+
+import org.json.JSONObject;
 //import javax.swing.event.*;
 
 import com.js.geometry.*;
@@ -165,7 +167,7 @@ public class PalettePanel extends JPanel {
   // }
   // private
   static final int NULL_INDEX = 0; // index of 'null' color within
-                                           // favorites list
+                                   // favorites list
 
   /**
    * Change selected color, and color all selected objects
@@ -528,8 +530,8 @@ public class PalettePanel extends JPanel {
     return (pos == null) ? -1 : pos.intValue();
   }
 
-  public String encodeDefaults() {
-    return "";
+  public JSONObject encodeDefaults() {
+    return new JSONObject();
     //
     // DefBuilder sb = new DefBuilder();
     //
@@ -541,7 +543,9 @@ public class PalettePanel extends JPanel {
     // return sb.toString();
   }
 
-  public void decodeDefaults(String str) {
+  public void decodeDefaults(JSONObject map) {
+    if (map == null)
+      return;
     // DefScanner sc = new DefScanner(str);
     // setSelectedColor(sc.sInt(), true);
     // int len = sc.sInt();
@@ -553,8 +557,7 @@ public class PalettePanel extends JPanel {
   }
 
   // private
-  static final int S_NONE = 0, S_DRAGGING = 1, S_FAVDRAG = 2,
-      S_FAVDEL = 3;
+  static final int S_NONE = 0, S_DRAGGING = 1, S_FAVDRAG = 2, S_FAVDEL = 3;
 
   // private
   void setState(int s) {

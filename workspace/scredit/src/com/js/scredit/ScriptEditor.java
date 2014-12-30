@@ -220,10 +220,10 @@ public class ScriptEditor {
    * 
    * @return
    */
-  private static String encodeLayers() {
+  private static JSONObject encodeLayers() {
     ScriptSet ss = new ScriptSet(mProject.directory(), layers.size(),
         layers.currentSlot(), layers.foregroundStart());
-    for (int i = 0; i < ss.nLayers(); i++) {
+    for (int i = 0; i < ss.size(); i++) {
       ScriptEditor ed = layers.layer(i);
       File f = ed.path();
       if (f != null) {
@@ -248,11 +248,6 @@ public class ScriptEditor {
     // return sb.toString();
   }
 
-  /**
-   * Decode object from string
-   * 
-   * @param s
-   */
   private static void decodeLayers(ScriptSet set) {
     layers.reset();
     // if (s != null)
@@ -261,7 +256,7 @@ public class ScriptEditor {
       // int sz = sc.sInt();
       // int curr = sc.sInt();
       // int fg = sc.sInt();
-      for (int i = 0; i < set.nLayers(); i++) {
+      for (int i = 0; i < set.size(); i++) {
         if (i > 0)
           layers.insert(true); // layers.insert(i > 0);
         File f = set.file(i);
@@ -274,8 +269,8 @@ public class ScriptEditor {
           }
         }
       }
-      layers.setForeground(set.getFgnd());
-      layers.select(set.getCurrent());
+      layers.setForeground(set.getForegroundLayer());
+      layers.select(set.getCurrentLayer());
     }
   }
 
@@ -1342,6 +1337,8 @@ public class ScriptEditor {
 
         editor = null;
 
+      } catch (JSONException e) {
+        AppTools.showError("closing project", e);
       } catch (IOException e) {
         AppTools.showError("closing project", e);
       }
@@ -1584,12 +1581,13 @@ public class ScriptEditor {
         break;
       try {
 
-        ScriptSet ss = new ScriptSet(mProject.directory(), f);
+        ScriptSet ss = new ScriptSet(mProject.directory(), new JSONObject(
+            Streams.readTextFile(f.toString())));
 
         decodeLayers(ss);
         setRecentSetPath(f);
 
-      } catch (IOException e) {
+      } catch (Throwable e) {
         AppTools.showError("reading set", e);
       }
 
@@ -1623,9 +1621,8 @@ public class ScriptEditor {
       setRecentSetPath(f);
 
       try {
-        Streams.writeIfChanged(f, encodeLayers()); // def.toString());
-
-      } catch (IOException e) {
+        Streams.writeIfChanged(f, encodeLayers().toString(2)); // def.toString());
+      } catch (Throwable e) {
         AppTools.showError("writing script set", e);
       }
     } while (false);
@@ -2226,11 +2223,10 @@ public class ScriptEditor {
   private static JMenuItem recentScriptsMenuItem, recentProjectsMenuItem,
       recentScriptSetsMenuItem;
 
-  private static void writeProjectDefaults() {
-    mProject.storeDefaults("LAYERS", encodeLayers());
+  private static void writeProjectDefaults() throws JSONException {
+    mProject.getDefaults().put("LAYERS", encodeLayers());
     ASSERT(pPanel != null);
-    mProject.storeDefaults("PALETTE", pPanel.encodeDefaults());
-
+    mProject.getDefaults().put("PALETTE", pPanel.encodeDefaults());
   }
 
   public static void setFocus(IPoint trans) {
@@ -2241,16 +2237,20 @@ public class ScriptEditor {
     if (pPanel == null) {
       warning("project panel null");
     } else {
-      String palInfo = mProject.getDefaults("PALETTE", null);
-      if (palInfo != null)
-        pPanel.decodeDefaults(palInfo);
+      pPanel.decodeDefaults(mProject.getDefaults().optJSONObject("PALETTE"));
     }
 
-    String layerInfo = mProject.getDefaults("LAYERS", null);
-    if (layerInfo != null) {
-      ScriptSet ss = new ScriptSet(mProject.directory(), layerInfo);
+    ScriptSet ss = null;
+    try {
+      JSONObject map = mProject.getDefaults().optJSONObject("LAYERS");
+      if (map != null)
+        ss = new ScriptSet(mProject.directory(), map);
+    } catch (JSONException e) {
+      AppTools.showError("Problem reading project defaults", e);
+    }
+    if (ss != null)
       decodeLayers(ss);
-    } else
+    else
       layers.select(0);
   }
 

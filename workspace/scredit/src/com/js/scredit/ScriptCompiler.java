@@ -1,7 +1,12 @@
 package com.js.scredit;
 
 import java.io.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.js.basic.*;
+
 import static com.js.basic.Tools.*;
 
 public class ScriptCompiler {
@@ -134,13 +139,14 @@ public class ScriptCompiler {
   }
 
   // private
-  void processScriptSet(File f) throws IOException {
+  void processScriptSet(File f) throws IOException, JSONException {
     final boolean db = false;
     if (db)
       pr("processScriptSet: " + f);
 
-    ScriptSet ss = new ScriptSet(project.directory(), f);
-    for (int i = 0; i < ss.nLayers(); i++) {
+    ScriptSet ss = new ScriptSet(project.directory(), new JSONObject(
+        Streams.readTextFile(f.toString())));
+    for (int i = 0; i < ss.size(); i++) {
       File f2 = ss.file(i);
       if (f2 != null)
         processScript(f2);
