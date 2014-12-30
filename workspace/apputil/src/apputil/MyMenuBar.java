@@ -33,40 +33,40 @@ public class MyMenuBar {
   private static class RecentFilesMenuItem extends JMenuItem {
     public RecentFilesMenuItem(File file, String label) {
       super(label);
-      this.file = file;
+      this.mFile = file;
     }
-
-    private File file;
 
     public File file() {
-      return file;
+      return mFile;
     }
+
+    private File mFile;
   }
 
   public static void updateRecentFilesFor(JMenuItem recentFilesList,
       RecentFiles recentFiles) {
     if (recentFilesList != null) {
       RecentFilesMenu rm = (RecentFilesMenu) recentFilesList;
-      rm.rf = recentFiles;
+      rm.mRecentFiles = recentFiles;
     }
   }
 
   private static class RecentFilesMenu extends JMenu implements MenuListener,
       ActionListener {
-    private static final boolean db = false;
 
     public RecentFilesMenu(String title, RecentFiles rf, ItemHandler evtHandler) {
       super(title);
-      this.rf = rf;
-      this.evtHandler = evtHandler;
+      this.mRecentFiles = rf;
+      this.mItemHandler = evtHandler;
       this.addMenuListener(this);
     }
 
+    @Override
     public boolean isEnabled() {
-      if (rf == null)
+      if (mRecentFiles == null)
         return false;
-      int size = rf.size();
-      if (rf.getCurrentFile() != null)
+      int size = mRecentFiles.size();
+      if (mRecentFiles.getCurrentFile() != null)
         size--;
       return size > 0;
     }
@@ -74,56 +74,42 @@ public class MyMenuBar {
     @Override
     public void actionPerformed(ActionEvent arg) {
       RecentFilesMenuItem item = (RecentFilesMenuItem) arg.getSource();
-      rf.setCurrentFile(item.file());
-      evtHandler.go();
+      mRecentFiles.setCurrentFile(item.file());
+      mItemHandler.go();
     }
-
-    private ItemHandler evtHandler;
-    private RecentFiles rf;
 
     @Override
     public void menuCanceled(MenuEvent arg0) {
-      if (db)
-        pr("recent files, cancelled");
     }
 
     @Override
     public void menuDeselected(MenuEvent arg0) {
-      if (db)
-        pr("recent files, deselected");
-
     }
 
     @Override
     public void menuSelected(MenuEvent arg0) {
-      if (db)
-        pr("recent files, selected; rf=\n" + rf);
-      this.removeAll();
-
-      if (rf != null) {
-
-        for (int i = 0; i < rf.size(); i++) {
-          File f = rf.get(i);
-          if (rf.getCurrentFile() == f) {
+      removeAll();
+      if (mRecentFiles != null) {
+        for (int i = 0; i < mRecentFiles.size(); i++) {
+          File f = mRecentFiles.get(i);
+          if (mRecentFiles.getCurrentFile() == f)
             continue;
-          }
-          String s = new RelPath(rf.getProjectBase(), f).display(); // RelPath.toString(rf.getProjectBase(),
-                                                                    // f);
+          String s = new RelPath(mRecentFiles.getProjectBase(), f).display();
           JMenuItem item = new RecentFilesMenuItem(f, s);
           this.add(item);
           item.addActionListener(this);
-          if (db)
-            pr(" adding file " + f);
-
         }
       }
     }
+
+    private ItemHandler mItemHandler;
+    private RecentFiles mRecentFiles;
+
   }
 
   public MyMenuBar(JFrame frame) {
     mbar = new JMenuBar();
     frame.setJMenuBar(mbar);
-
   }
 
   public void addMenu(String name) {
@@ -132,62 +118,44 @@ public class MyMenuBar {
 
   public void addMenu(String name, MenuHandler handler) {
 
-    menu = new MyMenu(name, handler);
+    menu = new Menu(name, handler);
     sepPending = false;
     itemsAdded = 0;
     mbar.add(menu);
 
-    menu.addMenuListener(
-
-    new MenuListener() {
-      final boolean db = false;
-
+    menu.addMenuListener(new MenuListener() {
       @Override
       public void menuCanceled(MenuEvent ev) {
         JMenu m = (JMenu) ev.getSource();
-        if (db)
-          pr("cancelled: " + m.getText());
         enableItems(m, false);
       }
 
       @Override
       public void menuDeselected(MenuEvent ev) {
         JMenu m = (JMenu) ev.getSource();
-        if (db)
-          pr("deselected: " + m.getText());
         enableItems(m, false);
       }
 
       @Override
       public void menuSelected(MenuEvent ev) {
         JMenu m = (JMenu) ev.getSource();
-        if (db)
-          pr("selected: " + m.getText());
         enableItems(m, true);
-
       }
     });
   }
 
   private static void enableItems(JMenu m, boolean showingMenu) {
-
-    final boolean db = false;
-
-    if (db)
-      pr("MyMenuBar.enableItems, showing=" + showingMenu);
-
     for (int i = 0; i < m.getItemCount(); i++) {
       JMenuItem item = m.getItem(i);
-      if (db)
-        pr(" item #" + i);
+      if (item == null)
+        continue;
 
-      if (item instanceof MyMenuItem) {
-        MyMenuItem it2 = (MyMenuItem) item;
-        boolean enable = true;
-        if (showingMenu) {
-          enable = it2.menu.handler.isEnabled() && it2.handler.isEnabled();
-        }
-        it2.setEnabled(enable);
+      if (item instanceof MenuItem) {
+        // If the menu isn't showing, ALWAYS enable the items.
+        // If user selects them via shortcut key, we'll perform an additional
+        // call to shouldBeEnabled() before acting on them.
+        MenuItem ourMenuItem = (MenuItem) item;
+        ourMenuItem.setEnabled(!showingMenu || ourMenuItem.shouldBeEnabled());
       } else if (item instanceof RecentFilesMenu) {
         RecentFilesMenu rm = (RecentFilesMenu) item;
         boolean enable = true;
@@ -195,9 +163,6 @@ public class MyMenuBar {
           enable = rm.isEnabled();
         }
         rm.setEnabled(enable);
-        if (db)
-          pr(" rm enabled=" + rm.isEnabled());
-
       }
     }
   }
@@ -225,8 +190,9 @@ public class MyMenuBar {
     }
     itemsAdded++;
 
-    MyMenuItem m = new MyMenuItem(name, evtHandler, menu);
+    MenuItem m = new MenuItem(name, evtHandler, menu);
 
+    warning("why this special case?");
     if (name.equals("Open"))
       m.setEnabled(false);
 
@@ -247,24 +213,55 @@ public class MyMenuBar {
       sepPending = true;
   }
 
-  private MyMenu menu;
+  private Menu menu;
   private JMenuBar mbar;
   private boolean sepPending;
   private int itemsAdded;
 
-  private static class MyMenuItem extends JMenuItem {
-    public MyMenuItem(String name, ItemHandler h, MyMenu menu) {
+  private static class MenuItem extends JMenuItem {
+
+    public MenuItem(String name, ItemHandler itemHandler, Menu containingMenu) {
       super(name);
-      this.menu = menu;
-      this.handler = h;
-      addActionListener(handler);
+      ASSERT(containingMenu != null);
+      mContainingMenu = containingMenu;
+      mItemHandler = itemHandler;
+
+      // In case user selects menu item using its shortcut key,
+      // we need to have the ActionListener verify that the
+      // item (and its containing menu) are both enabled before
+      // acting upon it.
+
+      addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+          if (shouldBeEnabled())
+            handler().actionPerformed(event);
+        }
+      });
     }
 
-    private ItemHandler handler;
-    private MyMenu menu;
+    public ItemHandler handler() {
+      return mItemHandler;
+    }
+
+    /**
+     * Determine if this menu item should be enabled, by examining both the
+     * containing menu's enabled state and the item handler interface. Avoid
+     * overriding isEnabled() for this, since it should continue to return the
+     * flag maintained by the Java GUI.
+     */
+    public boolean shouldBeEnabled() {
+      ASSERT(mContainingMenu != null); // verify not partially constructed
+      boolean enabled = mContainingMenu.handler().isEnabled()
+          && mItemHandler.isEnabled();
+      return enabled;
+    }
+
+    private ItemHandler mItemHandler;
+    private Menu mContainingMenu;
   }
 
-  private static class MyMenu extends JMenu {
+  private static class Menu extends JMenu {
 
     public void paint(Graphics g) {
       super.paint(g);
@@ -272,15 +269,18 @@ public class MyMenuBar {
         redrawOpenGLComponent.repaint(50);
     }
 
-    public MyMenu(String name, MenuHandler handler) {
+    public Menu(String name, MenuHandler handler) {
       super(name);
       if (handler == null)
         handler = new MenuHandler();
-      this.handler = handler;
-
+      this.mHandler2 = handler;
     }
 
-    private MenuHandler handler;
+    public MenuHandler handler() {
+      return mHandler2;
+    }
+
+    private MenuHandler mHandler2;
   }
 
   // masks for modifier keys; these are lazy-initialized according

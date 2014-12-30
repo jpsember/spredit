@@ -75,8 +75,12 @@ public class ConfigSet {
   }
 
   public ConfigSet save() throws IOException {
-    String s = write();
-    Streams.writeIfChanged(mFile, s);
+    try {
+      String s = constructJSONString();
+      Streams.writeIfChanged(mFile, s);
+    } catch (JSONException e) {
+      die(e);
+    }
     return this;
   }
 
@@ -112,15 +116,11 @@ public class ConfigSet {
     return null;
   }
 
-  private String write() {
+  private String constructJSONString() throws JSONException {
     JSONObject map = new JSONObject();
-    try {
-      for (Interface ic : configs)
-        ic.writeTo(map);
-    } catch (JSONException e) {
-      die(e);
-    }
-    return map.toString();
+    for (Interface ic : configs)
+      ic.writeTo(map);
+    return map.toString(2);
   }
 
   private ArrayList<Interface> configs = new ArrayList();

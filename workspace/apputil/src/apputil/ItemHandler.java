@@ -13,7 +13,6 @@ public abstract class ItemHandler implements ActionListener {
 
   /**
    * Determine if this menu item should be enabled at present time
-   * @return true if so
    */
   public boolean isEnabled() {
     return true;

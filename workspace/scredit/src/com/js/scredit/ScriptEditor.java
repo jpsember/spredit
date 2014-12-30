@@ -93,7 +93,7 @@ public class ScriptEditor {
           prompt = "Save changes to new file?";
         else {
           prompt = "Save changes to '"
-              + new RelPath(project.directory(), editor.path).display()
+              + new RelPath(mProject.directory(), editor.path).display()
               // + RelPath.toString(project.directory(), editor.path)
               + "'?";
         }
@@ -170,7 +170,8 @@ public class ScriptEditor {
 
       if (f == null) {
         f = AppTools.chooseFileToOpen("Open Script", Script.FILES_AND_DIRS,
-            project.replaceIfMissing(project.recentScripts().getCurrentFile()));
+            mProject
+                .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
       }
       if (f == null) {
         if (db)
@@ -195,13 +196,13 @@ public class ScriptEditor {
       } else {
 
         try {
-          Script s = new Script(project, f);
+          Script s = new Script(mProject, f);
           editor.items = s.items();
           editor.path = f;
 
           success = true;
           if (!updateLastScriptDisabled)
-            project.setLastScriptPath(f);
+            mProject.setLastScriptPath(f);
         } catch (Throwable e) {
           AppTools.showError("opening script", e);
         }
@@ -220,7 +221,7 @@ public class ScriptEditor {
    * @return
    */
   private static String encodeLayers() {
-    ScriptSet ss = new ScriptSet(project.directory(), layers.size(),
+    ScriptSet ss = new ScriptSet(mProject.directory(), layers.size(),
         layers.currentSlot(), layers.foregroundStart());
     for (int i = 0; i < ss.nLayers(); i++) {
       ScriptEditor ed = layers.layer(i);
@@ -416,11 +417,11 @@ public class ScriptEditor {
    * Determine if an editor is open
    */
   private static boolean isProjectOpen() {
-    return project != null;
+    return project() != null;
   }
 
   private static boolean notInProject(File scriptFile) {
-    boolean inProj = project.isDescendant(scriptFile);
+    boolean inProj = mProject.isDescendant(scriptFile);
     if (!inProj)
       JOptionPane.showMessageDialog(AppTools.frame(), "File '" + scriptFile
           + "' is not within the project", "Error", JOptionPane.ERROR_MESSAGE);
@@ -443,13 +444,14 @@ public class ScriptEditor {
       if (f == null || alwaysAskForPath) {
 
         f = AppTools.chooseFileToSave("Save Script", Script.FILES_AND_DIRS,
-            project.replaceIfMissing(project.recentScripts().getCurrentFile()));
+            mProject
+                .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
 
         if (f == null)
           break;
 
         if (db)
-          pr(" requested " + f + " (project=" + project.directory() + ")");
+          pr(" requested " + f + " (project=" + mProject.directory() + ")");
 
         if (notInProject(f))
           break;
@@ -462,7 +464,7 @@ public class ScriptEditor {
         int result = JOptionPane.showConfirmDialog(
             AppTools.frame(),
             "Replace existing file: '"
-                + new RelPath(project.directory(), f).display()
+                + new RelPath(mProject.directory(), f).display()
                 // + RelPath.toString(project.directory(), f)
                 + "'?", "Save Script", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.CANCEL_OPTION
@@ -471,7 +473,7 @@ public class ScriptEditor {
       }
 
       if (saveAs(f)) {
-        project.setLastScriptPath(f);
+        mProject.setLastScriptPath(f);
         path = f;
         setChanges(0);
         // resetUndo();
@@ -621,7 +623,7 @@ public class ScriptEditor {
           }
 
           public void go() {
-            open(project.recentScripts().getCurrentFile());
+            open(mProject.recentScripts().getCurrentFile());
             repaint();
           }
         });
@@ -1241,7 +1243,7 @@ public class ScriptEditor {
           }
 
           public void go() {
-            doOpenSet(project.recentScriptSets().getCurrentFile());
+            doOpenSet(mProject.recentScriptSets().getCurrentFile());
             repaint();
           }
         });
@@ -1284,7 +1286,7 @@ public class ScriptEditor {
 
     m.addItem("Close Project", 0, 0, new ItemHandler() {
       public boolean isEnabled() {
-        return project != null;
+        return isProjectOpen();
       }
 
       public void go() {
@@ -1301,10 +1303,10 @@ public class ScriptEditor {
 
     if (db) {
       warning("db:doCloseProject");
-      pr("doCloseProject " + project);
+      pr("doCloseProject " + mProject);
     }
     do {
-      if (project == null)
+      if (!isProjectOpen())
         break;
 
       try {
@@ -1324,7 +1326,7 @@ public class ScriptEditor {
         if (db)
           pr(" project.flush()");
 
-        project.flush();
+        mProject.flush();
 
         if (db)
           pr(" closeAll()");
@@ -1344,7 +1346,7 @@ public class ScriptEditor {
         AppTools.showError("closing project", e);
       }
     } while (false);
-    return project == null;
+    return !isProjectOpen();
   }
 
   private static class SelectNoneOper {
@@ -1537,7 +1539,7 @@ public class ScriptEditor {
       if (fx == null)
         fx = AppTools.chooseFileToOpen("Select Atlas",
             Atlas.DATA_FILES_AND_DIRS,
-            project.replaceIfMissing(atlasPanel.file()));
+            mProject.replaceIfMissing(atlasPanel.file()));
 
       if (fx == null)
         break;
@@ -1550,7 +1552,7 @@ public class ScriptEditor {
 
   private static void selectAtlas(File f) {
     if (f != null)
-      project.recentAtlases().setCurrentFile(f);
+      mProject.recentAtlases().setCurrentFile(f);
   }
 
   private static void doNewScript() {
@@ -1573,7 +1575,7 @@ public class ScriptEditor {
 
       if (f == null)
         f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES_AND_DIRS,
-            project.replaceIfMissing(project.recentScriptSets()
+            mProject.replaceIfMissing(mProject.recentScriptSets()
                 .getCurrentFile()));
       if (f == null)
         break;
@@ -1582,8 +1584,7 @@ public class ScriptEditor {
         break;
       try {
 
-        ScriptSet ss = new ScriptSet(project.directory(), f);
-        // String ls = Streams.readTextFile(f.toString());
+        ScriptSet ss = new ScriptSet(mProject.directory(), f);
 
         decodeLayers(ss);
         setRecentSetPath(f);
@@ -1610,9 +1611,9 @@ public class ScriptEditor {
       if (!flushAll())
         break;
 
-      File f = AppTools
-          .chooseFileToSave("Save Set", Script.SET_FILES_AND_DIRS, project
-              .replaceIfMissing(project.recentScriptSets().getCurrentFile()));
+      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES_AND_DIRS,
+          mProject.replaceIfMissing(mProject.recentScriptSets()
+              .getCurrentFile()));
 
       if (f == null)
         break;
@@ -1640,10 +1641,10 @@ public class ScriptEditor {
    *          script set file
    */
   private static void setRecentSetPath(File f) {
-    project.setLastSetPath(f);
+    mProject.setLastSetPath(f);
     MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
-        project.recentScriptSets());
-    project.setLastSetPath(null);
+        mProject.recentScriptSets());
+    mProject.setLastSetPath(null);
   }
 
   public static void unselectAll() {
@@ -1722,7 +1723,7 @@ public class ScriptEditor {
 
     boolean success = false;
     try {
-      Script s = new Script(project);
+      Script s = new Script(mProject);
       s.setPath(f);
       if (db)
         pr(" constructed script=" + s + ", lastAtlas=" + s.lastAtlas());
@@ -1789,10 +1790,10 @@ public class ScriptEditor {
             pr("atlasCB event received");
           File af = null;
 
-          if (project != null)
-            af = project.recentAtlases().getCurrentFile();
+          if (isProjectOpen())
+            af = mProject.recentAtlases().getCurrentFile();
           if (atlasPanel != null)
-            atlasPanel.setAtlas(project, af);
+            atlasPanel.setAtlas(mProject, af);
         }
       });
 
@@ -2003,9 +2004,9 @@ public class ScriptEditor {
         StringBuilder sb = new StringBuilder();
         sb.append(currentModified() ? "*" : " ");
         if (!isOrphan())
-          sb.append(new RelPath(project.directory(), editor.path).display());
+          sb.append(new RelPath(mProject.directory(), editor.path).display());
         upd(filePath, sb);
-        displayProjectPath(project.file().getName());
+        displayProjectPath(mProject.file().getName());
         // upd(projectPath, project.file().getName());
         upd(bgnd, true, layers.isBackground());
 
@@ -2226,9 +2227,9 @@ public class ScriptEditor {
       recentScriptSetsMenuItem;
 
   private static void writeProjectDefaults() {
-    project.storeDefaults("LAYERS", encodeLayers());
+    mProject.storeDefaults("LAYERS", encodeLayers());
     ASSERT(pPanel != null);
-    project.storeDefaults("PALETTE", pPanel.encodeDefaults());
+    mProject.storeDefaults("PALETTE", pPanel.encodeDefaults());
 
   }
 
@@ -2240,14 +2241,14 @@ public class ScriptEditor {
     if (pPanel == null) {
       warning("project panel null");
     } else {
-      String palInfo = project.getDefaults("PALETTE", null);
+      String palInfo = mProject.getDefaults("PALETTE", null);
       if (palInfo != null)
         pPanel.decodeDefaults(palInfo);
     }
 
-    String layerInfo = project.getDefaults("LAYERS", null);
+    String layerInfo = mProject.getDefaults("LAYERS", null);
     if (layerInfo != null) {
-      ScriptSet ss = new ScriptSet(project.directory(), layerInfo);
+      ScriptSet ss = new ScriptSet(mProject.directory(), layerInfo);
       decodeLayers(ss);
     } else
       layers.select(0);
@@ -2307,7 +2308,7 @@ public class ScriptEditor {
   }
 
   private static void setProjectField(ScriptProject p) {
-    project = p;
+    mProject = p;
   }
 
   private static void updateProject(ScriptProject p) {
@@ -2315,25 +2316,24 @@ public class ScriptEditor {
     final boolean db = false;
 
     if (db)
-      pr("updateProject from " + project + " to " + p);
+      pr("updateProject from " + mProject + " to " + p);
 
     setProjectField(p);
     MyMenuBar.updateRecentFilesFor(recentScriptsMenuItem,
-        project == null ? null : project.recentScripts());
+        isProjectOpen() ? mProject.recentScripts() : null);
 
     MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
-        project == null ? null : project.recentScriptSets());
-    recentProjects.setCurrentFile(project == null ? null : project.file());
+        isProjectOpen() ? mProject.recentScriptSets() : null);
+    recentProjects.setCurrentFile(isProjectOpen() ? mProject.file() : null);
 
-    if (project == null) {
+    if (isProjectOpen()) {
+      mProject.recentAtlases().setComboBox(atlasCB);
+      atlasCB.setEnabled(true);
+      atlasSelectButton.setEnabled(true);
+    } else {
       atlasCB.removeAllItems();
       atlasCB.setEnabled(false);
       atlasSelectButton.setEnabled(false);
-
-    } else {
-      project.recentAtlases().setComboBox(atlasCB);
-      atlasCB.setEnabled(true);
-      atlasSelectButton.setEnabled(true);
     }
     if (db)
       pr(" updateRecentFilesFor " + recentProjectsMenuItem
@@ -2344,7 +2344,7 @@ public class ScriptEditor {
   }
 
   public static ScriptProject project() {
-    return project;
+    return mProject;
   }
 
   private void resetUndo() {
@@ -2529,7 +2529,7 @@ public class ScriptEditor {
 
   private static IPoint focus = new IPoint();
   private static ObjArray clipboard = new ObjArray();
-  private static ScriptProject project;
+  private static ScriptProject mProject;
   private static LayerSet layers;
   private static AtlasPanel atlasPanel;
   private static PalettePanel pPanel;
