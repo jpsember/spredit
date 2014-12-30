@@ -18,10 +18,10 @@ import static com.js.basic.Tools.*;
  * 
  * 1) Construct, add listeners, and restore from file system:
  * 
- * ConfigSet configSet = new ConfigSet(...File...)  
- * .add(...ConfigSet.Interface...)
- * .add(...ConfigSet.Interface...) 
- * .restore();
+ * ConfigSet configSet = new ConfigSet(null)  
+ *   .add(...ConfigSet.Interface...)
+ *   .add(...ConfigSet.Interface...) 
+ *   .restore();
  * 
  * 2) Save:
  * 
@@ -50,7 +50,22 @@ public class ConfigSet {
     public void writeTo(JSONObject map) throws JSONException;
   }
 
+  /**
+   * Constructor
+   * 
+   * @param file
+   *          file to use; if null, uses application name, and looks for
+   *          matching file in current directory or one of its ancestors; if not
+   *          found, uses current directory
+   */
   public ConfigSet(File file) {
+    if (file == null) {
+      File currentDirectory = new File(System.getProperty("user.dir"));
+      String basename = basename();
+      file = findFileAsAncestor(basename, currentDirectory);
+      if (file == null)
+        file = new File(currentDirectory, basename);
+    }
     mFile = file;
   }
 
@@ -65,17 +80,6 @@ public class ConfigSet {
     return this;
   }
 
-  private String write() {
-    JSONObject map = new JSONObject();
-    try {
-      for (Interface ic : configs)
-        ic.writeTo(map);
-    } catch (JSONException e) {
-      die(e);
-    }
-    return map.toString();
-  }
-
   public ConfigSet restore() throws IOException, JSONException {
     JSONObject map = new JSONObject();
 
@@ -86,6 +90,37 @@ public class ConfigSet {
     for (Interface ic : configs)
       ic.readFrom(map);
     return this;
+  }
+
+  private String basename() {
+    String appName = AppTools.app().getName();
+    String osName = System.getProperty("os.name");
+    boolean isWindows = osName.startsWith("Windows");
+    if (isWindows)
+      return appName + "_defaults.txt";
+    else
+      return "." + appName + "_defaults";
+  }
+
+  private File findFileAsAncestor(String basename, File directory) {
+    while (directory != null) {
+      File candidate = new File(directory, basename);
+      if (candidate.exists())
+        return candidate;
+      directory = directory.getParentFile();
+    }
+    return null;
+  }
+
+  private String write() {
+    JSONObject map = new JSONObject();
+    try {
+      for (Interface ic : configs)
+        ic.writeTo(map);
+    } catch (JSONException e) {
+      die(e);
+    }
+    return map.toString();
   }
 
   private ArrayList<Interface> configs = new ArrayList();

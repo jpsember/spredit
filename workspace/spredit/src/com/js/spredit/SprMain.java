@@ -153,7 +153,7 @@ public class SprMain implements IApplication {
   @Override
   public void createAndShowGUI(JFrame frame) {
     try {
-      config = new ConfigSet(AppTools.getDefaultsPath("spredit")) //
+      config = new ConfigSet(null) //
           .add(apputil.MyFrame.CONFIG) //
           .add(SpriteEditor.CONFIG) //
           .restore();

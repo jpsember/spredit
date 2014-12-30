@@ -48,7 +48,7 @@ public class ScrMain implements IApplication {
   public void createAndShowGUI(JFrame frame) {
 
     try {
-      config = new ConfigSet(AppTools.getDefaultsPath(getName())) //
+      config = new ConfigSet(null) //
           .add(apputil.MyFrame.CONFIG) //
           .add(ScriptEditor.CONFIG) //
           .add(Grid.CONFIG) //

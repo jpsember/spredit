@@ -247,19 +247,6 @@ public class AppTools {
     return ret;
   }
 
-  public static File getDefaultsPath(String appName) {
-
-    File defaultsPath;
-
-    File userHome = Streams.homeDirectory();
-    String osName = System.getProperty("os.name");
-    boolean isWindows = osName.startsWith("Windows");
-    defaultsPath = new File(userHome, isWindows ? appName + "_defaults.txt"
-        : "." + appName + "_defaults");
-
-    return defaultsPath;
-  }
-
   public static void runAsCmdLine() {
     System.setProperty("java.awt.headless", "true");
   }
