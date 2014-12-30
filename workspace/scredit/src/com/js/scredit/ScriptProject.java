@@ -84,23 +84,20 @@ public class ScriptProject {
   private static final String DEF_RECENTSETS = "RECENTSCRIPTSETS";
 
   public void flush() throws IOException {
-
-    // store recent files list
-
-    storeDefaults(DEF_RECENTSCRIPTS, recentScripts.encode());
-    storeDefaults(DEF_RECENTATLASES, recentAtlases.encode());
-    storeDefaults(DEF_RECENTSETS, recentScriptSets.encode());
-
-    JSONObject projectMap = new JSONObject();
     try {
+      JSONObject projectMap = new JSONObject();
+      storeDefaults(DEF_RECENTSCRIPTS, recentScripts.encode());
+      storeDefaults(DEF_RECENTATLASES, recentAtlases.encode());
+      storeDefaults(DEF_RECENTSETS, recentScriptSets.encode());
+
       for (String key : JSONTools.iterable(defaults.keySet())) {
         projectMap.put(key, defaults.get(key));
       }
+      String content = projectMap.toString();
+      Streams.writeIfChanged(projectFile, content);
     } catch (JSONException e) {
       die(e);
     }
-    String content = projectMap.toString();
-    Streams.writeIfChanged(projectFile, content);
   }
 
   private void read() throws IOException {
@@ -111,12 +108,12 @@ public class ScriptProject {
       for (String key : JSONTools.keys(defaultsMap)) {
         defaults.put(key, defaultsMap.getString(key));
       }
+      recentScripts.decode(getDefaults(DEF_RECENTSCRIPTS, null));
+      recentAtlases.decode(getDefaults(DEF_RECENTATLASES, null));
+      recentScriptSets.decode(getDefaults(DEF_RECENTSETS, null));
     } catch (JSONException e) {
       die(e);
     }
-    recentScripts.decode(getDefaults(DEF_RECENTSCRIPTS, null));
-    recentAtlases.decode(getDefaults(DEF_RECENTATLASES, null));
-    recentScriptSets.decode(getDefaults(DEF_RECENTSETS, null));
   }
 
   public File file() {
@@ -194,17 +191,13 @@ public class ScriptProject {
   }
 
   public void setLastScriptPath(File f) {
-    recentScripts.use(f);
+    recentScripts.setCurrentFile(f);
   }
 
-  // public File lastSetPath() {
-  // return lastSetPath;
-  // }
   public void setLastSetPath(File f) {
-    recentScriptSets.use(f); // )lastSetPath = f;
+    recentScriptSets.setCurrentFile(f);
   }
 
-  // private File lastSetPath;
   private RecentFiles recentScripts, recentAtlases, recentScriptSets;
 
   public RecentFiles recentAtlases() {

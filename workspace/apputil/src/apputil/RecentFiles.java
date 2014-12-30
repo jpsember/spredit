@@ -7,12 +7,12 @@ import javax.swing.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.awt.event.*;
-import static com.js.basic.Tools.*;
 
 /**
- * Maintains list of recent files to display in application menu
+ * Maintains a list of recent files to display in an application menu
  */
 public class RecentFiles {
 
@@ -25,7 +25,7 @@ public class RecentFiles {
    *          base of project tree, or null if none (absolute paths)
    */
   public RecentFiles(File projectBase) {
-    this.projectBase = projectBase;
+    mProjectBase = projectBase;
   }
 
   /**
@@ -33,60 +33,35 @@ public class RecentFiles {
    * 
    * @return current file, or null if not active
    */
-  public File current() {
-    return fileActive ? get(0) : null;
+  public File getCurrentFile() {
+    return mFileActive ? get(0) : null;
   }
-
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("================\n");
-    sb.append("RecentFiles");
-    sb.append(" projectBase=" + projectBase);
-    sb.append(" fileActive=" + fileActive);
-    sb.append('\n');
-    for (int i = 0; i < size(); i++)
-      sb.append(" " + get(i) + "\n");
-    sb.append("================\n");
-    return sb.toString();
-  }
-
-  private boolean fileActive;
 
   /**
-   * Specify current file (if not null, adds or moves file to front of list)
-   * 
-   * @param f
-   *          file
-   * @return true if current file has changed
+   * Specify current file; if not null, moves it to the front of the list (and
+   * bumps one if the list is too full)
    */
-  public boolean use(File f) {
+  public void setCurrentFile(File file) {
+    File c = getCurrentFile();
+    mFileActive = false;
+    if (file == null)
+      return;
+    int j = mFileList.indexOf(file);
+    if (j >= 0) {
+      mFileList.remove(j);
+    }
+    mFileList.add(0, file);
+    mFileActive = true;
+    while (mFileList.size() > MAX)
+      mFileList.remove(mFileList.size() - 1);
 
-    boolean changed = false;
-    File c = current();
-    fileActive = false;
-    if (f != null) {
-
-      int j = files.indexOf(f);
-      if (j >= 0) {
-        files.remove(j);
+    if (!file.equals(c)) {
+      if (mComboBox != null) {
+        mRebuildingBox = true;
+        rebuildComboBox();
+        mRebuildingBox = false;
       }
-      files.add(0, f);
-      fileActive = true;
-      while (files.size() > MAX)
-        files.remove(files.size() - 1);
-
-      if (!f.equals(c)) {
-        changed = true;
-        if (cb != null) {
-          rebuildingBox = true;
-          rebuildComboBox();
-          rebuildingBox = false;
-        }
-      }
-
-    } else if (c != null)
-      changed = true;
-    return changed;
+    }
   }
 
   /**
@@ -94,27 +69,33 @@ public class RecentFiles {
    * 
    * @return number of files
    */
-  public int size() {
-    return files.size();
+  int size() {
+    return mFileList.size();
   }
 
   /**
    * Get nth most recently used file
-   * 
-   * @param n
-   *          (0=most recent)
-   * @return nth last used file
    */
-  public File get(int n) {
-    return (File) files.get(n);
+  File get(int n) {
+    return mFileList.get(n);
+  }
+
+  /**
+   * Get the most recently used file, or null if the list is empty
+   */
+  public File getMostRecentFile() {
+    File file = null;
+    if (!mFileList.isEmpty())
+      file = mFileList.get(0);
+    return file;
   }
 
   /**
    * Clear history
    */
   public void clear() {
-    files.clear();
-    fileActive = false;
+    mFileList.clear();
+    mFileActive = false;
   }
 
   /**
@@ -123,72 +104,49 @@ public class RecentFiles {
    * @return directory
    */
   public File getProjectBase() {
-    return projectBase;
+    return mProjectBase;
   }
 
   /**
-   * Get position of file within tree
-   * 
-   * @param file
-   * @return position 0...size()-1, or -1 if not found
+   * Encode recent files object to JSONObject
    */
-  public int indexOf(File file) {
-    return files.indexOf(file);
-  }
-
-  /**
-   * Encode object to string
-   * 
-   * @return
-   */
-  public String encode() {
-    final boolean db = false;
-
-    if (db)
-      pr("RecentFiles, encode; projectBase=" + projectBase);
-
+  public JSONObject encode() throws JSONException {
+    JSONObject map = new JSONObject();
+    map.put("active", mFileActive);
     JSONArray a = new JSONArray();
-    a.put(fileActive);
     for (int i = 0; i < size(); i++) {
       File f = get(i);
-      RelPath rp = new RelPath(projectBase, f);
+      RelPath rp = new RelPath(mProjectBase, f);
       a.put(rp.toString());
-      // if (db)
-      // pr("constructed RelPath for ["+f+"]:\n"+rp);
-      //
-      // sb.append(rp);
     }
-    return a.toString();
-    // sb.addCr();
-    // return sb.toString();
+    map.put("list", a);
+    return map;
+  }
+
+  public void decode(String mapAsJSONString) throws JSONException {
+    JSONObject map = new JSONObject(mapAsJSONString);
+    decode(map);
   }
 
   /**
-   * Decode object from string
-   * 
-   * @param s
+   * Decode object from JSON, if map exists
    */
-  public void decode(String s) {
+  public void decode(JSONObject map) throws JSONException {
     clear();
-    try {
-      if (s != null) {
-        JSONArray a = new JSONArray(s);
-        int c = 0;
-        fileActive = a.getBoolean(c++);
-        while (c < a.length()) {
-          RelPath rp = new RelPath(projectBase, a.getString(c++));
-          files.add(rp.file());
-          fileActive = true;
-        }
-      }
-    } catch (JSONException e) {
-      warning("caught: " + e);
+    if (map == null)
+      return;
+    mFileActive = map.getBoolean("active");
+    JSONArray a = map.getJSONArray("list");
+    int c = 0;
+    while (c < a.length()) {
+      RelPath rp = new RelPath(mProjectBase, a.getString(c++));
+      mFileList.add(rp.file());
     }
   }
 
-  private class CBItem {
-    public CBItem(File f) {
-      this.p = new RelPath(projectBase, f);
+  private class ComboBoxItem {
+    public ComboBoxItem(File f) {
+      this.p = new RelPath(mProjectBase, f);
     }
 
     public String toString() {
@@ -201,26 +159,21 @@ public class RecentFiles {
     private RelPath p;
   }
 
-  private JComboBox cb;
-  private File projectBase;
-  private ArrayList<File> files = new ArrayList();
-  private boolean rebuildingBox;
-
   /**
    * Connect this object to a JComboBox
    * 
-   * @param cb
+   * @param mComboBox
    */
   public void setComboBox(JComboBox cbx) {
-    this.cb = cbx;
+    this.mComboBox = cbx;
 
-    cb.addActionListener(new ActionListener() {
+    mComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        CBItem itm = (CBItem) cb.getSelectedItem();
+        ComboBoxItem itm = (ComboBoxItem) mComboBox.getSelectedItem();
         // RelPath rp = (RelPath) cb.getSelectedItem();
-        if (!rebuildingBox) {
+        if (!mRebuildingBox) {
           if (itm != null) {
-            use(itm.p.file());
+            setCurrentFile(itm.p.file());
           }
         }
       }
@@ -229,10 +182,16 @@ public class RecentFiles {
   }
 
   private void rebuildComboBox() {
-    cb.removeAllItems();
+    mComboBox.removeAllItems();
     for (int i = 0; i < size(); i++) {
-      cb.addItem(new CBItem(get(i))); // RelPath(projectBase, get(i)));
+      mComboBox.addItem(new ComboBoxItem(get(i))); 
     }
   }
+
+  private JComboBox mComboBox;
+  private File mProjectBase;
+  private ArrayList<File> mFileList = new ArrayList();
+  private boolean mRebuildingBox;
+  private boolean mFileActive;
 
 }

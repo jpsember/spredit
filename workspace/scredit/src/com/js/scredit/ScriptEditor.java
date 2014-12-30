@@ -168,11 +168,9 @@ public class ScriptEditor {
         break;
       }
 
-      // clearCurrentSet();
-
       if (f == null) {
         f = AppTools.chooseFileToOpen("Open Script", Script.FILES_AND_DIRS,
-            project.replaceIfMissing(project.recentScripts().current()));
+            project.replaceIfMissing(project.recentScripts().getCurrentFile()));
       }
       if (f == null) {
         if (db)
@@ -445,7 +443,7 @@ public class ScriptEditor {
       if (f == null || alwaysAskForPath) {
 
         f = AppTools.chooseFileToSave("Save Script", Script.FILES_AND_DIRS,
-            project.replaceIfMissing(project.recentScripts().current()));
+            project.replaceIfMissing(project.recentScripts().getCurrentFile()));
 
         if (f == null)
           break;
@@ -623,7 +621,7 @@ public class ScriptEditor {
           }
 
           public void go() {
-            open(project.recentScripts().current());
+            open(project.recentScripts().getCurrentFile());
             repaint();
           }
         });
@@ -1243,7 +1241,7 @@ public class ScriptEditor {
           }
 
           public void go() {
-            doOpenSet(project.recentScriptSets().current());
+            doOpenSet(project.recentScriptSets().getCurrentFile());
             repaint();
           }
         });
@@ -1279,7 +1277,7 @@ public class ScriptEditor {
         recentProjects, new ItemHandler() {
           @Override
           public void go() {
-            openProject(recentProjects.current());
+            openProject(recentProjects.getCurrentFile());
             repaint();
           }
         });
@@ -1552,7 +1550,7 @@ public class ScriptEditor {
 
   private static void selectAtlas(File f) {
     if (f != null)
-      project.recentAtlases().use(f);
+      project.recentAtlases().setCurrentFile(f);
   }
 
   private static void doNewScript() {
@@ -1575,7 +1573,8 @@ public class ScriptEditor {
 
       if (f == null)
         f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES_AND_DIRS,
-            project.replaceIfMissing(project.recentScriptSets().current()));
+            project.replaceIfMissing(project.recentScriptSets()
+                .getCurrentFile()));
       if (f == null)
         break;
 
@@ -1611,8 +1610,9 @@ public class ScriptEditor {
       if (!flushAll())
         break;
 
-      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES_AND_DIRS,
-          project.replaceIfMissing(project.recentScriptSets().current()));
+      File f = AppTools
+          .chooseFileToSave("Save Set", Script.SET_FILES_AND_DIRS, project
+              .replaceIfMissing(project.recentScriptSets().getCurrentFile()));
 
       if (f == null)
         break;
@@ -1790,7 +1790,7 @@ public class ScriptEditor {
           File af = null;
 
           if (project != null)
-            af = project.recentAtlases().current();
+            af = project.recentAtlases().getCurrentFile();
           if (atlasPanel != null)
             atlasPanel.setAtlas(project, af);
         }
@@ -1819,11 +1819,7 @@ public class ScriptEditor {
     addMenus();
 
     {
-      File base = null;
-      if (true) {
-        if (recentProjects.size() > 0)
-          base = recentProjects.get(0);
-      }
+      File base = recentProjects.getMostRecentFile();
       if (base != null && !ScriptProject.FILES_ONLY.accept(base))
         base = null;
       if (base != null && base.exists()) {
@@ -2189,11 +2185,7 @@ public class ScriptEditor {
 
     @Override
     public void readFrom(JSONObject map) throws JSONException {
-      // TODO Auto-generated method stub
-      String s = map.optString(PROJECTS_TAG);
-      if (s != null)
-        recentProjects.decode(s);
-      unimp("encode recent projects as JSON, not as intermediate string");
+      recentProjects.decode(map.optJSONObject(PROJECTS_TAG));
       setOrigin(map.optBoolean("ORIGIN", true));
       setFaded(map.optBoolean("FADED"));
       zoomFactor = (float) map.optDouble("ZOOM", 1);
@@ -2331,7 +2323,7 @@ public class ScriptEditor {
 
     MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
         project == null ? null : project.recentScriptSets());
-    recentProjects.use(project == null ? null : project.file());
+    recentProjects.setCurrentFile(project == null ? null : project.file());
 
     if (project == null) {
       atlasCB.removeAllItems();

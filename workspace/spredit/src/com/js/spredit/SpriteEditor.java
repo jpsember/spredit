@@ -52,9 +52,7 @@ public class SpriteEditor {
     addMenus();
 
     {
-      File base = null;
-      if (recentProjects.size() > 0)
-        base = recentProjects.get(0);
+      File base = recentProjects.getMostRecentFile();
       if (base != null && !TexProject.FILES_ONLY.accept(base))
         base = null;
       if (base != null && base.exists()) {
@@ -175,7 +173,7 @@ public class SpriteEditor {
 
     project = p;
 
-    recentProjects.use(project == null ? null : project.file());
+    recentProjects.setCurrentFile(project == null ? null : project.file());
 
     MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
     //
@@ -248,12 +246,10 @@ public class SpriteEditor {
   private static void openProject(File projFile) {
     if (projFile == null) {
 
-      File base = null;
-      if (recentProjects.size() > 0)
-        base = recentProjects.get(0);
+      File base = recentProjects.getMostRecentFile();
 
       projFile = AppTools.chooseFileToOpen("Open Project",
-          TexProject.FILES_AND_DIRS, base); // lastProjectPath);
+          TexProject.FILES_AND_DIRS, base);
     }
     if (projFile != null) {
       try {
@@ -455,7 +451,7 @@ public class SpriteEditor {
         recentProjects, new ItemHandler() {
           @Override
           public void go() {
-            openProject(recentProjects.current());
+            openProject(recentProjects.getCurrentFile());
             repaint();
           }
         });

@@ -8,9 +8,9 @@ import javax.swing.event.*;
 import static com.js.basic.Tools.*;
 
 /*
-   [] trouble disabling recent files submenus
-   [] support dynamic menu item labels for undo/redo, sensitive to operation to be performed 
-  
+ [] trouble disabling recent files submenus
+ [] support dynamic menu item labels for undo/redo, sensitive to operation to be performed 
+
  */
 public class MyMenuBar {
   public static final int CTRL = (1 << 0);
@@ -19,13 +19,15 @@ public class MyMenuBar {
   public static final int ALT = (1 << 1);
 
   /**
-   * Kludge to deal with OpenGL window / menu repaint conflict;
-   * generate repaint every time a menu is redrawn
+   * Kludge to deal with OpenGL window / menu repaint conflict; generate repaint
+   * every time a menu is redrawn
+   * 
    * @param c
    */
   public static void addRepaintComponent(Component c) {
     redrawOpenGLComponent = c;
   }
+
   private static Component redrawOpenGLComponent;
 
   private static class RecentFilesMenuItem extends JMenuItem {
@@ -33,7 +35,9 @@ public class MyMenuBar {
       super(label);
       this.file = file;
     }
+
     private File file;
+
     public File file() {
       return file;
     }
@@ -50,39 +54,46 @@ public class MyMenuBar {
   private static class RecentFilesMenu extends JMenu implements MenuListener,
       ActionListener {
     private static final boolean db = false;
+
     public RecentFilesMenu(String title, RecentFiles rf, ItemHandler evtHandler) {
       super(title);
       this.rf = rf;
       this.evtHandler = evtHandler;
       this.addMenuListener(this);
     }
+
     public boolean isEnabled() {
       if (rf == null)
         return false;
       int size = rf.size();
-      if (rf.current() != null)
+      if (rf.getCurrentFile() != null)
         size--;
       return size > 0;
     }
+
     @Override
     public void actionPerformed(ActionEvent arg) {
       RecentFilesMenuItem item = (RecentFilesMenuItem) arg.getSource();
-      rf.use(item.file());
+      rf.setCurrentFile(item.file());
       evtHandler.go();
     }
+
     private ItemHandler evtHandler;
     private RecentFiles rf;
+
     @Override
     public void menuCanceled(MenuEvent arg0) {
       if (db)
         pr("recent files, cancelled");
     }
+
     @Override
     public void menuDeselected(MenuEvent arg0) {
       if (db)
         pr("recent files, deselected");
 
     }
+
     @Override
     public void menuSelected(MenuEvent arg0) {
       if (db)
@@ -90,14 +101,14 @@ public class MyMenuBar {
       this.removeAll();
 
       if (rf != null) {
+
         for (int i = 0; i < rf.size(); i++) {
           File f = rf.get(i);
-          if (rf.current() == f) {
-            if (db)
-              pr(" not adding selected file " + f);
+          if (rf.getCurrentFile() == f) {
             continue;
           }
-          String s = new RelPath(rf.getProjectBase(),f).display(); //RelPath.toString(rf.getProjectBase(), f);
+          String s = new RelPath(rf.getProjectBase(), f).display(); // RelPath.toString(rf.getProjectBase(),
+                                                                    // f);
           JMenuItem item = new RecentFilesMenuItem(f, s);
           this.add(item);
           item.addActionListener(this);
@@ -114,6 +125,7 @@ public class MyMenuBar {
     frame.setJMenuBar(mbar);
 
   }
+
   public void addMenu(String name) {
     addMenu(name, null);
   }
@@ -181,13 +193,6 @@ public class MyMenuBar {
         boolean enable = true;
         if (showingMenu) {
           enable = rm.isEnabled();
-          //          if (!enable) {
-          //            rm.removeAll();
-          //          }
-          if (db)
-            pr("  recentFilesMenu " + rm.getText() + " isEnabled is " + enable);
-          //          warn("doesn't seem to disable the recent files lists");
-
         }
         rm.setEnabled(enable);
         if (db)
@@ -209,7 +214,6 @@ public class MyMenuBar {
     JMenuItem item = new RecentFilesMenu(name, rf, evtHandler);
     menu.add(item);
     return item;
-    //   addItem(name, 0,0, new RecentFilesHandler(evtHandler));
   }
 
   public JMenuItem addItem(String name, int accelKey, int accelFlags,
@@ -234,10 +238,10 @@ public class MyMenuBar {
       }
       m.setAccelerator(KeyStroke.getKeyStroke(accelKey, k));
     }
-    //  m.addActionListener(evtHandler);
     menu.add(m);
     return m;
   }
+
   public void addSeparator() {
     if (itemsAdded > 0)
       sepPending = true;
@@ -247,6 +251,7 @@ public class MyMenuBar {
   private JMenuBar mbar;
   private boolean sepPending;
   private int itemsAdded;
+
   private static class MyMenuItem extends JMenuItem {
     public MyMenuItem(String name, ItemHandler h, MyMenu menu) {
       super(name);
@@ -254,6 +259,7 @@ public class MyMenuBar {
       this.handler = h;
       addActionListener(handler);
     }
+
     private ItemHandler handler;
     private MyMenu menu;
   }
