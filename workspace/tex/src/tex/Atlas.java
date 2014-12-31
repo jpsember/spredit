@@ -45,17 +45,19 @@ public class Atlas {
 
   /**
    * Get short form for atlas name, suitable for writing to scripts file
+   * 
    * @return short form of atlas
    */
   public String atlasTag() {
     File f = dataFile();
-    String s = Files.removeExt(f.getName());
-    return s;
+    return Files.removeExtension(f).getName();
   }
 
   /**
    * Construct a new atlas
-   * @param imageSize size of atlas
+   * 
+   * @param imageSize
+   *          size of atlas
    */
   public Atlas(IPoint imageSize) {
     this.texPageSize = imageSize;
@@ -70,19 +72,25 @@ public class Atlas {
   public void setFontAscent(int n) {
     fontAscent = n;
   }
+
   public void setFontDescent(int n) {
     fontDescent = n;
   }
+
   public void setFontLeading(int n) {
     fontLeading = n;
   }
+
   private int fontAscent, fontDescent, fontLeading;
+
   public int fontAscent() {
     return fontAscent;
   }
+
   public int fontDescent() {
     return fontDescent;
   }
+
   public int fontLeading() {
     return fontLeading;
   }
@@ -133,6 +141,7 @@ public class Atlas {
 
   /**
    * For building atlases: set image
+   * 
    * @param img
    */
   public void setImage(BufferedImage img) {
@@ -159,8 +168,10 @@ public class Atlas {
 
   /**
    * Read atlas from file
-   * @param dataFile file containing data portion of atlas
-   * @throws IOException 
+   * 
+   * @param dataFile
+   *          file containing data portion of atlas
+   * @throws IOException
    */
   public Atlas(File dataFile) throws IOException {
     final boolean db = false;
@@ -172,7 +183,7 @@ public class Atlas {
 
     construct(new FileInputStream(dataFile));
   }
-  
+
   private void construct(InputStream dataIn) throws IOException {
     final boolean db = false;
     DataInputStream s = new DataInputStream(dataIn);
@@ -210,15 +221,15 @@ public class Atlas {
         for (int k = 0; k < nSprites; k++) {
           sb.setLength(0);
           // Sprite sp = sprite(k);
-          
-					while (true) {
+
+          while (true) {
             byte b = s.readByte();
             if (b == 0)
               break;
             sb.append((char) b);
           }
           ids[k] = sb.toString();
-          //  sp.setId(sb.toString());
+          // sp.setId(sb.toString());
           if (db)
             pr(" sprite #" + k + " id=" + ids[k]);
         }
@@ -240,22 +251,23 @@ public class Atlas {
       }
     }
 
-    {  
+    {
       s.readInt(); // read image length
-      // read image 
+      // read image
       image = ImgUtil.read(s, "png");
     }
     s.close();
   }
 
   /**
-   * Read atlas from input stream 
+   * Read atlas from input stream
+   * 
    * @param f
-   * @throws IOException 
+   * @throws IOException
    */
   public Atlas(InputStream dataIn) throws IOException {
-    //    if (!ONEFILE)
-    //      throw new IllegalArgumentException();
+    // if (!ONEFILE)
+    // throw new IllegalArgumentException();
     construct(dataIn);
   }
 
@@ -311,7 +323,7 @@ public class Atlas {
       // sortEntries();
       for (int k = 0; k < size(); k++) {
         Sprite sp = sprite(k);
-        
+
         IRect r = sp.bounds();
         s.writeInt(r.x);
         s.writeInt(r.y);
@@ -340,7 +352,6 @@ public class Atlas {
     s.close();
   }
 
-
   private void buildMap() {
     idMap = new HashMap(records.size());
     for (int i = 0; i < size(); i++) {
@@ -353,11 +364,13 @@ public class Atlas {
 
   /**
    * Get file containing data
+   * 
    * @return data file, or null if unknown
    */
   public File dataFile() {
     return dataFile;
   }
+
   public int indexOf(String id) {
     if (idMap == null)
       buildMap();

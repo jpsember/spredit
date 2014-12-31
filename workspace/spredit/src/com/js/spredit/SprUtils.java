@@ -18,7 +18,7 @@ public class SprUtils {
       String ext = null;
       if (Files.hasExtension(file)) {
         ext = Files.getExtension(file);
-        s = Files.removeExt(s);
+        s = Files.removeExtension(file).getPath();
       }
       s = s + "_" + slot;
       if (ext != null)
@@ -123,7 +123,7 @@ public class SprUtils {
   public static File incrementFile(File f) {
     String name = f.getName();
     String ext = Files.getExtension(f);
-    name = Files.removeExt(name);
+    name = Files.removeExtension(f).getName();
 
     if (name.length() == 0)
       throw new IllegalArgumentException(f.toString());

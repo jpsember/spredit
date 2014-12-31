@@ -228,9 +228,9 @@ public class AppTools {
   }
 
   public static File incrementFile(File f) {
-    String name = f.getName();
+
     String ext = Files.getExtension(f);
-    name = Files.removeExt(name);
+    String name = Files.removeExtension(f).getName();
 
     if (name.length() == 0)
       throw new IllegalArgumentException(f.toString());

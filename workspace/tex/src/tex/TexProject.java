@@ -55,7 +55,7 @@ public class TexProject {
 
     this.baseDir = f.getParentFile();
     this.projectFile = f;
-    this.name = Files.removeExt(f.getName());
+    this.name = Files.removeExtension(f).getName();
 
     if (db)
       pr("baseDir=" + baseDir + "\nname=" + name);
@@ -162,7 +162,7 @@ public class TexProject {
     String s = rp.toString();
 
     StringBuilder sb = new StringBuilder();
-    s = Files.removeExt(s);
+    s = Files.removeExtension(rp.file()).getPath();
 
     for (int i = 1; i < s.length(); i++) {
       char c = Character.toUpperCase(s.charAt(i));

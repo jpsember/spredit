@@ -42,4 +42,18 @@ public class FilesTest extends MyTestCase {
     }
   }
 
+  public void testRemoveExtension() {
+    String[] a = {//
+    "", "", //
+        "foo.txt", "foo",//
+        "a/b/c.jpg", "a/b/c",//
+        "a/b/c", "a/b/c",//
+        "a.b/c", "a.b/c",//
+    };
+    for (int i = 0; i < a.length; i += 2) {
+      String before = a[i];
+      String after = a[i + 1];
+      assertEquals(new File(after), Files.removeExtension(new File(before)));
+    }
+  }
 }

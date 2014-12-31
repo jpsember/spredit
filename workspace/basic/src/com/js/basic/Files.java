@@ -60,7 +60,7 @@ public class Files {
     String out = name;
     String currExt = extString(name);
     if (!currExt.equalsIgnoreCase(ext)) {
-      out = removeExt(name);
+      out = removeExtension(new File(name)).getPath();
       if (ext.length() > 0) {
         out = out + "." + ext;
       }
@@ -118,15 +118,9 @@ public class Files {
 
   /**
    * Remove extension, if any, from path
-   * 
-   * @deprecated use Apache Commons IO
    */
-  public static String removeExt(String path) {
-    int extPos = path.lastIndexOf('.');
-    if (extPos >= 0) {
-      return path.substring(0, extPos);
-    }
-    return path;
+  public static File removeExtension(File file) {
+    return new File(FilenameUtils.removeExtension(file.getPath()));
   }
 
 }

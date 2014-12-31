@@ -232,7 +232,7 @@ public class SpriteInfo {
       if (!metaDir.mkdir())
         throw new IOException("unable to create meta directory");
     }
-    String imgName = Files.removeExt(mImgPath.getName());
+    String imgName = Files.removeExtension(mImgPath).getName();
     return new File(metaDir, Files.addExtension(imgName, META_SPRITE_EXT));
   }
 

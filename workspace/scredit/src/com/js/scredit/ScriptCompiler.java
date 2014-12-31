@@ -94,7 +94,7 @@ public class ScriptCompiler {
       pr("writeSymFile corresponding to " + sourceFile);
 
     File symPath = sourceFile.getParentFile();
-    String scriptSetName = Files.removeExt(sourceFile.getName());
+    String scriptSetName = Files.removeExtension(sourceFile).getName();
     scriptSetName = scriptSetName + "_scripts";
 
     symPath = new File(symPath, Files.addExtension(scriptSetName, "h"));
