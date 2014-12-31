@@ -182,7 +182,7 @@ public class ScriptCompiler {
           throw new FileNotFoundException("cannot find project file, base="
               + base);
 
-        File[] fl = base.listFiles((FileFilter) ScriptProject.FILES_ONLY);
+        File[] fl = base.listFiles((FileFilter) ScriptProject.FILES);
         if (db)
           pr(" files at base:" + base + " = " + fl.length);
 

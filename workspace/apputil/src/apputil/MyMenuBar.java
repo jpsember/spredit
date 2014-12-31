@@ -61,7 +61,8 @@ public class MyMenuBar {
   private static class RecentFilesMenu extends JMenu implements MenuListener,
       ActionListener, Enableable {
 
-    public RecentFilesMenu(String title, RecentFiles rf, ActionHandler evtHandler) {
+    public RecentFilesMenu(String title, RecentFiles rf,
+        ActionHandler evtHandler) {
       super(title);
       this.mRecentFiles = rf;
       this.mItemHandler = evtHandler;

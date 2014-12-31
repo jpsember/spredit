@@ -174,8 +174,6 @@ public class AppTools {
     return f;
   }
 
-  // private static final boolean USE_SWING_FILECHOOSERS = false;
-
   private static void enableMenuBar(boolean f) {
     JMenuBar mb = sFrame.getJMenuBar();
     if (mb != null)

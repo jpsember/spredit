@@ -15,15 +15,10 @@ import tex.*;
 
 public class Script {
   public static final String SRC_EXT = "scr";
-  public static MyFileFilter FILES_ONLY = new MyFileFilter("Script files",
-      SRC_EXT, false, null);
-  public static MyFileFilter FILES_AND_DIRS = new MyFileFilter("Script files",
-      SRC_EXT, true, null);
+  public static MyFileFilter FILES = new MyFileFilter("Script files", SRC_EXT);
   public static final String SET_EXT = "set";
-  // private static MyFileFilter SET_FILES_ONLY = new MyFileFilter(
-  // "Script project files", SET_EXT, false, null);
-  public static MyFileFilter SET_FILES_AND_DIRS = new MyFileFilter(
-      "Script project files", SET_EXT, true, null);
+  public static MyFileFilter SET_FILES = new MyFileFilter(
+      "Script project files", SET_EXT);
 
   /**
    * Create a new script

@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 import javax.swing.*;
 
@@ -156,9 +158,9 @@ public class ScriptEditor {
       }
 
       if (f == null) {
-        f = AppTools.chooseFileToOpen("Open Script", Script.FILES_AND_DIRS,
-            mProject
-                .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
+        pr("choose file to open");
+        f = AppTools.chooseFileToOpen("Open Script", Script.FILES, mProject
+            .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
       }
       if (f == null) {
         break;
@@ -362,10 +364,9 @@ public class ScriptEditor {
       if (f == null)
         f = path;
       if (f == null || alwaysAskForPath) {
-
-        f = AppTools.chooseFileToSave("Save Script", Script.FILES_AND_DIRS,
-            mProject
-                .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
+        pr("choose file to save");
+        f = AppTools.chooseFileToSave("Save Script", Script.FILES, mProject
+            .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
 
         if (f == null)
           break;
@@ -557,7 +558,7 @@ public class ScriptEditor {
         repaint();
       }
     });
-    m.addItem("Open Next File...", KeyEvent.VK_O, META | SHIFT,
+    m.addItem("Open Next File...", KeyEvent.VK_O, CTRL | SHIFT,
         new ActionHandler() {
           public boolean shouldBeEnabled() {
             return !isOrphan();
@@ -781,32 +782,34 @@ public class ScriptEditor {
 
     m.addSeparator();
 
-    m.addItem("Move Backward", KeyEvent.VK_OPEN_BRACKET, 0, new ActionHandler() {
-      private Reversible r;
+    m.addItem("Move Backward", KeyEvent.VK_OPEN_BRACKET, 0,
+        new ActionHandler() {
+          private Reversible r;
 
-      public boolean shouldBeEnabled() {
-        r = new AdjustSlotsReversible(1, false);
-        return r.valid();
-      }
+          public boolean shouldBeEnabled() {
+            r = new AdjustSlotsReversible(1, false);
+            return r.valid();
+          }
 
-      public void go() {
-        editor().registerPush(r);
-        perform(r);
-      }
-    });
-    m.addItem("Move Forward", KeyEvent.VK_CLOSE_BRACKET, 0, new ActionHandler() {
-      private Reversible r;
+          public void go() {
+            editor().registerPush(r);
+            perform(r);
+          }
+        });
+    m.addItem("Move Forward", KeyEvent.VK_CLOSE_BRACKET, 0,
+        new ActionHandler() {
+          private Reversible r;
 
-      public boolean shouldBeEnabled() {
-        r = new AdjustSlotsReversible(-1, false);
-        return r.valid();
-      }
+          public boolean shouldBeEnabled() {
+            r = new AdjustSlotsReversible(-1, false);
+            return r.valid();
+          }
 
-      public void go() {
-        editor().registerPush(r);
-        perform(r);
-      }
-    });
+          public void go() {
+            editor().registerPush(r);
+            perform(r);
+          }
+        });
     m.addItem("Move to Rear", KeyEvent.VK_OPEN_BRACKET, CTRL,
         new ActionHandler() {
           private Reversible r;
@@ -1155,12 +1158,13 @@ public class ScriptEditor {
           }
         });
 
-    m.addItem("Save Set As...", KeyEvent.VK_S, CTRL | SHIFT, new ActionHandler() {
-      public void go() {
-        doSaveSet();
-        repaint();
-      }
-    });
+    m.addItem("Save Set As...", KeyEvent.VK_S, CTRL | SHIFT,
+        new ActionHandler() {
+          public void go() {
+            doSaveSet();
+            repaint();
+          }
+        });
     m.addSeparator();
 
     // -----------------------------------
@@ -1174,8 +1178,8 @@ public class ScriptEditor {
     });
     m.addItem("Open Project", 0, 0, new ActionHandler() {
       public void go() {
-        File f = AppTools.chooseFileToOpen("Open Project",
-            ScriptProject.FILES_AND_DIRS, null);
+        File f = AppTools.chooseFileToOpen("Open Project", ScriptProject.FILES,
+            null);
         if (f != null) {
           openProject(f);
           repaint();
@@ -1375,38 +1379,20 @@ public class ScriptEditor {
   // }
 
   private static void openNextFile() {
-    final boolean db = false;
-    // unimp("if attempting to load file that is already in another editor, just copy that editor");
-
-    do {
-      File prev = editor.path;
-      if (db)
-        pr("openNextFile prev=" + prev);
-      File dir = prev.getParentFile();
-      File[] fs = Script.FILES_ONLY.list(dir);
-      File next = null;
-
-      if (fs.length > 0 && !fs[0].equals(prev))
-        next = fs[0];
-
-      for (int i = 0; i < fs.length; i++) {
-        if (db)
-          pr(" ..." + fs[i]);
-        if (fs[i].equals(prev)) {
-          i++;
-          if (i < fs.length)
-            next = fs[i];
-          break;
-        }
-      }
-      if (next == null) {
-        if (db)
-          pr("can't find next file");
-        break;
-      }
-      layers.insert(true);
-      open(next);
-    } while (false);
+    File currentFile = editor.path;
+    TreeSet<File> candidates = new TreeSet();
+    File[] array = currentFile.getParentFile().listFiles(
+        (FilenameFilter) Script.FILES);
+    candidates.addAll(Arrays.asList(array));
+    if (candidates.isEmpty())
+      return;
+    File candidate = candidates.higher(currentFile);
+    if (candidate == null)
+      candidate = candidates.first();
+    if (candidate.equals(currentFile))
+      return;
+    layers.insert(true);
+    open(candidate);
   }
 
   /**
@@ -1416,7 +1402,7 @@ public class ScriptEditor {
     do {
 
       File projFile = AppTools.chooseFileToSave("Create New Project",
-          ScriptProject.FILES_AND_DIRS, null);
+          ScriptProject.FILES, null);
       if (projFile == null)
         break;
 
@@ -1446,8 +1432,7 @@ public class ScriptEditor {
         pr("selectAtlas");
 
       if (fx == null)
-        fx = AppTools.chooseFileToOpen("Select Atlas",
-            Atlas.DATA_FILES_AND_DIRS,
+        fx = AppTools.chooseFileToOpen("Select Atlas", Atlas.DATA_FILES,
             mProject.replaceIfMissing(atlasPanel.file()));
 
       if (fx == null)
@@ -1483,9 +1468,8 @@ public class ScriptEditor {
         break;
 
       if (f == null)
-        f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES_AND_DIRS,
-            mProject.replaceIfMissing(mProject.recentScriptSets()
-                .getCurrentFile()));
+        f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES, mProject
+            .replaceIfMissing(mProject.recentScriptSets().getCurrentFile()));
       if (f == null)
         break;
 
@@ -1521,9 +1505,8 @@ public class ScriptEditor {
       if (!flushAll())
         break;
 
-      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES_AND_DIRS,
-          mProject.replaceIfMissing(mProject.recentScriptSets()
-              .getCurrentFile()));
+      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES, mProject
+          .replaceIfMissing(mProject.recentScriptSets().getCurrentFile()));
 
       if (f == null)
         break;
@@ -1730,7 +1713,7 @@ public class ScriptEditor {
 
     {
       File base = recentProjects.getMostRecentFile();
-      if (base != null && !ScriptProject.FILES_ONLY.accept(base))
+      if (base != null && !ScriptProject.FILES.accept(base))
         base = null;
       if (base != null && base.exists()) {
         openProject(base);

@@ -100,10 +100,8 @@ public class TexProject {
     return false;
   }
 
-  public static MyFileFilter FILES_ONLY = new MyFileFilter(
-      "Sprite project files", SRC_EXT, false, null);
-  public static MyFileFilter FILES_AND_DIRS = new MyFileFilter(
-      "Sprite project files", SRC_EXT, true, null);
+  public static MyFileFilter FILES = new MyFileFilter("Sprite project files",
+      SRC_EXT);
 
   public void flush() throws IOException {
     String content = defaults.toString();

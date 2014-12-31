@@ -53,7 +53,7 @@ public class SpriteEditor {
 
     {
       File base = recentProjects.getMostRecentFile();
-      if (base != null && !TexProject.FILES_ONLY.accept(base))
+      if (base != null && !TexProject.FILES.accept(base))
         base = null;
       if (base != null && base.exists()) {
         openProject(base);
@@ -115,7 +115,7 @@ public class SpriteEditor {
   private static void newProject() {
     do {
       File f = AppTools.chooseFileToSave("Create New Project",
-          TexProject.FILES_AND_DIRS, null);
+          TexProject.FILES, null);
       if (f == null)
         break;
       //
@@ -249,7 +249,8 @@ public class SpriteEditor {
       File base = recentProjects.getMostRecentFile();
 
       projFile = AppTools.chooseFileToOpen("Open Project",
-          TexProject.FILES_AND_DIRS, base);
+ TexProject.FILES,
+          base);
     }
     if (projFile != null) {
       try {

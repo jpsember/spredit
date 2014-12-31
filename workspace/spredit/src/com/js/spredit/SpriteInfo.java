@@ -73,7 +73,7 @@ public class SpriteInfo {
 
     mSprite = new Sprite(sprId);
 
-    if (META_FILES_ONLY.accept(path)) {
+    if (META_FILES.accept(path)) {
       mMetaPath = path;
       readMeta();
     } else {
@@ -221,8 +221,8 @@ public class SpriteInfo {
 
   private static final String META_SPRITE_EXT = "spi";
   private static final String THUMB_EXT = "png";
-  public static MyFileFilter META_FILES_ONLY = new MyFileFilter(
-      "Sprite Meta files", META_SPRITE_EXT, false, null);
+  public static MyFileFilter META_FILES = new MyFileFilter("Sprite Meta files",
+      META_SPRITE_EXT);
 
   private File createMetaPath() throws IOException {
 

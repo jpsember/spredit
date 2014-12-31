@@ -15,7 +15,7 @@ public class SprUtils {
   public static File addResolutionSuffix(File file, float[] res, int slot) {
     if (slot != 0) {
       String s = file.getPath();
-      String ext = null;
+      String ext = "";
       if (Files.hasExtension(file)) {
         ext = Files.getExtension(file);
         s = Files.removeExtension(file).getPath();
@@ -65,7 +65,7 @@ public class SprUtils {
     File ret = null;
     if (!f.isDirectory()) {
       // warn("disabled");
-      if (!f.equals(projectFile) && TexProject.FILES_ONLY.accept(f))
+      if (!f.equals(projectFile) && TexProject.FILES.accept(f))
         ret = f;
     } else {
       File[] fl = f.listFiles();
@@ -194,7 +194,7 @@ public class SprUtils {
       pr("addAliasEntries " + f);
     do {
       if (!f.isDirectory()) {
-        if (!SpriteInfo.META_FILES_ONLY.accept(f))
+        if (!SpriteInfo.META_FILES.accept(f))
           break;
 
         // is there already an entry with this id?

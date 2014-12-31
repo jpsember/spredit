@@ -17,10 +17,8 @@ import static com.js.basic.Tools.*;
 public class ScriptProject {
 
   public static final String PROJ_EXT = "scp";
-  public static MyFileFilter FILES_ONLY = new MyFileFilter(
-      "Script project files", PROJ_EXT, false, null);
-  public static MyFileFilter FILES_AND_DIRS = new MyFileFilter(
-      "Script project files", PROJ_EXT, true, null);
+  public static MyFileFilter FILES = new MyFileFilter("Script project files",
+      PROJ_EXT);
 
   public ScriptProject(File f) throws IOException {
     mProjectDir = f.getParentFile();

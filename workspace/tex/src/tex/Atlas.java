@@ -22,14 +22,8 @@ public class Atlas {
   /**
    * File filter for atlas files
    */
-  public static MyFileFilter DATA_FILES_ONLY = new MyFileFilter("Atlas files",
-      ATLAS_EXT, false, null);
-
-  /**
-   * File filter for atlas files + directories
-   */
-  public static MyFileFilter DATA_FILES_AND_DIRS = new MyFileFilter(
-      "Atlas files", ATLAS_EXT, true, null);
+  public static MyFileFilter DATA_FILES = new MyFileFilter("Atlas files",
+      ATLAS_EXT);
 
   public void debugWriteToPNG() {
     File pngPath = Files.setExtension(dataFile, "png");
