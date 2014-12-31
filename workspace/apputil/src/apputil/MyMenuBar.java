@@ -18,7 +18,7 @@ public class MyMenuBar {
   public static final int META = (1 << 2);
   public static final int ALT = (1 << 1);
 
-  private static ItemEnabled ALWAYS_ENABLED_HANDLER = new ItemEnabled() {
+  private static Enableable ALWAYS_ENABLED_HANDLER = new Enableable() {
     @Override
     public boolean shouldBeEnabled() {
       return true;
@@ -59,9 +59,9 @@ public class MyMenuBar {
   }
 
   private static class RecentFilesMenu extends JMenu implements MenuListener,
-      ActionListener, ItemEnabled {
+      ActionListener, Enableable {
 
-    public RecentFilesMenu(String title, RecentFiles rf, ItemHandler evtHandler) {
+    public RecentFilesMenu(String title, RecentFiles rf, ActionHandler evtHandler) {
       super(title);
       this.mRecentFiles = rf;
       this.mItemHandler = evtHandler;
@@ -109,7 +109,7 @@ public class MyMenuBar {
       }
     }
 
-    private ItemHandler mItemHandler;
+    private ActionHandler mItemHandler;
     private RecentFiles mRecentFiles;
 
   }
@@ -123,7 +123,7 @@ public class MyMenuBar {
     addMenu(name, null);
   }
 
-  public void addMenu(String name, ItemEnabled handler) {
+  public void addMenu(String name, Enableable handler) {
 
     menu = new Menu(name, handler);
     sepPending = false;
@@ -175,7 +175,7 @@ public class MyMenuBar {
   }
 
   public JMenuItem addRecentFilesList(String name, RecentFiles rf,
-      ItemHandler evtHandler) {
+      ActionHandler evtHandler) {
 
     if (sepPending) {
       menu.addSeparator();
@@ -189,7 +189,7 @@ public class MyMenuBar {
   }
 
   public JMenuItem addItem(String name, int accelKey, int accelFlags,
-      ItemHandler evtHandler) {
+      ActionHandler evtHandler) {
 
     if (sepPending) {
       menu.addSeparator();
@@ -225,9 +225,9 @@ public class MyMenuBar {
   private boolean sepPending;
   private int itemsAdded;
 
-  private static class MenuItem extends JMenuItem implements ItemEnabled {
+  private static class MenuItem extends JMenuItem implements Enableable {
 
-    public MenuItem(String name, ItemHandler itemHandler, Menu containingMenu) {
+    public MenuItem(String name, ActionHandler itemHandler, Menu containingMenu) {
       super(name);
       ASSERT(containingMenu != null);
       mContainingMenu = containingMenu;
@@ -247,7 +247,7 @@ public class MyMenuBar {
       });
     }
 
-    public ItemHandler handler() {
+    public ActionHandler handler() {
       return mItemHandler;
     }
 
@@ -261,7 +261,7 @@ public class MyMenuBar {
       return enabled;
     }
 
-    private ItemHandler mItemHandler;
+    private ActionHandler mItemHandler;
     private Menu mContainingMenu;
   }
 
@@ -273,18 +273,18 @@ public class MyMenuBar {
         redrawOpenGLComponent.repaint(50);
     }
 
-    public Menu(String name, ItemEnabled handler) {
+    public Menu(String name, Enableable handler) {
       super(name);
       if (handler == null)
         handler = ALWAYS_ENABLED_HANDLER;
       this.mHandler = handler;
     }
 
-    public ItemEnabled handler() {
+    public Enableable handler() {
       return mHandler;
     }
 
-    private ItemEnabled mHandler;
+    private Enableable mHandler;
   }
 
   // masks for modifier keys; these are lazy-initialized according

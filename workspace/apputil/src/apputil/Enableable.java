@@ -1,6 +1,6 @@
 package apputil;
 
-public interface ItemEnabled {
+public interface Enableable {
 
   /**
    * Determine if the item should be enabled
