@@ -44,10 +44,10 @@ public class SprMain implements IApplication {
 
       ca.parse(args);
 
-      verbose = ca.get("verbose");
+      mVerbose = ca.get("verbose");
 
       if (ca.get("showfonts")) {
-        runGUI = false;
+        mRunGUI = false;
         String[] fn = Builder.getFontNames();
         for (int i = 0; i < fn.length; i++) {
           String s = fn[i];
@@ -55,55 +55,50 @@ public class SprMain implements IApplication {
           pr(s);
         }
       }
-      showAtlas = ca.get("showfont");
+      mShowAtlas = ca.get("showfont");
       if (ca.hasValue("font")) {
         String[] s = ca.getStrings("font");
-        runGUI = false;
-        fontName = s[0];
-        fontName = fontName.replaceAll("_", " ");
-        fontSize = Integer.parseInt(s[1]);
-        fontPath = new File(s[2]);
+        mRunGUI = false;
+        mFontName = s[0];
+        mFontName = mFontName.replaceAll("_", " ");
+        mFontSize = Integer.parseInt(s[1]);
+        mFontPath = new File(s[2]);
       }
 
       if (ca.hasValue("size")) {
         int[] v = ca.getInts("size");
-        atlasSize = new IPoint(v[0], v[1]);
+        mAtlasSize = new IPoint(v[0], v[1]);
       }
       if (ca.hasValue("build")) {
-        runGUI = false;
+        mRunGUI = false;
         File path = new File(ca.getString("build"));
-        buildPath = Files.setExtension(path.getAbsoluteFile(),
+        mBuildPath = Files.setExtension(path.getAbsoluteFile(),
             TexProject.SRC_EXT);
       }
 
       if (ca.hasValue("resolutions")) {
-        resolutions = ca.getFloats("resolutions");
+        mResolutions = ca.getFloats("resolutions");
       }
 
-      if (runGUI) {
+      if (mRunGUI) {
         AppTools.startApplication(new SprMain());
       } else {
         AppTools.runAsCmdLine();
 
-        if (fontPath != null) {
+        if (mFontPath != null) {
           buildFont();
           return;
         }
 
-        if (buildPath != null) {
-          final boolean db = false;
+        if (mBuildPath != null) {
+          if (mVerbose)
+            pr("Building atlas: " + mBuildPath);
 
-          if (db)
-            pr("buildPath=" + buildPath);
-
-          if (verbose)
-            pr("Building atlas: " + buildPath);
-
-          TexProject tp = new TexProject(buildPath);
+          TexProject tp = new TexProject(mBuildPath);
 
           Builder b = new Builder();
           b.setProject(tp);
-          b.setVerbose(verbose);
+          b.setVerbose(mVerbose);
           b.setSort(!sArgs.get("nosort"));
           b.setPlotFrames(sArgs.get("frames"));
           if (sArgs.get("palette"))
@@ -121,22 +116,15 @@ public class SprMain implements IApplication {
 
             pr("building atlas [" + f + "]");
 
-            Atlas at = b.build(f, atlasSize, null, resolution);
-
-            if (db)
-              pr("done building");
+            Atlas at = b.build(f, mAtlasSize, null, resolution);
 
             if (sArgs.get("write")) {
               at.debugWriteToPNG();
-              // File pngPath = Streams.changeExtension(f, "png");
-              // pr("writing atlas to " + pngPath);
-              // ImgUtil.writePNG(at.image(), pngPath);
             }
 
             if (i == 0) {
-
-              atlasFile = at.dataFile();
-              if (showAtlas)
+              mAtlasFile = at.dataFile();
+              if (mShowAtlas)
                 laterShowNewAtlas();
             }
           }
@@ -153,7 +141,7 @@ public class SprMain implements IApplication {
   @Override
   public void createAndShowGUI(JFrame frame) {
     try {
-      config = new ConfigSet(null) //
+      mConfigSet = new ConfigSet(null) //
           .add(apputil.MyFrame.CONFIG) //
           .add(SpriteEditor.CONFIG) //
           .restore();
@@ -184,7 +172,7 @@ public class SprMain implements IApplication {
 
   private void writeDefaults() {
     try {
-      config.save();
+      mConfigSet.save();
     } catch (IOException e) {
       AppTools.showError("writing defaults file", e);
     }
@@ -197,11 +185,8 @@ public class SprMain implements IApplication {
     for (int slot = 0; slot < res.length; slot++) {
       float scl = res[slot];
 
-      if (db)
-        pr("buildFont resolution #" + slot + "= " + scl);
-
       Builder atlasBuilder = new Builder();
-      atlasBuilder.setVerbose(verbose);
+      atlasBuilder.setVerbose(mVerbose);
       atlasBuilder.setSort(!sArgs.get("nosort"));
       atlasBuilder.setPlotFrames(sArgs.get("frames"));
 
@@ -215,26 +200,18 @@ public class SprMain implements IApplication {
       if (sArgs.get("bold"))
         style |= Font.BOLD;
 
-      int scaledSize = Math.round(fontSize * scl);
-      // Font f;
-
-      // f = new Font(fontName, style, fontSize);
-      FontExtractor fimg = new FontExtractor(
-          new Font(fontName, style, fontSize));
+      int scaledSize = Math.round(mFontSize * scl);
+      FontExtractor fimg = new FontExtractor(new Font(mFontName, style,
+          mFontSize));
       fimg.setHorizontalSpacing(sArgs.getInt("horzpixels"));
       fimg.setCropping(!sArgs.get("nocrop"));
 
       FontExtractor fimg2 = null;
-      if (scaledSize != fontSize) {
-        fimg2 = new FontExtractor(new Font(fontName, style, scaledSize));
+      if (scaledSize != mFontSize) {
+        fimg2 = new FontExtractor(new Font(mFontName, style, scaledSize));
         fimg2.setHorizontalSpacing(sArgs.getInt("horzpixels"));
         fimg2.setCropping(!sArgs.get("nocrop"));
       }
-
-      // if (
-
-      if (db)
-        pr(" fontSize=" + fontSize + " scaledSize=" + scaledSize);
 
       for (char c = ' '; c < 128; c++) {
         fimg.render(c);
@@ -256,16 +233,9 @@ public class SprMain implements IApplication {
       int[] fd = fimg.getFontInfo();
       fimg = null;
 
-      File fp = SprUtils.addResolutionSuffix(fontPath, res, slot);
+      File fp = SprUtils.addResolutionSuffix(mFontPath, res, slot);
       if (db)
         pr(" writing to " + fp);
-
-      // // use -1 as resolution to ignore it; we don't want it throwing
-      // // out our image which we have pre-attached to the SpriteInfo record
-      // Atlas at = atlasBuilder.build(fp, null, fd, -1);
-
-      if (db)
-        pr(" building atlas, resolution " + res[slot]);
 
       Atlas at = atlasBuilder.build(fp, null, fd, res[slot]);
 
@@ -273,21 +243,19 @@ public class SprMain implements IApplication {
         pr("*** Could not build atlas " + fp);
         System.exit(1);
       }
-      if (verbose)
+      if (mVerbose)
         pr("built atlas " + at);
 
       if (sArgs.get("write"))
         at.debugWriteToPNG();
 
       if (slot == 0) {
-        atlasFile = at.dataFile();
+        mAtlasFile = at.dataFile();
 
-        if (showAtlas)
+        if (mShowAtlas)
           laterShowNewAtlas();
       }
-
     }
-
   }
 
   private static void laterShowNewAtlas() {
@@ -306,29 +274,29 @@ public class SprMain implements IApplication {
    * invoked from the event-dispatching thread.
    */
   private static void displayNewAtlas() {
-    AtlasDisplay a = new AtlasDisplay(atlasFile);
+    AtlasDisplay a = new AtlasDisplay(mAtlasFile);
     a.setVisible(true);
   }
 
   private static float[] getResolutions() {
-    if (resolutions == null) {
-      resolutions = new float[1];
-      resolutions[0] = 1;
+    if (mResolutions == null) {
+      mResolutions = new float[1];
+      mResolutions[0] = 1;
     }
-    return resolutions;
+    return mResolutions;
   }
 
-  private static ConfigSet config;
-  private static IPoint atlasSize;
-  private static File buildPath;
-  private static File fontPath;
-  private static String fontName;
-  private static int fontSize;
-  private static boolean verbose;
-  private static boolean runGUI = true;
-  private static boolean showAtlas;
-  private static File atlasFile;
-  private static float[] resolutions;
+  private static ConfigSet mConfigSet;
+  private static IPoint mAtlasSize;
+  private static File mBuildPath;
+  private static File mFontPath;
+  private static String mFontName;
+  private static int mFontSize;
+  private static boolean mVerbose;
+  private static boolean mRunGUI = true;
+  private static boolean mShowAtlas;
+  private static File mAtlasFile;
+  private static float[] mResolutions;
   private static CmdLineArgs sArgs;
 
 }
