@@ -275,9 +275,9 @@ public class SpriteEditor {
 
   private static void addMenus() {
 
-    MenuHandler projectMustBeOpenHandler = new MenuHandler() {
+    ItemEnabled projectMustBeOpenHandler = new ItemEnabled() {
       @Override
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return isProjectOpen();
       }
     };
@@ -301,7 +301,7 @@ public class SpriteEditor {
         doAdjustZoom(-1);
       }
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return spritePanel.getZoom() < 20;
       }
     });
@@ -311,12 +311,12 @@ public class SpriteEditor {
         doAdjustZoom(1);
       }
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return spritePanel.getZoom() > .1f;
       }
     });
     m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return spritePanel.getZoom() != 1;
       }
 
@@ -365,7 +365,7 @@ public class SpriteEditor {
         doResetClip();
       }
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return defined();
       }
     });
@@ -378,7 +378,7 @@ public class SpriteEditor {
           move(-XMOVE, 0);
         }
 
-        public boolean isEnabled() {
+        public boolean shouldBeEnabled() {
           return defined();
         }
       });
@@ -387,7 +387,7 @@ public class SpriteEditor {
           move(XMOVE, 0);
         }
 
-        public boolean isEnabled() {
+        public boolean shouldBeEnabled() {
           return defined();
         }
       });
@@ -396,7 +396,7 @@ public class SpriteEditor {
           move(0, YMOVE);
         }
 
-        public boolean isEnabled() {
+        public boolean shouldBeEnabled() {
           return defined();
         }
       });
@@ -406,7 +406,7 @@ public class SpriteEditor {
 
         }
 
-        public boolean isEnabled() {
+        public boolean shouldBeEnabled() {
           return defined();
         }
       });
@@ -414,7 +414,7 @@ public class SpriteEditor {
     }
 
     m.addItem("Create Alias", KeyEvent.VK_A, SHIFT, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return defined();
       }
 
@@ -423,7 +423,7 @@ public class SpriteEditor {
       }
     });
     m.addItem("Delete Alias", KeyEvent.VK_D, SHIFT | CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return defined() && spriteInfo.isAlias();
       }
 
@@ -457,7 +457,7 @@ public class SpriteEditor {
         });
 
     m.addItem("Close", KeyEvent.VK_W, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return SpriteEditor.isProjectOpen();
       };
 
@@ -470,7 +470,7 @@ public class SpriteEditor {
     m.addSeparator();
 
     m.addItem("Build", KeyEvent.VK_B, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return SpriteEditor.isProjectOpen();
       };
 
@@ -481,7 +481,7 @@ public class SpriteEditor {
     });
     m.addItem("Build Parameters", KeyEvent.VK_B, SHIFT | CTRL,
         new ItemHandler() {
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             return SpriteEditor.isProjectOpen();
           }
 

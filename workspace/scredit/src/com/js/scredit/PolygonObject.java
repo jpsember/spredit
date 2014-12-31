@@ -145,7 +145,7 @@ public class PolygonObject extends EdObject {
 
   public static ItemHandler DELETE_VERTEX = new ItemHandler() {
     @Override
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null
           && EdPolygonOper.activePoly().nPoints() > 0;
     }
@@ -158,7 +158,7 @@ public class PolygonObject extends EdObject {
   };
   public static ItemHandler PREV_VERTEX = new ItemHandler() {
     @Override
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null
           && EdPolygonOper.activePoly().nPoints() > 1;
     }
@@ -172,7 +172,7 @@ public class PolygonObject extends EdObject {
   };
   public static ItemHandler NEXT_VERTEX = new ItemHandler() {
     @Override
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null
           && EdPolygonOper.activePoly().nPoints() > 0;
     }
@@ -185,7 +185,7 @@ public class PolygonObject extends EdObject {
   };
   public static ItemHandler TOGGLE_VERTEX_DIR = new ItemHandler() {
     @Override
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null;
     }
 

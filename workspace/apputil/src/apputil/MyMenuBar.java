@@ -18,9 +18,9 @@ public class MyMenuBar {
   public static final int META = (1 << 2);
   public static final int ALT = (1 << 1);
 
-  private static MenuHandler ALWAYS_ENABLED_HANDLER = new MenuHandler() {
+  private static ItemEnabled ALWAYS_ENABLED_HANDLER = new ItemEnabled() {
     @Override
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       return true;
     }
   };
@@ -59,7 +59,7 @@ public class MyMenuBar {
   }
 
   private static class RecentFilesMenu extends JMenu implements MenuListener,
-      ActionListener {
+      ActionListener, ItemEnabled {
 
     public RecentFilesMenu(String title, RecentFiles rf, ItemHandler evtHandler) {
       super(title);
@@ -69,7 +69,7 @@ public class MyMenuBar {
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       if (mRecentFiles == null)
         return false;
       int size = mRecentFiles.size();
@@ -123,7 +123,7 @@ public class MyMenuBar {
     addMenu(name, null);
   }
 
-  public void addMenu(String name, MenuHandler handler) {
+  public void addMenu(String name, ItemEnabled handler) {
 
     menu = new Menu(name, handler);
     sepPending = false;
@@ -167,7 +167,7 @@ public class MyMenuBar {
         RecentFilesMenu rm = (RecentFilesMenu) item;
         boolean enable = true;
         if (showingMenu) {
-          enable = rm.isEnabled();
+          enable = rm.shouldBeEnabled();
         }
         rm.setEnabled(enable);
       }
@@ -225,7 +225,7 @@ public class MyMenuBar {
   private boolean sepPending;
   private int itemsAdded;
 
-  private static class MenuItem extends JMenuItem {
+  private static class MenuItem extends JMenuItem implements ItemEnabled {
 
     public MenuItem(String name, ItemHandler itemHandler, Menu containingMenu) {
       super(name);
@@ -251,16 +251,13 @@ public class MyMenuBar {
       return mItemHandler;
     }
 
-    /**
-     * Determine if this menu item should be enabled, by examining both the
-     * containing menu's enabled state and the item handler interface. Avoid
-     * overriding isEnabled() for this, since it should continue to return the
-     * flag maintained by the Java GUI.
-     */
+    @Override
     public boolean shouldBeEnabled() {
+      // examine both the containing menu's enabled state and the item handler
+      // interface
       ASSERT(mContainingMenu != null); // verify not partially constructed
-      boolean enabled = mContainingMenu.handler().isEnabled()
-          && mItemHandler.isEnabled();
+      boolean enabled = mContainingMenu.handler().shouldBeEnabled()
+          && mItemHandler.shouldBeEnabled();
       return enabled;
     }
 
@@ -276,18 +273,18 @@ public class MyMenuBar {
         redrawOpenGLComponent.repaint(50);
     }
 
-    public Menu(String name, MenuHandler handler) {
+    public Menu(String name, ItemEnabled handler) {
       super(name);
       if (handler == null)
         handler = ALWAYS_ENABLED_HANDLER;
       this.mHandler = handler;
     }
 
-    public MenuHandler handler() {
+    public ItemEnabled handler() {
       return mHandler;
     }
 
-    private MenuHandler mHandler;
+    private ItemEnabled mHandler;
   }
 
   // masks for modifier keys; these are lazy-initialized according

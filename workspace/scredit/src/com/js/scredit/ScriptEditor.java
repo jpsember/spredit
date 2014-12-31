@@ -25,11 +25,6 @@ import com.js.myopengl.GLPanel;
 import static com.js.basic.Tools.*;
 import static apputil.MyMenuBar.*;
 
-/*
- [] should NEW always insert layer? probably, if current is not orphan.
- [] figure out relationship between 'Reversible' operations and MouseEditOpers;
- maybe they are orthogonal.
- */
 public class ScriptEditor {
 
   public ScriptEditor() {
@@ -474,7 +469,7 @@ public class ScriptEditor {
 
     private int dir;
 
-    public boolean isEnabled() {
+    public boolean shouldBeEnabled() {
       return editor.items.hasSelected();
     }
 
@@ -507,9 +502,9 @@ public class ScriptEditor {
 
   private static void addMenus() {
 
-    MenuHandler projectMustBeOpenHandler = new MenuHandler() {
+    ItemEnabled projectMustBeOpenHandler = new ItemEnabled() {
       @Override
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return ScriptEditor.isProjectOpen();
       }
     };
@@ -543,7 +538,7 @@ public class ScriptEditor {
     recentScriptsMenuItem = m.addRecentFilesList("Open Recent Script", null,
         new ItemHandler() {
           @Override
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             return ScriptEditor.isProjectOpen();
           }
 
@@ -564,7 +559,7 @@ public class ScriptEditor {
     });
     m.addItem("Open Next File...", KeyEvent.VK_O, META | SHIFT,
         new ItemHandler() {
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             return !isOrphan();
           }
 
@@ -605,7 +600,7 @@ public class ScriptEditor {
     });
 
     m.addItem("Save", KeyEvent.VK_S, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return isOrphan() || editor.modified();
       }
 
@@ -623,7 +618,7 @@ public class ScriptEditor {
     });
     m.addItem("Save All", KeyEvent.VK_S, CTRL | SHIFT, new ItemHandler() {
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         boolean ret = false;
         for (int i = 0; i < layers.size(); i++) {
           ScriptEditor ed = layers.layer(i);
@@ -645,7 +640,7 @@ public class ScriptEditor {
       }
     });
     m.addItem("Save As Next", KeyEvent.VK_S, META | SHIFT, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return !isOrphan();
       }
 
@@ -660,7 +655,7 @@ public class ScriptEditor {
     // -----------------------------------
     m.addMenu("Edit", projectMustBeOpenHandler);
     undoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return editor.undoCursor > 0;
       }
 
@@ -671,7 +666,7 @@ public class ScriptEditor {
     });
 
     redoMenuItem = m.addItem("Redo", KeyEvent.VK_Y, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return editor.getRedoOper() != null;
       }
 
@@ -684,7 +679,7 @@ public class ScriptEditor {
     m.addItem("Cut", KeyEvent.VK_X, CTRL, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new CutReversible();
         return r.valid();
         // return editor.items.hasSelected();
@@ -713,7 +708,7 @@ public class ScriptEditor {
     m.addItem("Copy", KeyEvent.VK_C, CTRL, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new CopyReversible();
         return r.valid();
         // return editor.items.hasSelected();
@@ -729,7 +724,7 @@ public class ScriptEditor {
     m.addItem("Paste", KeyEvent.VK_V, CTRL, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new PasteReversible();
         return r.valid();
         // return clipboard().size() > 0;
@@ -745,7 +740,7 @@ public class ScriptEditor {
     m.addItem("Duplicate", KeyEvent.VK_D, CTRL, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new DuplicateReversible();
         return r.valid();
       }
@@ -758,7 +753,7 @@ public class ScriptEditor {
 
     m.addSeparator();
     m.addItem("Select All", KeyEvent.VK_A, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return !editor.items.isEmpty();
       }
 
@@ -773,7 +768,7 @@ public class ScriptEditor {
         new ItemHandler() {
           private SelectNoneOper r;
 
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             r = new SelectNoneOper();
             return r.valid();
           }
@@ -789,7 +784,7 @@ public class ScriptEditor {
     m.addItem("Move Backward", KeyEvent.VK_OPEN_BRACKET, 0, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new AdjustSlotsReversible(1, false);
         return r.valid();
       }
@@ -802,7 +797,7 @@ public class ScriptEditor {
     m.addItem("Move Forward", KeyEvent.VK_CLOSE_BRACKET, 0, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new AdjustSlotsReversible(-1, false);
         return r.valid();
       }
@@ -816,7 +811,7 @@ public class ScriptEditor {
         new ItemHandler() {
           private Reversible r;
 
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(1, true);
             return r.valid();
           }
@@ -830,7 +825,7 @@ public class ScriptEditor {
         new ItemHandler() {
           private Reversible r;
 
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(-1, true);
             return r.valid();
           }
@@ -846,7 +841,7 @@ public class ScriptEditor {
     m.addItem("Group", KeyEvent.VK_G, CTRL, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = GroupObject.getGroupReversible();
         return r.valid();
       }
@@ -859,7 +854,7 @@ public class ScriptEditor {
     m.addItem("Ungroup", KeyEvent.VK_U, CTRL, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = GroupObject.getUnGroupReversible();
         return r.valid();
       }
@@ -880,7 +875,7 @@ public class ScriptEditor {
         new ItemHandler() {
           private Reversible r;
 
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             r = new FlipReversible(true);
             return r.valid();
 
@@ -895,7 +890,7 @@ public class ScriptEditor {
         new ItemHandler() {
           private Reversible r;
 
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             r = new FlipReversible(false);
             return r.valid();
 
@@ -910,66 +905,53 @@ public class ScriptEditor {
     m.addItem("Rotate", KeyEvent.VK_R, CTRL, new ItemHandler() {
       private RotateOper r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = new RotateOper();
         return r.valid();
-        // return editor.items.getSelected().length != 0;
       }
 
       public void go() {
-        //
-        // int[] slots = editor.items.getSelected();
-        // if (slots.length == 0)
-        // return;
-        MouseOper.setOperation(r); // new RotateOper(slots));
+        MouseOper.setOperation(r);
       }
     });
     m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
-        r = RotateOper.getResetOper(); // new ResetRotateOper();
+      public boolean shouldBeEnabled() {
+        r = RotateOper.getResetOper();
         return r.valid();
       }
 
       public void go() {
-        // if (r.valid()) {
         editor().registerPush(r);
         perform(r);
         repaint();
-        // }
       }
     });
     m.addItem("Scale", KeyEvent.VK_E, CTRL, new ItemHandler() {
       private ScaleOper oper;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         oper = new ScaleOper();
         return oper.valid();
-        // return editor.items.getSelected().length != 0;
       }
 
       public void go() {
-        // int[] slots = editor.items.getSelected();
-        // if (slots.length == 0)
-        // return;
-        MouseOper.setOperation(oper); // new RotateOper(slots));
+        MouseOper.setOperation(oper);
       }
     });
     m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
-        r = ScaleOper.getResetOper(); // new Z_ResetScaleOper();
+      public boolean shouldBeEnabled() {
+        r = ScaleOper.getResetOper();
         return r.valid();
       }
 
       public void go() {
-        // if (r.valid()) {
         editor().registerPush(r);
         perform(r);
         repaint();
-        // }
       }
     });
 
@@ -980,7 +962,7 @@ public class ScriptEditor {
         doAdjustZoom(-1);
       }
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return zoomFactor < 20;
       }
     });
@@ -990,12 +972,12 @@ public class ScriptEditor {
         doAdjustZoom(1);
       }
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return zoomFactor > .1f;
       }
     });
     m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return zoomFactor != 1;
       }
 
@@ -1007,7 +989,7 @@ public class ScriptEditor {
     m.addItem("Snap to Grid", KeyEvent.VK_G, CTRL | SHIFT, new ItemHandler() {
       private Reversible r;
 
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         r = Grid.getOper();
         return r.valid();
 
@@ -1037,7 +1019,7 @@ public class ScriptEditor {
     // -----------------------------------
     m.addMenu("Objects", projectMustBeOpenHandler);
     m.addItem("Add Sprite", KeyEvent.VK_S, 0, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return lastSprite != null;
       }
 
@@ -1133,7 +1115,7 @@ public class ScriptEditor {
     // -----------------------------------
     m.addMenu("Layer", projectMustBeOpenHandler);
     m.addItem("Next", KeyEvent.VK_EQUALS, 0, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return layers.size() > 1;
       }
 
@@ -1143,7 +1125,7 @@ public class ScriptEditor {
       }
     });
     m.addItem("Previous", KeyEvent.VK_MINUS, 0, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return layers.size() > 1;
       }
 
@@ -1163,7 +1145,7 @@ public class ScriptEditor {
     recentScriptSetsMenuItem = m.addRecentFilesList("Open Recent Set", null,
         new ItemHandler() {
           @Override
-          public boolean isEnabled() {
+          public boolean shouldBeEnabled() {
             return ScriptEditor.isProjectOpen();
           }
 
@@ -1210,7 +1192,7 @@ public class ScriptEditor {
         });
 
     m.addItem("Close Project", 0, 0, new ItemHandler() {
-      public boolean isEnabled() {
+      public boolean shouldBeEnabled() {
         return isProjectOpen();
       }
 
