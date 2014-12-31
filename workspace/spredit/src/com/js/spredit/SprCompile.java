@@ -39,36 +39,38 @@ public class SprCompile {
   private void run(String[] args) {
     if (true) {
       warning("using test args");
-      String[] a = { "-p", "sample", "-v" };
+      String[] a = {//
+      "-v", //
+          "-p", "sample", //
+      };
       args = a;
     }
 
     try {
-      ca = buildCmdLineArgs();
+      mArgs = buildCmdLineArgs();
+      mArgs.parse(args);
 
-      ca.parse(args);
+      mVerbose = mArgs.get("verbose");
 
-      mVerbose = ca.get("verbose");
-
-      if (ca.hasValue("size")) {
-        int[] v = ca.getInts("size");
+      if (mArgs.hasValue("size")) {
+        int[] v = mArgs.getInts("size");
         mAtlasSize = new IPoint(v[0], v[1]);
       }
 
       {
-        File path = new File(ca.getString("project"));
-        warning("what happens if no 'project' specified?");
+        File path = new File(mArgs.getString("project"));
         mBuildPath = Files.setExtension(path, TexProject.SRC_EXT);
       }
 
-      if (ca.hasValue("resolutions")) {
-        mResolutions = ca.getFloats("resolutions");
+      if (mArgs.hasValue("resolutions")) {
+        mResolutions = mArgs.getFloats("resolutions");
       }
 
       buildAtlas();
     } catch (CmdLineArgs.Exception e) {
       System.out.println(e.getMessage());
     } catch (Throwable e) {
+      System.out.println(e.getMessage());
       e.printStackTrace();
     }
   }
@@ -80,15 +82,15 @@ public class SprCompile {
 
     TexProject tp = new TexProject(mBuildPath);
 
-    Builder b = new Builder();
-    b.setProject(tp);
-    b.setVerbose(mVerbose);
-    b.setSort(!ca.get("nosort"));
-    b.setPlotFrames(ca.get("frames"));
-    if (ca.get("palette"))
-      b.includePalette();
+    Builder builder = new Builder();
+    builder.setProject(tp);
+    builder.setVerbose(mVerbose);
+    builder.setSort(!mArgs.get("nosort"));
+    builder.setPlotFrames(mArgs.get("frames"));
+    if (mArgs.get("palette"))
+      builder.includePalette();
 
-    b.gatherSprites();
+    builder.gatherSprites();
 
     float[] res = mResolutions;
 
@@ -100,9 +102,9 @@ public class SprCompile {
 
       pr("building atlas [" + f + "]");
 
-      Atlas at = b.build(f, mAtlasSize, null, resolution);
+      Atlas at = builder.build(f, mAtlasSize, null, resolution);
 
-      if (ca.get("write")) {
+      if (mArgs.get("write")) {
         at.debugWriteToPNG();
       }
     }
@@ -114,5 +116,5 @@ public class SprCompile {
   private File mBuildPath;
   private boolean mVerbose;
   private float[] mResolutions = sDefaultResolutions;
-  private CmdLineArgs ca;
+  private CmdLineArgs mArgs;
 }

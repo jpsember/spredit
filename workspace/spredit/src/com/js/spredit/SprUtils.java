@@ -150,28 +150,27 @@ public class SprUtils {
   /**
    * Add entries for any image files we find in file tree
    * 
-   * @param f
+   * @param file
    *          root of file tree
    * @throws IOException
    */
-  private static void addEntries(TexProject project, TreeMap entries, File f)
+  private static void addEntries(TexProject project, TreeMap entries, File file)
       throws IOException {
-    if (!f.isDirectory()) {
-      if (project.isTexture(f)) {
-        String id = project.extractId(f);
+    if (!file.isDirectory()) {
+      if (project.isTexture(file)) {
+        String id = project.extractId(file);
         {
           SpriteInfo si;
-          si = new SpriteInfo(project, f);
+          si = new SpriteInfo(project, file);
           si.verifyMetaData(true);
           // Entry ent = new Entry(id);
           // ent.si = si;
           entries.put(id, si);
-
         }
       }
     } else {
-      if (!TexProject.isMetaInfoFolder(f)) {
-        File[] fs = f.listFiles();
+      if (!TexProject.isMetaInfoFolder(file)) {
+        File[] fs = file.listFiles();
         for (int i = 0; i < fs.length; i++)
           addEntries(project, entries, fs[i]);
       }
@@ -188,7 +187,6 @@ public class SprUtils {
    */
   private static void addAliasEntries(TexProject project, TreeMap entries,
       File f) throws IOException {
-    final boolean db = true;
 
     if (db)
       pr("addAliasEntries " + f);

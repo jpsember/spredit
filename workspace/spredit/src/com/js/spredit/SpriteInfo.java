@@ -70,6 +70,7 @@ public class SpriteInfo {
     mProject = project;
 
     String sprId = project.extractId(path);
+    pr("SpriteInfo, path " + path + ", extracted id  " + sprId);
 
     mSprite = new Sprite(sprId);
 

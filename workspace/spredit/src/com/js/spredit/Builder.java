@@ -101,29 +101,21 @@ public class Builder {
    * Add sprites from TexProject
    */
   public void gatherSprites() throws IOException {
-    final boolean db = false;
-
     if (project == null)
       throw new IllegalStateException();
 
     if (db)
       pr("gatherSprites");
 
-    // private DArray readSprites() throws IOException {
     TreeMap<String, SpriteInfo> map = SprUtils.readSprites(project);
     ArrayList<SpriteInfo> a = new ArrayList();
     a.addAll(map.values());
-    // return a;
-    // }
-    // sprites = a;
 
     // sprites = readSprites();
     if (db)
       pr("read " + a.size() + " sprites");
 
-    for (int i = 0; i < a.size(); i++) {
-      SpriteInfo si = (SpriteInfo) a.get(i);
-
+    for (SpriteInfo si : a) {
       String id = project.extractId(si.imagePath());
       addSprite(si, id);
     }

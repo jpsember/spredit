@@ -17,50 +17,43 @@ public class TexProject {
   public static final String THUMB_DIR = "_thumbnails";
 
   /**
-   * @param f
+   * @param file
    * @return
    * @throws IOException
    */
-  public static TexProject create(File f) throws IOException {
-    if (f.exists())
+  public static TexProject create(File file) throws IOException {
+    if (file.exists())
       throw new IOException("File already exists");
-    return new TexProject(f, false);
+    return new TexProject(file, false);
   }
 
   /**
    * Construct existing project
    * 
-   * @param f
+   * @param projectFile
    * @throws IOException
    * @throws FileNotFoundException
    */
-  public TexProject(File f) throws FileNotFoundException, IOException {
-    this(f, true);
+  public TexProject(File projectFile) throws FileNotFoundException, IOException {
+    this(projectFile, true);
   }
 
   /**
    * Create new project
    * 
-   * @param baseDir
+   * @param mBaseDirectory
    *          location of base directory containing project file; if no project
    *          file found here, creates it
    * @throws IOException
    */
-  private TexProject(File f, boolean mustExist) throws IOException {
+  private TexProject(File projectFile, boolean mustExist) throws IOException {
 
-    final boolean db = false;
+    projectFile = projectFile.getAbsoluteFile();
+    this.mBaseDirectory = projectFile.getParentFile();
+    this.mProjectFile = projectFile;
+    this.mProjectName = Files.removeExtension(projectFile).getName();
 
-    if (db)
-      pr("TexProject constructor: " + f);
-
-    this.baseDir = f.getParentFile();
-    this.projectFile = f;
-    this.name = Files.removeExtension(f).getName();
-
-    if (db)
-      pr("baseDir=" + baseDir + "\nname=" + name);
-
-    if (projectFile.exists()) {
+    if (mProjectFile.exists()) {
       try {
         read();
       } catch (JSONException e) {
@@ -74,12 +67,12 @@ public class TexProject {
   }
 
   private void read() throws IOException, JSONException {
-    String content = FileUtils.readFileToString(projectFile);
-    defaults = new JSONObject(content);
+    String content = FileUtils.readFileToString(mProjectFile);
+    mDefaults = new JSONObject(content);
   }
 
   public JSONObject getDefaults() {
-    return defaults;
+    return mDefaults;
   }
 
   private static String[] imgExt = { "png", "jpg", };
@@ -104,12 +97,12 @@ public class TexProject {
       SRC_EXT);
 
   public void flush() throws IOException {
-    String content = defaults.toString();
-    Files.writeStringToFileIfChanged(projectFile, content);
+    String content = mDefaults.toString();
+    Files.writeStringToFileIfChanged(mProjectFile, content);
   }
 
   public String toString() {
-    return projectFile.toString();
+    return mProjectFile.toString();
   }
 
   /**
@@ -118,28 +111,26 @@ public class TexProject {
    * @return .atl file
    */
   public File atlasFile() {
-    if (atlasFile == null)
-      atlasFile = Files.setExtension(projectFile, Atlas.ATLAS_EXT);
-    return atlasFile;
+    if (mAtlasFile == null)
+      mAtlasFile = Files.setExtension(mProjectFile, Atlas.ATLAS_EXT);
+    return mAtlasFile;
   }
 
-  private File atlasFile;
-
   public File file() {
-    return projectFile;
+    return mProjectFile;
   }
 
   public File baseDirectory() {
-    return baseDir;
+    return mBaseDirectory;
   }
 
   public String shortPath(File f) {
-    if (basePrefix == null) {
-      basePrefix = baseDirectory().getAbsolutePath() + "/";
+    if (mBasePrefix == null) {
+      mBasePrefix = baseDirectory().getAbsolutePath() + "/";
     }
     String p = f.getAbsolutePath();
-    if (p.startsWith(basePrefix))
-      p = p.substring(basePrefix.length());
+    if (p.startsWith(mBasePrefix))
+      p = p.substring(mBasePrefix.length());
     return p;
   }
 
@@ -151,11 +142,13 @@ public class TexProject {
    * @return full id
    */
   public String extractId(File texFile) {
+    pr("TexProject.extractId texFile '" + texFile + "', baseDirectory "
+        + mBaseDirectory);
 
-    RelPath rp = new RelPath(baseDir, texFile);
+    RelPath rp = new RelPath(mBaseDirectory, texFile);
     if (!rp.withinProjectTree())
-      throw new IllegalStateException("TexProject " + rp
-          + " is not within project tree");
+      throw new IllegalStateException("TexProject '" + texFile
+          + "' is not within project tree");
 
     String s = rp.toString();
 
@@ -191,7 +184,9 @@ public class TexProject {
 
       sb.append(Character.toUpperCase(c));
     }
-    return sb.toString();
+    String idString = sb.toString();
+    ASSERT(idString.length() < 20, "idString = " + d(idString));
+    return idString;
   }
 
   /**
@@ -201,10 +196,10 @@ public class TexProject {
    * @throws IOException
    */
   public Atlas atlas() throws IOException {
-    if (atlas == null) {
-      atlas = new Atlas(atlasFile());
+    if (mAtlas == null) {
+      mAtlas = new Atlas(atlasFile());
     }
-    return atlas;
+    return mAtlas;
   }
 
   private void addImgFiles(ArrayList<File> imgFiles, File dir) {
@@ -244,32 +239,28 @@ public class TexProject {
    */
   public File[] getImageFiles() {
 
-    if (imgFiles == null) {
+    if (mImageFiles == null) {
       ArrayList<File> lst = new ArrayList();
-      addImgFiles(lst, baseDir);
-      imgFiles = lst.toArray(new File[0]);
+      addImgFiles(lst, mBaseDirectory);
+      mImageFiles = lst.toArray(new File[0]);
     }
-    return imgFiles;
+    return mImageFiles;
   }
-
-  private File[] imgFiles;
-
-  private Atlas atlas;
-  private File projectFile;
-  private File baseDir;
-  private String basePrefix;
-  private String name;
 
   public String name() {
-    return name;
+    return mProjectName;
   }
-
-  private JSONObject defaults = new JSONObject();
-
-  // private Map defaults = new HashMap();
 
   public void discardAtlas() {
-    atlas = null;
+    mAtlas = null;
   }
 
+  private File[] mImageFiles;
+  private File mAtlasFile;
+  private Atlas mAtlas;
+  private File mProjectFile;
+  private File mBaseDirectory;
+  private String mBasePrefix;
+  private String mProjectName;
+  private JSONObject mDefaults = new JSONObject();
 }
