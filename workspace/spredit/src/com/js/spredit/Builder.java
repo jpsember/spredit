@@ -292,7 +292,7 @@ public class Builder {
       atlas.write(f);
 
       if (false) {
-        File pngPath = Files.changeExtension(f, "png");
+        File pngPath = Files.setExtension(f, "png");
         warning("writing atlas to " + pngPath);
         ImgUtil.writePNG(atlas.image(), pngPath);
       }

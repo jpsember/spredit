@@ -62,7 +62,7 @@ public class SprMain implements IApplication {
         fontName = s[0];
         fontName = fontName.replaceAll("_", " ");
         fontSize = Integer.parseInt(s[1]);
-        fontPath = s[2];
+        fontPath = new File(s[2]);
       }
 
       if (ca.hasValue("size")) {
@@ -71,9 +71,9 @@ public class SprMain implements IApplication {
       }
       if (ca.hasValue("build")) {
         runGUI = false;
-        String p = ca.getString("build");
-        p = Files.addExtension(p, TexProject.SRC_EXT);
-        buildPath = new File(p).getAbsoluteFile();
+        File path = new File(ca.getString("build"));
+        buildPath = Files.setExtension(path.getAbsoluteFile(),
+            TexProject.SRC_EXT);
       }
 
       if (ca.hasValue("resolutions")) {
@@ -256,10 +256,7 @@ public class SprMain implements IApplication {
       int[] fd = fimg.getFontInfo();
       fimg = null;
 
-      fontPath = Files.addExtension(fontPath, Atlas.ATLAS_EXT);
-      File fp = new File(fontPath);
-
-      fp = SprUtils.addResolutionSuffix(fp, res, slot);
+      File fp = SprUtils.addResolutionSuffix(fontPath, res, slot);
       if (db)
         pr(" writing to " + fp);
 
@@ -324,7 +321,7 @@ public class SprMain implements IApplication {
   private static ConfigSet config;
   private static IPoint atlasSize;
   private static File buildPath;
-  private static String fontPath;
+  private static File fontPath;
   private static String fontName;
   private static int fontSize;
   private static boolean verbose;

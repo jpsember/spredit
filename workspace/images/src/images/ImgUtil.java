@@ -156,8 +156,8 @@ public class ImgUtil {
    * @throws IOException
    */
   public static void writeJPG(BufferedImage img, File dest) throws IOException {
-    dest = Files.changeExtension(dest, JPEG_EXT);
-    ImageIO.write(img, "jpg", dest); // was "jpeg"
+    dest = Files.setExtension(dest, JPEG_EXT);
+    ImageIO.write(img, "jpg", dest);
   }
 
   /**

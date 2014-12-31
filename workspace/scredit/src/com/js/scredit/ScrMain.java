@@ -20,9 +20,10 @@ public class ScrMain implements IApplication {
       if (scriptList.length > 0) {
         if (scriptList.length > 1)
           ca.fail("only one scriptlist file allowed");
-        String s = scriptList[0];
-        Files.addExtension(s, ScriptCompiler.SCRIPTFILE_EXT);
-        scriptListPath = new File(s);
+        File s = new File(scriptList[0]);
+        if (!Files.hasExtension(s))
+          s = Files.setExtension(s, ScriptCompiler.SCRIPTFILE_EXT);
+        scriptListPath = s;
       }
 
       // add handlers for various object types

@@ -121,7 +121,7 @@ public class TexProject {
    */
   public File atlasFile() {
     if (atlasFile == null)
-      atlasFile = Files.changeExtension(projectFile, Atlas.ATLAS_EXT);
+      atlasFile = Files.setExtension(projectFile, Atlas.ATLAS_EXT);
     return atlasFile;
   }
 

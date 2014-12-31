@@ -12,7 +12,7 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter implements
 
   public File fixExtension(File f) {
     if (extension != null) {
-      f = Files.changeExtension(f, extension);
+      f = Files.setExtension(f, extension);
     }
     return f;
   }

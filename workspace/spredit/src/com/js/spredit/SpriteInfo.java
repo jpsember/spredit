@@ -232,8 +232,8 @@ public class SpriteInfo {
       if (!metaDir.mkdir())
         throw new IOException("unable to create meta directory");
     }
-    String imgName = Files.removeExtension(mImgPath).getName();
-    return new File(metaDir, Files.addExtension(imgName, META_SPRITE_EXT));
+    File imgName = Files.setExtension(mImgPath, META_SPRITE_EXT);
+    return new File(metaDir, imgName.getName());
   }
 
   public Sprite sprite() {
@@ -312,8 +312,8 @@ public class SpriteInfo {
                   throw new IOException("unable to create meta directory");
               }
 
-              thumbPath = new File(thumbDir, Files.addExtension(mSprite.id(),
-                  THUMB_EXT));
+              thumbPath = Files.setExtension(new File(thumbDir, mSprite.id()),
+                  THUMB_EXT);
             }
             // if disk thumb version exists, and is not older than disk
             // original,

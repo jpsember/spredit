@@ -14,16 +14,15 @@ public class SprUtils {
 
   public static File addResolutionSuffix(File file, float[] res, int slot) {
     if (slot != 0) {
-      String s = file.toString();
+      String s = file.getPath();
       String ext = null;
       if (Files.hasExtension(file)) {
         ext = Files.getExtension(file);
         s = Files.removeExtension(file).getPath();
       }
       s = s + "_" + slot;
-      if (ext != null)
-        s = Files.addExtension(s, ext);
       file = new File(s);
+      file = Files.setExtension(file, ext);
     }
     return file;
   }

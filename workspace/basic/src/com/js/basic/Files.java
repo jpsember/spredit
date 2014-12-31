@@ -26,9 +26,9 @@ public class Files {
    * @return BufferedInputStream
    * @throws IOException
    */
-  public static BufferedInputStream openResource(Class c, String resourceName)
-      throws IOException {
-    InputStream is = c.getResourceAsStream(resourceName);
+  public static BufferedInputStream openResource(Class theClass,
+      String resourceName) throws IOException {
+    InputStream is = theClass.getResourceAsStream(resourceName);
     if (is == null) {
       throw new FileNotFoundException("openResource failed: " + resourceName);
     }
@@ -36,71 +36,17 @@ public class Files {
   }
 
   /**
-   * @deprecated use Apache Commons IO
-   */
-  public static String addExtension(String path, String ext) {
-    if (!hasExtension(new File(path))) {
-      path = changeExtension(path, ext);
-    }
-    return path;
-  }
-
-  /**
-   * Change extension of a file.
+   * Set extension of file (replacing any existing one)
    * 
-   * @param name
-   *          current filename
-   * @param ext
-   *          new extension, "" for none
-   * @return String representing new filename
-   * @deprecated use Apache Commons IO
+   * @param extension
+   *          new extension; if empty string, just removes existing extension
    */
-  public static String changeExtension(String name, String ext) {
-    ext = extString(ext);
-    String out = name;
-    String currExt = extString(name);
-    if (!currExt.equalsIgnoreCase(ext)) {
-      out = removeExtension(new File(name)).getPath();
-      if (ext.length() > 0) {
-        out = out + "." + ext;
-      }
-    }
-    return out;
-  }
-
-  /**
-   * Replace the extension of a file
-   * 
-   * @param f
-   *          existing File
-   * @param ext
-   *          new extension
-   * @return File with replaced extension
-   * @deprecated use Apache Commons IO
-   */
-  public static File changeExtension(File f, String ext) {
-
-    // get the name from the file; we will change its extension.
-    String name = f.getName();
-    if (name.length() == 0) {
-      throw new RuntimeException("Set extension of empty name: " + f);
-    }
-
-    String parent = f.getParent();
-    return new File(parent, changeExtension(name, ext));
-  }
-
-  /**
-   * Convert string to an extension; add '.' if necessary; if '.' already
-   * exists, remove everything to left of it
-   * 
-   * @deprecated use Apache Commons IO
-   */
-  private static String extString(String s) {
-    String out = null;
-    int pos = s.lastIndexOf('.');
-    out = s.substring(pos + 1);
-    return out;
+  public static File setExtension(File file, String extension) {
+    String filePath = file.getPath();
+    filePath = FilenameUtils.removeExtension(filePath);
+    if (!extension.isEmpty())
+      filePath += FilenameUtils.EXTENSION_SEPARATOR_STR + extension;
+    return new File(filePath);
   }
 
   /**
@@ -112,6 +58,9 @@ public class Files {
     return FilenameUtils.getExtension(file.getPath());
   }
 
+  /**
+   * Determine if file has an extension
+   */
   public static boolean hasExtension(File file) {
     return !FilenameUtils.getExtension(file.getPath()).isEmpty();
   }
@@ -120,7 +69,7 @@ public class Files {
    * Remove extension, if any, from path
    */
   public static File removeExtension(File file) {
-    return new File(FilenameUtils.removeExtension(file.getPath()));
+    return setExtension(file, "");
   }
 
 }

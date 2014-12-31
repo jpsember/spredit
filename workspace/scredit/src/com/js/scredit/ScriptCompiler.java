@@ -26,8 +26,7 @@ public class ScriptCompiler {
 
   private ScriptCompiler(File sourceFile) {
     this.sourceFile = sourceFile.getAbsoluteFile();
-    this.outputFile = Files
-        .changeExtension(sourceFile, SCRIPTFILE_COMPILED_EXT);
+    this.outputFile = Files.setExtension(sourceFile, SCRIPTFILE_COMPILED_EXT);
   }
 
   private void build() throws IOException {
@@ -96,8 +95,7 @@ public class ScriptCompiler {
     File symPath = sourceFile.getParentFile();
     String scriptSetName = Files.removeExtension(sourceFile).getName();
     scriptSetName = scriptSetName + "_scripts";
-
-    symPath = new File(symPath, Files.addExtension(scriptSetName, "h"));
+    symPath = Files.setExtension(new File(symPath, scriptSetName), "h");
 
     StringBuilder sb = new StringBuilder();
     String equName = scriptSetName.toUpperCase() + "_EQU";

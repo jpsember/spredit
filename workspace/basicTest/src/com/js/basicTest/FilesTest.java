@@ -56,4 +56,23 @@ public class FilesTest extends MyTestCase {
       assertEquals(new File(after), Files.removeExtension(new File(before)));
     }
   }
+
+  public void testSetExtension() {
+    String[] a = {//
+    "foo.txt", "bin", "foo.bin", //
+        "a/b/c.jpg", "jpg", "a/b/c.jpg",//
+        "a/b/c", "jpg", "a/b/c.jpg",//
+        "a.b/c", "", "a.b/c",//
+        "a.b/c.jpg", "", "a.b/c",//
+        "a.b.jpg/c.jpg", "", "a.b.jpg/c",//
+    };
+    for (int i = 0; i < a.length; i += 3) {
+      String before = a[i];
+      String ext = a[i + 1];
+      String after = a[i + 2];
+
+      assertEquals(new File(after), Files.setExtension(new File(before), ext));
+    }
+  }
+
 }

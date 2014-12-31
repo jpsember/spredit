@@ -32,7 +32,7 @@ public class Atlas {
       "Atlas files", ATLAS_EXT, true, null);
 
   public void debugWriteToPNG() {
-    File pngPath = Files.changeExtension(dataFile, "png");
+    File pngPath = Files.setExtension(dataFile, "png");
     String nm = pngPath.getName();
     pngPath = new File(nm);
     pr("writing atlas to " + pngPath);
