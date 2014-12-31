@@ -3,6 +3,7 @@ package apputil;
 import java.io.*;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FileUtils;
 import org.json.*;
 
 import com.js.basic.Files;
@@ -77,7 +78,7 @@ public class ConfigSet {
   public ConfigSet save() throws IOException {
     try {
       String s = constructJSONString();
-      Files.writeIfChanged(mFile, s);
+      Files.writeStringToFileIfChanged(mFile, s);
     } catch (JSONException e) {
       die(e);
     }
@@ -88,7 +89,7 @@ public class ConfigSet {
     JSONObject map = new JSONObject();
 
     if (mFile.exists()) {
-      String s = Files.readTextFile(mFile.getPath());
+      String s = FileUtils.readFileToString(mFile);
       map = new JSONObject(s);
     }
     for (Interface ic : configs)

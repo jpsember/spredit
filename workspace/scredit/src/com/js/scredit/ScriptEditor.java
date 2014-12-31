@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1511,7 +1512,7 @@ public class ScriptEditor {
       try {
 
         ScriptSet ss = new ScriptSet(mProject.directory(), new JSONObject(
-            Files.readTextFile(f.toString())));
+            FileUtils.readFileToString(f)));
 
         decodeLayers(ss);
         setRecentSetPath(f);
@@ -1550,7 +1551,7 @@ public class ScriptEditor {
       setRecentSetPath(f);
 
       try {
-        Files.writeIfChanged(f, encodeLayers().toString(2)); // def.toString());
+        Files.writeStringToFileIfChanged(f, encodeLayers().toString(2));
       } catch (Throwable e) {
         AppTools.showError("writing script set", e);
       }

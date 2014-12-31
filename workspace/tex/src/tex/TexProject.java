@@ -3,6 +3,7 @@ package tex;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,7 +74,7 @@ public class TexProject {
   }
 
   private void read() throws IOException, JSONException {
-    String content = Files.readTextFile(projectFile.getPath());
+    String content = FileUtils.readFileToString(projectFile);
     defaults = new JSONObject(content);
   }
 
@@ -106,7 +107,7 @@ public class TexProject {
 
   public void flush() throws IOException {
     String content = defaults.toString();
-    Files.writeIfChanged(projectFile, content);
+    Files.writeStringToFileIfChanged(projectFile, content);
   }
 
   public String toString() {

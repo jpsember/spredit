@@ -3,6 +3,7 @@ package com.js.scredit;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +67,7 @@ public class Script {
   private static final String ITEMS_TAG = "ITEMS";
 
   private void read() throws IOException {
-    String content = Files.readTextFile(path.getPath());
+    String content = FileUtils.readFileToString(path);
     try {
       JSONObject fileMap = new JSONObject(content);
       {
@@ -131,7 +132,7 @@ public class Script {
     if (path == null)
       throw new IllegalStateException("path undefined");
 
-    Files.writeIfChanged(path, content);
+    Files.writeStringToFileIfChanged(path, content);
   }
 
   public File path() {

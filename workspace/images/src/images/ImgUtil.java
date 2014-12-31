@@ -5,6 +5,9 @@ import java.io.*;
 import java.util.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
+
+import org.apache.commons.io.FileUtils;
+
 import static com.js.basic.Tools.*;
 
 import com.js.basic.Files;
@@ -142,12 +145,7 @@ public class ImgUtil {
    *          path to write to
    */
   public static void write(byte[] img, File dest) throws IOException {
-    OutputStream os = Files.outputStream(dest.getPath());
-    try {
-      os.write(img);
-    } finally {
-      os.close();
-    }
+    FileUtils.writeByteArrayToFile(dest, img);
   }
 
   /**

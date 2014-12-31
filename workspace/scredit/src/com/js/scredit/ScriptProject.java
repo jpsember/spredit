@@ -4,6 +4,7 @@ import java.awt.image.*;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,14 +55,14 @@ public class ScriptProject {
       // they are at least deterministically ordered, then this 'write only if
       // changed' test is still useful.
       String content = getDefaults().toString(2);
-      Files.writeIfChanged(mProjectFile, content);
+      Files.writeStringToFileIfChanged(mProjectFile, content);
     } catch (JSONException e) {
       die(e);
     }
   }
 
   private void read() throws IOException, JSONException {
-    String content = Files.readTextFile(mProjectFile.getPath());
+    String content = FileUtils.readFileToString(mProjectFile);
     mProjectDefaults = new JSONObject(content);
     mRecentScripts.decode(getDefaults().optJSONObject(KEY_RECENTSCRIPTS));
     mRecentAtlases.decode(getDefaults().optJSONObject(KEY_RECENTATLASES));

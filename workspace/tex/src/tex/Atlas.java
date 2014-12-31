@@ -7,6 +7,8 @@ import java.awt.image.*;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.FileUtils;
+
 import com.js.basic.Files;
 import com.js.geometry.IPoint;
 import com.js.geometry.IRect;
@@ -32,7 +34,7 @@ public class Atlas {
   public void debugWriteToPNG() {
     File pngPath = Files.changeExtension(dataFile, "png");
     String nm = pngPath.getName();
-    pngPath = new File(Files.homeDirectory(), nm);
+    pngPath = new File(nm);
     pr("writing atlas to " + pngPath);
     try {
       ImgUtil.writePNG(image(), pngPath);
@@ -329,7 +331,7 @@ public class Atlas {
       BufferedImage im = image();
 
       ImgUtil.writePNG(im, tmp);
-      byte[] img = Files.readBinaryFile(tmp.toString());
+      byte[] img = FileUtils.readFileToByteArray(tmp);
 
       s.writeInt(img.length);
       s.write(img);
