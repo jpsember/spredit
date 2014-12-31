@@ -252,6 +252,10 @@ public class AppTools {
     return ret;
   }
 
+  /**
+   * We should strive to have separate executables for programs that don't
+   * require a GUI; so this method should be unnecessary
+   */
   public static void runAsCmdLine() {
     System.setProperty("java.awt.headless", "true");
   }
