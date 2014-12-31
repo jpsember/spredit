@@ -32,9 +32,9 @@ public class SpriteInfo {
     try {
       mLastFileContents = FileUtils.readFileToString(mMetaPath);
       JSONObject map = new JSONObject(mLastFileContents);
-      setCenterpoint(Point.parseJSON(map, "CP"));
-      setCropRect(IRect.parseJSON(map, "CLIP"));
-      mSourceImageSize = IPoint.parseJSON(map, "SIZE");
+      setCenterpoint(Point.opt(map, "CP"));
+      setCropRect(IRect.opt(map, "CLIP"));
+      mSourceImageSize = IPoint.opt(map, "SIZE");
       String alias = map.optString("ALIAS");
       if (alias != null) {
         mAliasFileRead = new RelPath(mProject.baseDirectory(), alias).file();
@@ -130,9 +130,9 @@ public class SpriteInfo {
         map.put("ALIAS",
             new RelPath(mProject.baseDirectory(), imagePath()).toString());
       }
-      map.put("SIZE", workImageSize().toJSON());
-      map.put("CP", centerpoint().toJSON());
-      map.put("CLIP", cropRect().toJSON());
+      workImageSize().put(map, "SIZE");
+      centerpoint().put(map, "CP");
+      cropRect().put(map, "CLIP");
     } catch (JSONException e) {
       AppTools.showError("encoding SpriteInfo", e);
     }

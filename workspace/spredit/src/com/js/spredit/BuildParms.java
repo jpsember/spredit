@@ -147,14 +147,14 @@ public class BuildParms {
   public static void parseFrom(JSONObject map) throws JSONException {
     if (map == null)
       map = new JSONObject();
-    IPoint size = IPoint.parseJSON(map, "SIZE");
+    IPoint size = IPoint.opt(map, "SIZE");
     if (size != null)
       setTexSize(size);
     fixedSize.setSelected(map.optBoolean("FIXEDSIZE", false));
   }
 
   public static void encodeTo(JSONObject map) throws JSONException {
-    map.put("SIZE", new IPoint(iv(texWidth), iv(texHeight)).toJSON());
+    new IPoint(iv(texWidth), iv(texHeight)).put(map, "SIZE");
     map.put("FIXEDSIZE", fixedSize.isSelected());
   }
 

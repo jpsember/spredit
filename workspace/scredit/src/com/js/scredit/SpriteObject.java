@@ -260,7 +260,7 @@ public class SpriteObject extends EdObject {
       // so.tintColor = s.sInt();
       // }
 
-      so.tfm.setLocation(Point.parseJSON(map, "loc"));
+      so.tfm.setLocation(Point.opt(map, "loc"));
       float scale = (float) map.optDouble("scale", 1);
       so.tfm.setScale(scale);
       float rot = (float) map.optDouble("rot", 0) / MyMath.M_DEG;
@@ -294,8 +294,7 @@ public class SpriteObject extends EdObject {
          * if (so.tintColor >= 0) { sb.append(TINT); sb.append(so.tintColor); }
          */
       }
-      map.put("loc", so.tfm.location().toJSON());
-      // sb.append(so.tfm.location());
+      so.tfm.location().put(map, "loc");
       if (so.tfm.scale() != 1 || so.tfm.rotation() != 0) {
         map.put("scale", so.tfm.scale());
         if (so.tfm.rotation() != 0)

@@ -2078,7 +2078,7 @@ public class ScriptEditor {
       setOrigin(map.optBoolean("ORIGIN", true));
       setFaded(map.optBoolean("FADED"));
       zoomFactor = (float) map.optDouble("ZOOM", 1);
-      IPoint focus = IPoint.parseJSON(map, "FOCUS");
+      IPoint focus = IPoint.opt(map, "FOCUS");
       if (focus != null)
         setFocus(focus);
       if (map.optBoolean(NOSAVENECESSARY_TAG))
@@ -2093,7 +2093,7 @@ public class ScriptEditor {
       map.put("ORIGIN", showOrigin());
       map.put("FADED", faded());
       map.put("ZOOM", zoomFactor);
-      map.put("FOCUS", focus.toJSON());
+      focus.put(map, "FOCUS");
       if (noSaveNecessary) {
         map.put(NOSAVENECESSARY_TAG, true);
       }

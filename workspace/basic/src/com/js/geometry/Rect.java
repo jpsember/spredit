@@ -256,10 +256,9 @@ public class Rect {
     return new Point(width, height);
   }
 
-  /**
-   * Encode object as JSON array
-   */
-  public JSONArray toJSON() throws JSONException {
+  // JSON encoding
+
+  private JSONArray toJSON() throws JSONException {
     JSONArray a = new JSONArray();
     a.put(x);
     a.put(y);
@@ -268,10 +267,26 @@ public class Rect {
     return a;
   }
 
+  private static Rect parseJSON(JSONArray array) throws JSONException {
+    int c = 0;
+    float x = (float) array.getDouble(c++);
+    float y = (float) array.getDouble(c++);
+    float w = (float) array.getDouble(c++);
+    float h = (float) array.getDouble(c++);
+    return new Rect(x, y, w, h);
+  }
+
   /**
-   * Parse Rect from JSON map
+   * Store Rect within JSON map
    */
-  public static Rect parseJSON(JSONObject map, String key) throws JSONException {
+  public void put(JSONObject map, String key) throws JSONException {
+    map.put(key, toJSON());
+  }
+
+  /**
+   * Parse Rect from JSON map; returns null if no such key
+   */
+  public static Rect opt(JSONObject map, String key) throws JSONException {
     JSONArray array = map.optJSONArray(key);
     if (array == null)
       return null;
@@ -279,15 +294,10 @@ public class Rect {
   }
 
   /**
-   * Parse Rect from JSONArray
+   * Parse Rect from JSON map
    */
-  public static Rect parseJSON(JSONArray array) throws JSONException {
-    int c = 0;
-    float x = (float) array.getDouble(c++);
-    float y = (float) array.getDouble(c++);
-    float w = (float) array.getDouble(c++);
-    float h = (float) array.getDouble(c++);
-    return new Rect(x, y, w, h);
+  public static Rect get(JSONObject map, String key) throws JSONException {
+    return parseJSON(map.getJSONArray(key));
   }
 
   public float x, y, width, height;

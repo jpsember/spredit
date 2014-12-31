@@ -3,8 +3,8 @@ package com.js.scredit;
 import java.awt.Color;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,7 +17,7 @@ import static com.js.basic.Tools.*;
 
 public class PolygonObject extends EdObject {
 
-  public PolygonObject(Color color, ArrayList<Point> pts) {
+  public PolygonObject(Color color, List<Point> pts) {
     this(color, pts.toArray(new Point[0]), null);
   }
 
@@ -504,9 +504,8 @@ public class PolygonObject extends EdObject {
 
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
-      JSONArray srcPoints = map.getJSONArray("vertices");
-      ArrayList<Point> a = Point.parseListFromJSON(srcPoints);
-      PolygonObject so = new PolygonObject(JSONTools.getColor(map), a);
+      List<Point> a = Point.getList(map, "vertices");
+      PolygonObject so = new PolygonObject(JSONTools.getColor(map, "color"), a);
       return so;
     }
 
@@ -515,11 +514,11 @@ public class PolygonObject extends EdObject {
         throws JSONException {
 
       PolygonObject so = (PolygonObject) obj;
-      JSONTools.put(map, obj.getColor());
+      JSONTools.put(map, "color", obj.getColor());
       ArrayList<Point> pts = new ArrayList();
       for (int i = 0; i < so.nPoints(); i++)
         pts.add(so.getPoint(i));
-      map.put("vertices", Point.toJSON(pts));
+      Point.put(pts, map, "vertices");
     }
 
     /**

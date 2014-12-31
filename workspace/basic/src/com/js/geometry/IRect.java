@@ -247,10 +247,7 @@ public class IRect {
     return new IPoint(width, height);
   }
 
-  /**
-   * Encode IRect as JSON array
-   */
-  public JSONArray toJSON() throws JSONException {
+  private JSONArray toJSON() throws JSONException {
     JSONArray a = new JSONArray();
     a.put(x);
     a.put(y);
@@ -260,20 +257,33 @@ public class IRect {
   }
 
   /**
-   * Parse IRect from JSON map
+   * Store IRect within JSON map
    */
-  public static IRect parseJSON(JSONObject map, String key)
-      throws JSONException {
+  public void put(JSONObject map, String key) throws JSONException {
+    map.put(key, toJSON());
+  }
+
+  /**
+   * Parse IRect from JSON map; returns null if no such key
+   */
+  public static IRect opt(JSONObject map, String key) throws JSONException {
     JSONArray array = map.optJSONArray(key);
     if (array == null)
       return null;
-    return parseJSON(array);
+    return get(array);
+  }
+
+  /**
+   * Parse IRect from JSON map
+   */
+  public static IRect get(JSONObject map, String key) throws JSONException {
+    return get(map.getJSONArray(key));
   }
 
   /**
    * Parse IRect from JSONArray
    */
-  public static IRect parseJSON(JSONArray array) throws JSONException {
+  public static IRect get(JSONArray array) throws JSONException {
     int c = 0;
     int x = array.getInt(c++);
     int y = array.getInt(c++);

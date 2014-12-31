@@ -63,21 +63,34 @@ public final class IPoint {
     return sb.toString();
   }
 
-  /**
-   * Encode point as JSON array
-   */
-  public JSONArray toJSON() throws JSONException {
+  public Point toPoint() {
+    return new Point(x, y);
+  }
+
+  // JSON encoding
+
+  private JSONArray toJSON() throws JSONException {
     JSONArray a = new JSONArray();
     a.put(x);
     a.put(y);
     return a;
   }
 
+  private static IPoint parseJSON(JSONArray array) throws JSONException {
+    int c = 0;
+    int x = array.getInt(c++);
+    int y = array.getInt(c++);
+    return new IPoint(x, y);
+  }
+
+  public void put(JSONObject map, String key) throws JSONException {
+    map.put(key, toJSON());
+  }
+
   /**
    * Parse point from JSON map; returns null if no point found
    */
-  public static IPoint parseJSON(JSONObject map, String key)
-      throws JSONException {
+  public static IPoint opt(JSONObject map, String key) throws JSONException {
     JSONArray a = map.optJSONArray(key);
     if (a == null)
       return null;
@@ -85,17 +98,10 @@ public final class IPoint {
   }
 
   /**
-   * Parse point from JSONArray
+   * Parse point from JSON map
    */
-  public static IPoint parseJSON(JSONArray array) throws JSONException {
-    int c = 0;
-    int x = array.getInt(c++);
-    int y = array.getInt(c++);
-    return new IPoint(x, y);
-  }
-
-  public Point toPoint() {
-    return new Point(x, y);
+  public static IPoint get(JSONObject map, String key) throws JSONException {
+    return parseJSON(map.getJSONArray(key));
   }
 
   public int x;

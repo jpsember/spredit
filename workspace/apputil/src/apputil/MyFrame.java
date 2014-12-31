@@ -32,7 +32,7 @@ public class MyFrame extends JFrame {
   private boolean restoreBounds() {
     if (!boundsDefined) {
       try {
-        IRect r = IRect.parseJSON(sFrameMap, persistId2);
+        IRect r = IRect.opt(sFrameMap, persistId2);
         if (r != null) {
           setBounds(r.toRectangle());
           boundsDefined = true;
@@ -60,7 +60,7 @@ public class MyFrame extends JFrame {
         public void componentMoved(ComponentEvent ev) {
           IRect r = new IRect(getBounds());
           try {
-            sFrameMap.put(persistId2, r.toJSON());
+            r.put(sFrameMap, persistId2);
           } catch (JSONException e) {
             die(e);
           }

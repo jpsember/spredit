@@ -3,6 +3,7 @@ package com.js.scredit;
 import java.awt.Color;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -215,21 +216,20 @@ public class RectangleObject extends EdObject {
         throws JSONException {
 
       RectangleObject so = (RectangleObject) obj;
-      JSONTools.put(map, so.getColor());
+      JSONTools.put(map, "color", so.getColor());
       ArrayList<Point> points = new ArrayList();
       points.add(so.mBottomLeftCorner);
       points.add(so.mTopRightCorner);
-      map.put("points", Point.toJSON(points));
+      Point.put(points, map, "points");
     }
 
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
-      ArrayList<Point> points = Point.parseListFromJSON(map
-          .getJSONArray("points"));
+      List<Point> points = Point.getList(map, "points");
       Point ptA = points.get(0);
       Point ptB = points.get(1);
-      RectangleObject so = new RectangleObject(JSONTools.getColor(map), ptA,
-          ptB);
+      RectangleObject so = new RectangleObject(
+          JSONTools.getColor(map, "color"), ptA, ptB);
       return so;
     }
 

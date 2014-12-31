@@ -90,10 +90,14 @@ public class Point {
     return sb.toString();
   }
 
-  /**
-   * Encode point as JSON array
-   */
-  public JSONArray toJSON() throws JSONException {
+  public void snapToGrid(float gridSize) {
+    x = MyMath.snapToGrid(x, gridSize);
+    y = MyMath.snapToGrid(y, gridSize);
+  }
+
+  // JSON encoding
+
+  private JSONArray toJSON() throws JSONException {
     JSONArray a = new JSONArray();
     unimp("figure out way to truncate float values to something reasonable");
     a.put(x);
@@ -101,28 +105,7 @@ public class Point {
     return a;
   }
 
-  /**
-   * Parse point from JSON map
-   */
-  public static Point parseJSON(JSONObject map, String key)
-      throws JSONException {
-    JSONArray a = map.optJSONArray(key);
-    if (a == null)
-      return null;
-    return parseJSON(a);
-  }
-
-  /**
-   * Parse point from JSONArray
-   */
-  public static Point parseJSON(JSONArray array) throws JSONException {
-    int c = 0;
-    float x = (float) array.getDouble(c++);
-    float y = (float) array.getDouble(c++);
-    return new Point(x, y);
-  }
-
-  public static JSONArray toJSON(List<Point> points) throws JSONException {
+  private static JSONArray toJSON(List<Point> points) throws JSONException {
     JSONArray a = new JSONArray();
     for (Point pt : points) {
       a.put(pt.x);
@@ -131,8 +114,14 @@ public class Point {
     return a;
   }
 
-  public static ArrayList<Point> parseListFromJSON(JSONArray array)
-      throws JSONException {
+  private static Point get(JSONArray array) throws JSONException {
+    int c = 0;
+    float x = (float) array.getDouble(c++);
+    float y = (float) array.getDouble(c++);
+    return new Point(x, y);
+  }
+
+  private static List<Point> getList(JSONArray array) throws JSONException {
     ArrayList<Point> list = new ArrayList();
     if (array.length() % 2 != 0)
       throw new JSONException("malformed array");
@@ -145,9 +134,38 @@ public class Point {
     return list;
   }
 
-  public void snapToGrid(float gridSize) {
-    x = MyMath.snapToGrid(x, gridSize);
-    y = MyMath.snapToGrid(y, gridSize);
+  public void put(JSONObject map, String key) throws JSONException {
+    map.put(key, toJSON());
+  }
+
+  /**
+   * Parse point from JSON map; return null if none found
+   */
+  public static Point opt(JSONObject map, String key) throws JSONException {
+    JSONArray a = map.optJSONArray(key);
+    if (a == null)
+      return null;
+    return get(a);
+  }
+
+  /**
+   * Parse point from JSON map
+   */
+  public static Point get(JSONObject map, String key) throws JSONException {
+    return get(map.getJSONArray(key));
+  }
+
+  /**
+   * Encode a list of points to a JSON map
+   */
+  public static void put(List<Point> points, JSONObject map, String key)
+      throws JSONException {
+    map.put(key, toJSON(points));
+  }
+
+  public static List<Point> getList(JSONObject map, String key)
+      throws JSONException {
+    return getList(map.getJSONArray(key));
   }
 
   public float x;
