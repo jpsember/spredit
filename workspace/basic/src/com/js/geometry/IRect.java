@@ -260,6 +260,17 @@ public class IRect {
   }
 
   /**
+   * Parse IRect from JSON map
+   */
+  public static IRect parseJSON(JSONObject map, String key)
+      throws JSONException {
+    JSONArray array = map.optJSONArray(key);
+    if (array == null)
+      return null;
+    return parseJSON(array);
+  }
+
+  /**
    * Parse IRect from JSONArray
    */
   public static IRect parseJSON(JSONArray array) throws JSONException {

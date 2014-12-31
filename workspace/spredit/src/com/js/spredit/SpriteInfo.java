@@ -32,9 +32,9 @@ public class SpriteInfo {
     try {
       mLastFileContents = FileUtils.readFileToString(mMetaPath);
       JSONObject map = new JSONObject(mLastFileContents);
-      setCenterpoint(Point.parseJSON(map.getJSONArray("CP")));
-      setCropRect(IRect.parseJSON(map.getJSONArray("CLIP")));
-      mSourceImageSize = IPoint.parseJSON(map.getJSONArray("SIZE"));
+      setCenterpoint(Point.parseJSON(map, "CP"));
+      setCropRect(IRect.parseJSON(map, "CLIP"));
+      mSourceImageSize = IPoint.parseJSON(map, "SIZE");
       String alias = map.optString("ALIAS");
       if (alias != null) {
         mAliasFileRead = new RelPath(mProject.baseDirectory(), alias).file();

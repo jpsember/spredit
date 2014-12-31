@@ -2,12 +2,10 @@ package apputil;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
 
 import javax.swing.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
 import static com.js.basic.Tools.*;
 
@@ -21,20 +19,10 @@ public class MyFrame extends JFrame {
 
   @Override
   public void setVisible(boolean f) {
-    final boolean db = false;
-    if (db)
-      pr("setVisible " + this + ", f=" + f + " isVis=" + isVisible());
-
     if (f) {
       if (!isVisible()) {
-        if (db)
-          pr("  not already visible");
-
         if (!restoreBounds())
           pack();
-        if (db)
-          pr("calling super.setVisible");
-
         super.setVisible(f);
       }
     } else
@@ -43,10 +31,14 @@ public class MyFrame extends JFrame {
 
   private boolean restoreBounds() {
     if (!boundsDefined) {
-      IRect r = frameInfo.get(persistId2);
-      if (r != null) {
-        setBounds(r.toRectangle());
-        boundsDefined = true;
+      try {
+        IRect r = IRect.parseJSON(sFrameMap, persistId2);
+        if (r != null) {
+          setBounds(r.toRectangle());
+          boundsDefined = true;
+        }
+      } catch (JSONException e) {
+        die(e);
       }
     }
     return boundsDefined;
@@ -67,7 +59,11 @@ public class MyFrame extends JFrame {
         @Override
         public void componentMoved(ComponentEvent ev) {
           IRect r = new IRect(getBounds());
-          frameInfo.put(persistId2, r);
+          try {
+            sFrameMap.put(persistId2, r.toJSON());
+          } catch (JSONException e) {
+            die(e);
+          }
         }
 
         @Override
@@ -97,41 +93,21 @@ public class MyFrame extends JFrame {
     getContentPane().add(c);
   }
 
-  private static Map<String, IRect> frameInfo = new HashMap();
-
-  private static JSONObject constructFrameInfo() throws JSONException {
-    JSONObject framesMap = new JSONObject();
-    Iterator<String> it = frameInfo.keySet().iterator();
-    while (it.hasNext()) {
-      String key = it.next();
-      IRect bounds = frameInfo.get(key);
-      framesMap.put(key, bounds.toJSON());
-    }
-    return framesMap;
-  }
-
   public static final ConfigSet.Interface CONFIG = new ConfigSet.Interface() {
     private static final String TAG = "FRAMES";
 
     @Override
     public void writeTo(JSONObject map) throws JSONException {
-      if (!frameInfo.isEmpty()) {
-        map.put(TAG, constructFrameInfo());
-      }
+      map.put(TAG, sFrameMap);
     }
 
     @Override
     public void readFrom(JSONObject map) throws JSONException {
-      JSONObject framesMap = map.optJSONObject(TAG);
-      if (framesMap == null)
-        return;
-      Iterator<String> it = framesMap.keys();
-      while (it.hasNext()) {
-        String key = it.next();
-        IRect bounds = IRect.parseJSON(framesMap.getJSONArray(key));
-        frameInfo.put(key, bounds);
-      }
+      sFrameMap = map.optJSONObject(TAG);
+      if (sFrameMap == null)
+        sFrameMap = new JSONObject();
     }
   };
 
+  private static JSONObject sFrameMap = new JSONObject();
 }

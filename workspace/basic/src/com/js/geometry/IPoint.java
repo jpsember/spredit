@@ -4,6 +4,7 @@ import static com.js.basic.Tools.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public final class IPoint {
 
@@ -70,6 +71,17 @@ public final class IPoint {
     a.put(x);
     a.put(y);
     return a;
+  }
+
+  /**
+   * Parse point from JSON map; returns null if no point found
+   */
+  public static IPoint parseJSON(JSONObject map, String key)
+      throws JSONException {
+    JSONArray a = map.optJSONArray(key);
+    if (a == null)
+      return null;
+    return parseJSON(a);
   }
 
   /**

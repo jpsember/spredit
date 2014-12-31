@@ -260,7 +260,7 @@ public class SpriteObject extends EdObject {
       // so.tintColor = s.sInt();
       // }
 
-      so.tfm.setLocation(Point.parseJSON(map.getJSONArray("loc")));
+      so.tfm.setLocation(Point.parseJSON(map, "loc"));
       float scale = (float) map.optDouble("scale", 1);
       so.tfm.setScale(scale);
       float rot = (float) map.optDouble("rot", 0) / MyMath.M_DEG;

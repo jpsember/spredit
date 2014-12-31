@@ -13,7 +13,6 @@ import java.util.TreeSet;
 import javax.swing.*;
 
 import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,8 +68,6 @@ public class ScriptEditor {
         for (int i = 0; i < layers.size(); i++) {
           if (i != layers.currentSlot()
               && editor.path().equals(layers.layer(i).path())) {
-            pr("copy of current editor (" + layers.currentSlot()
-                + ") exists in layer " + i + ", not flushing");
             success = true;
             break outer;
           }
@@ -78,7 +75,6 @@ public class ScriptEditor {
       }
 
       if (allowQuitWithoutSave()) {
-        // warn("skipping save warning during test");
         if (askUser) {
           success = true;
           break;
@@ -2082,9 +2078,9 @@ public class ScriptEditor {
       setOrigin(map.optBoolean("ORIGIN", true));
       setFaded(map.optBoolean("FADED"));
       zoomFactor = (float) map.optDouble("ZOOM", 1);
-      JSONArray a = map.optJSONArray("FOCUS");
-      if (a != null)
-        setFocus(IPoint.parseJSON(a));
+      IPoint focus = IPoint.parseJSON(map, "FOCUS");
+      if (focus != null)
+        setFocus(focus);
       if (map.optBoolean(NOSAVENECESSARY_TAG))
         noSaveNecessary = true;
       if (map.optBoolean("POLYVERTS"))

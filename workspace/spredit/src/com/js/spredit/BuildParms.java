@@ -4,14 +4,12 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.js.geometry.IPoint;
 
 import apputil.*;
-import static com.js.basic.Tools.*;
 
 public class BuildParms {
 
@@ -44,8 +42,7 @@ public class BuildParms {
     c.add(texHeight);
     c1.add(c);
 
-    //MyFrame f = 
-      new MyFrame("BUILDPARMS", "Atlas Parameters", c1);
+    new MyFrame("BUILDPARMS", "Atlas Parameters", c1);
 
   }
 
@@ -56,7 +53,6 @@ public class BuildParms {
 
     d.setTitle("Atlas Parameters");
 
-    if (true) {
       MyPanel c1 = new MyPanel(false);
       MyPanel.insetBy(c1, 8);
 
@@ -91,52 +87,6 @@ public class BuildParms {
       // only add component to parent when complete
       d.getContentPane().add(c1);
 
-    }
-    //    else { // old way
-    //      Container c = d.getContentPane();
-    //      c.setLayout(new FlowLayout());
-    // ------------------------------------------------- OLD
-    //
-    //      c.add(new JLabel("fixed size:"));
-    //      c.add(fixedSize);
-    //      c.add(new JLabel("width:"));
-    //      c.add(texWidth);
-    //      c.add(new JLabel("height:"));
-    //      c.add(texHeight);
-    //
-    //      c.add(ok);
-    //
-    //      if (false) {
-    //        warn("testing new comp stuff");
-    //
-    //        MyComp p2 = new MyComp(true);
-    //
-    //        {
-    //          MyComp panel = new MyComp(false);
-    //
-    //          panel.add(MyComp.testComp(40, 220, true, true, Color.ORANGE));
-    //          p2.add(panel);
-    //        }
-    //
-    //        p2.add(MyComp.hSpace(22));
-    //        {
-    //          MyComp panel = new MyComp(false);
-    //
-    //          panel.add(MyComp.testComp(100, 40, false, false, Color.red));
-    //          // panel.add(MyComp.testComp(1, 1, true, true, Color.green));
-    //          panel.add(MyComp.testComp(150, 40, true, false, Color.blue));
-    //          panel.add(MyComp.stretch());
-    //          //  panel.add(MyComp.testComp(1, 1, true, true, Color.green));
-    //          panel.add(MyComp.testComp(50, 40, true, false, Color.DARK_GRAY));
-    //          //panel.validate();
-    //          p2.add(panel);
-    //        }
-    //
-    //        // panel.setPreferredSize(new Dimension(200, 200));
-    //        c.add(p2);
-    //
-    //      }
-    //    }
     ok.addActionListener(new ActionListener() {
       // ------------------------------------------------- OLD
 
@@ -147,8 +97,6 @@ public class BuildParms {
     });
 
     // ------------------------------------------------- OLD
-    //    if (false)
-    //      d.setPreferredSize(new Dimension(400, 400));
 
     // set min width to accomodate title
     d.setMinimumSize(new Dimension(300, 1));
@@ -180,6 +128,7 @@ public class BuildParms {
 
   /**
    * Get texture page size
+   * 
    * @return page size, or null if not a fixed size
    */
   public static IPoint texSize() {
@@ -198,10 +147,9 @@ public class BuildParms {
   public static void parseFrom(JSONObject map) throws JSONException {
     if (map == null)
       map = new JSONObject();
-    JSONArray array = map.optJSONArray("SIZE");
-    unimp("have default value if array is null?");
-    if (array != null)
-      setTexSize(IPoint.parseJSON(array));
+    IPoint size = IPoint.parseJSON(map, "SIZE");
+    if (size != null)
+      setTexSize(size);
     fixedSize.setSelected(map.optBoolean("FIXEDSIZE", false));
   }
 

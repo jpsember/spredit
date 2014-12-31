@@ -9,7 +9,6 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public class JSONTools {
 
@@ -28,10 +27,6 @@ public class JSONTools {
    */
   public static Iterable<String> iterable(Set<String> set) {
     return toList(set.iterator());
-  }
-
-  public static JSONObject parseMap(String source) throws JSONException {
-    return (JSONObject) new JSONTokener(source).nextValue();
   }
 
   /**

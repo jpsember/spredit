@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Point {
 
@@ -98,6 +99,17 @@ public class Point {
     a.put(x);
     a.put(y);
     return a;
+  }
+
+  /**
+   * Parse point from JSON map
+   */
+  public static Point parseJSON(JSONObject map, String key)
+      throws JSONException {
+    JSONArray a = map.optJSONArray(key);
+    if (a == null)
+      return null;
+    return parseJSON(a);
   }
 
   /**

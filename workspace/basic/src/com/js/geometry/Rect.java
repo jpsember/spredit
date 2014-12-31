@@ -269,6 +269,16 @@ public class Rect {
   }
 
   /**
+   * Parse Rect from JSON map
+   */
+  public static Rect parseJSON(JSONObject map, String key) throws JSONException {
+    JSONArray array = map.optJSONArray(key);
+    if (array == null)
+      return null;
+    return parseJSON(array);
+  }
+
+  /**
    * Parse Rect from JSONArray
    */
   public static Rect parseJSON(JSONArray array) throws JSONException {
