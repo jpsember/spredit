@@ -229,7 +229,7 @@ public class AppTools {
 
   public static File incrementFile(File f) {
     String name = f.getName();
-    String ext = Files.getExtension(name);
+    String ext = Files.getExtension(f);
     name = Files.removeExt(name);
 
     if (name.length() == 0)

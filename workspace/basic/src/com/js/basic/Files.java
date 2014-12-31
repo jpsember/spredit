@@ -3,6 +3,7 @@ package com.js.basic;
 import java.io.*;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 public class Files {
 
@@ -37,15 +38,8 @@ public class Files {
   /**
    * @deprecated use Apache Commons IO
    */
-  public static boolean hasExtension(String path) {
-    return (getExtension(path).length() != 0);
-  }
-
-  /**
-   * @deprecated use Apache Commons IO
-   */
   public static String addExtension(String path, String ext) {
-    if (!hasExtension(path)) {
+    if (!hasExtension(new File(path))) {
       path = changeExtension(path, ext);
     }
     return path;
@@ -112,32 +106,14 @@ public class Files {
   /**
    * Get extension of a file
    * 
-   * @return String containing extension, empty if it has none (or is a
-   *         directory)
-   * @deprecated use Apache Commons IO
+   * @return String containing extension, empty if it has none
    */
   public static String getExtension(File file) {
-    String ext = "";
-    String f = file.getName();
-    int extPos = f.lastIndexOf('.');
-    if (extPos >= 0) {
-      ext = f.substring(extPos + 1);
-    }
-    return ext;
+    return FilenameUtils.getExtension(file.getPath());
   }
 
-  /**
-   * @deprecated use Apache Commons IO
-   */
   public static boolean hasExtension(File file) {
-    return getExtension(file).length() > 0;
-  }
-
-  /**
-   * @deprecated use Apache Commons IO
-   */
-  public static String getExtension(String path) {
-    return getExtension(new File(path));
+    return !FilenameUtils.getExtension(file.getPath()).isEmpty();
   }
 
   /**

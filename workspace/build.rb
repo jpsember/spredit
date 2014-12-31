@@ -72,7 +72,7 @@ class App
       # Declare the various projects and their dependencies
       #
 
-      Project.add("basic").add_libraries %w(java-json.jar)
+      Project.add("basic").add_libraries %w(java-json.jar commons-io.jar)
       Project.add("apputil")
       .add_projects(%w(basic))
       .add_libraries(%w(ui.jar))
