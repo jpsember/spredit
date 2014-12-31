@@ -66,4 +66,24 @@ public class JSONTools {
     return map;
   }
 
+  /**
+   * Store a float within a JSON array as an integer, preserving 3 decimal
+   * places
+   * 
+   * @param array
+   * @param floatValue
+   * @throws JSONException
+   */
+  public static void put(JSONArray array, float floatValue)
+      throws JSONException {
+    long intValue = (long) (floatValue * 1000);
+    array.put(intValue);
+  }
+
+  public static float getFloat(JSONArray array, int cursor)
+      throws JSONException {
+    long intValue = array.getLong(cursor);
+    return ((float) intValue) / 1000;
+  }
+
 }

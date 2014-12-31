@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.basic.JSONTools;
+
 public class Point {
 
   public static final Point ZERO = new Point();
@@ -99,25 +101,24 @@ public class Point {
 
   private JSONArray toJSON() throws JSONException {
     JSONArray a = new JSONArray();
-    unimp("figure out way to truncate float values to something reasonable");
-    a.put(x);
-    a.put(y);
+    JSONTools.put(a, x);
+    JSONTools.put(a, y);
     return a;
   }
 
   private static JSONArray toJSON(List<Point> points) throws JSONException {
     JSONArray a = new JSONArray();
     for (Point pt : points) {
-      a.put(pt.x);
-      a.put(pt.y);
+      JSONTools.put(a, pt.x);
+      JSONTools.put(a, pt.y);
     }
     return a;
   }
 
   private static Point get(JSONArray array) throws JSONException {
-    int c = 0;
-    float x = (float) array.getDouble(c++);
-    float y = (float) array.getDouble(c++);
+    int cursor = 0;
+    float x = JSONTools.getFloat(array, cursor++);
+    float y = JSONTools.getFloat(array, cursor++);
     return new Point(x, y);
   }
 
@@ -127,8 +128,8 @@ public class Point {
       throw new JSONException("malformed array");
     int cursor = 0;
     while (cursor < array.length()) {
-      float x = (float) array.getDouble(cursor++);
-      float y = (float) array.getDouble(cursor++);
+      float x = JSONTools.getFloat(array, cursor++);
+      float y = JSONTools.getFloat(array, cursor++);
       list.add(new Point(x, y));
     }
     return list;

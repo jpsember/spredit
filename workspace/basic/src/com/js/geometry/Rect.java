@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.json.*;
 
+import com.js.basic.JSONTools;
+
 public class Rect {
 
   public Rect(float x, float y, float w, float h) {
@@ -260,19 +262,19 @@ public class Rect {
 
   private JSONArray toJSON() throws JSONException {
     JSONArray a = new JSONArray();
-    a.put(x);
-    a.put(y);
-    a.put(width);
-    a.put(height);
+    JSONTools.put(a, x);
+    JSONTools.put(a, y);
+    JSONTools.put(a, width);
+    JSONTools.put(a, height);
     return a;
   }
 
   private static Rect parseJSON(JSONArray array) throws JSONException {
     int c = 0;
-    float x = (float) array.getDouble(c++);
-    float y = (float) array.getDouble(c++);
-    float w = (float) array.getDouble(c++);
-    float h = (float) array.getDouble(c++);
+    float x = JSONTools.getFloat(array, c++);
+    float y = JSONTools.getFloat(array, c++);
+    float w = JSONTools.getFloat(array, c++);
+    float h = JSONTools.getFloat(array, c++);
     return new Rect(x, y, w, h);
   }
 
