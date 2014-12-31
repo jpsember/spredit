@@ -33,6 +33,10 @@ public class SprCompile {
   }
 
   public static void main(String[] args) {
+    new SprCompile().run(args);
+  }
+
+  private void run(String[] args) {
     if (true) {
       warning("using test args");
       String[] a = { "-p", "sample", "-v" };
@@ -69,7 +73,7 @@ public class SprCompile {
     }
   }
 
-  private static void buildAtlas() throws IOException {
+  private void buildAtlas() throws IOException {
 
     if (mVerbose)
       pr("Building atlas: " + mBuildPath);
@@ -102,14 +106,13 @@ public class SprCompile {
         at.debugWriteToPNG();
       }
     }
-
   }
 
   private static float[] sDefaultResolutions = { 1 };
 
-  private static IPoint mAtlasSize;
-  private static File mBuildPath;
-  private static boolean mVerbose;
-  private static float[] mResolutions = sDefaultResolutions;
-  private static CmdLineArgs ca;
+  private IPoint mAtlasSize;
+  private File mBuildPath;
+  private boolean mVerbose;
+  private float[] mResolutions = sDefaultResolutions;
+  private CmdLineArgs ca;
 }
