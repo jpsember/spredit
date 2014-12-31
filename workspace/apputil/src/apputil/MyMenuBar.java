@@ -18,6 +18,13 @@ public class MyMenuBar {
   public static final int META = (1 << 2);
   public static final int ALT = (1 << 1);
 
+  private static MenuHandler ALWAYS_ENABLED_HANDLER = new MenuHandler() {
+    @Override
+    public boolean isEnabled() {
+      return true;
+    }
+  };
+
   /**
    * Kludge to deal with OpenGL window / menu repaint conflict; generate repaint
    * every time a menu is redrawn
@@ -272,15 +279,15 @@ public class MyMenuBar {
     public Menu(String name, MenuHandler handler) {
       super(name);
       if (handler == null)
-        handler = new MenuHandler();
-      this.mHandler2 = handler;
+        handler = ALWAYS_ENABLED_HANDLER;
+      this.mHandler = handler;
     }
 
     public MenuHandler handler() {
-      return mHandler2;
+      return mHandler;
     }
 
-    private MenuHandler mHandler2;
+    private MenuHandler mHandler;
   }
 
   // masks for modifier keys; these are lazy-initialized according

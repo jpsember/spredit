@@ -1,13 +1,11 @@
 package apputil;
 
-
-public class MenuHandler  {
+public interface MenuHandler {
   /**
-   * Determine if items within this menu should be enabled.
-   * If it returns false, the individual item tests are not done.
+   * Determine if items within this menu should be enabled. If it returns false,
+   * the individual item tests are not done.
+   * 
    * @return true if so
    */
-  public boolean isEnabled() {
-    return true;
-  }
+  public boolean isEnabled();
 }
