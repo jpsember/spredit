@@ -10,6 +10,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.awt.event.*;
+import static com.js.basic.Tools.*;
+
 
 /**
  * Maintains a list of recent files to display in an application menu
@@ -46,6 +48,9 @@ public class RecentFiles {
     mFileActive = false;
     if (file == null)
       return;
+
+    file = fileRelativeToDirectory(file, mProjectBase);
+
     int j = mFileList.indexOf(file);
     if (j >= 0) {
       mFileList.remove(j);
@@ -116,8 +121,9 @@ public class RecentFiles {
     JSONArray a = new JSONArray();
     for (int i = 0; i < size(); i++) {
       File f = get(i);
-      RelPath rp = new RelPath(mProjectBase, f);
-      a.put(rp.toString());
+      // RelPath rp = new RelPath(mProjectBase, f);
+      a.put(f.getPath());
+      // a.put(rp.toString());
     }
     map.put("list", a);
     return map;
@@ -139,24 +145,29 @@ public class RecentFiles {
     JSONArray a = map.getJSONArray("list");
     int c = 0;
     while (c < a.length()) {
-      RelPath rp = new RelPath(mProjectBase, a.getString(c++));
-      mFileList.add(rp.file());
+      File f = new File(a.getString(c++));
+      // RelPath rp = new RelPath(mProjectBase, a.getString(c++));
+      pr("adding recent file " + f);
+      mFileList.add(f);
     }
   }
 
   private class ComboBoxItem {
     public ComboBoxItem(File f) {
-      this.p = new RelPath(mProjectBase, f);
+      mFile = f;
+      // this.p = new RelPath(mProjectBase, f);
     }
 
     public String toString() {
-      String s = p.display(); // toString();
+      return mFile.getPath();
+      // String s = p.display(); // toString();
       // if (p.withinProjectTree()) //s.startsWith(">"))
       // s = s.substring(1);
-      return s;
+      // return s;
     }
 
-    private RelPath p;
+    private File mFile;
+    // private RelPath p;
   }
 
   /**
@@ -173,7 +184,7 @@ public class RecentFiles {
         // RelPath rp = (RelPath) cb.getSelectedItem();
         if (!mRebuildingBox) {
           if (itm != null) {
-            setCurrentFile(itm.p.file());
+            setCurrentFile(itm.mFile); // itm.p.file());
           }
         }
       }
@@ -181,10 +192,44 @@ public class RecentFiles {
     rebuildComboBox();
   }
 
+  public File fileRelativeToDirectory(File file, File directory) {
+    if (directory == null)
+      return file.getAbsoluteFile();
+
+    String dirPath = directory.getAbsolutePath();
+    String filePath = file.getAbsolutePath();
+    if (!filePath.startsWith(dirPath))
+      return file.getAbsoluteFile();
+
+    String suffix = filePath.substring(dirPath.length());
+    if (suffix.startsWith(File.separator)) {
+      suffix = suffix.substring(File.separator.length());
+    }
+    return new File(suffix);
+  }
+
+  public String displayRelativeToProjectBase(File file) {
+    return fileRelativeToDirectory(file, mProjectBase).getPath();
+  }
+
+  //
+  // String filePath = file.getPath();
+  // if (mProjectBase == null)
+  // return filePath;
+  // String projectPath = mProjectBase.getPath();
+  // if (!filePath.startsWith(projectPath))
+  // return filePath;
+  // String suffix = filePath.substring(projectPath.length());
+  // if (suffix.startsWith(File.separator)) {
+  // suffix = suffix.substring(File.separator.length());
+  // }
+  // return suffix;
+  // }
+
   private void rebuildComboBox() {
     mComboBox.removeAllItems();
     for (int i = 0; i < size(); i++) {
-      mComboBox.addItem(new ComboBoxItem(get(i))); 
+      mComboBox.addItem(new ComboBoxItem(get(i)));
     }
   }
 

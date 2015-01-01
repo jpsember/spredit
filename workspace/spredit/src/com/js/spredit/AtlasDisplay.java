@@ -11,35 +11,35 @@ public class AtlasDisplay extends MyFrame {
 
   public static AtlasDisplay create(TexProject project) {
     final AtlasDisplay f = new AtlasDisplay(project);
-    //  f.pack();
+    // f.pack();
 
-    //    f.addComponentListener(new ComponentListener() {
+    // f.addComponentListener(new ComponentListener() {
     //
-    //      @Override
-    //      public void componentHidden(ComponentEvent arg0) {
-    //      }
+    // @Override
+    // public void componentHidden(ComponentEvent arg0) {
+    // }
     //
-    //      @Override
-    //      public void componentMoved(ComponentEvent ev) {
-    //        bounds = new IRect(f.getBounds());
-    //      }
+    // @Override
+    // public void componentMoved(ComponentEvent ev) {
+    // bounds = new IRect(f.getBounds());
+    // }
     //
-    //      @Override
-    //      public void componentResized(ComponentEvent arg0) {
-    //      }
+    // @Override
+    // public void componentResized(ComponentEvent arg0) {
+    // }
     //
-    //      @Override
-    //      public void componentShown(ComponentEvent arg0) {
-    //      }
-    //    });
+    // @Override
+    // public void componentShown(ComponentEvent arg0) {
+    // }
+    // });
 
-    //    if (bounds != null)
-    //      f.setLocation(bounds.x, bounds.y);
-    //    else
-    //      f.setLocationRelativeTo(null);
+    // if (bounds != null)
+    // f.setLocation(bounds.x, bounds.y);
+    // else
+    // f.setLocationRelativeTo(null);
 
     f.setVisible(true);
-    //    f.setVisible(true);
+    // f.setVisible(true);
     return f;
   }
 
@@ -47,7 +47,8 @@ public class AtlasDisplay extends MyFrame {
 
   /**
    * Create atlas display frame
-   * @param project 
+   * 
+   * @param project
    */
   public AtlasDisplay(TexProject project) {
     super("ATLAS_" + project.name());
@@ -56,7 +57,7 @@ public class AtlasDisplay extends MyFrame {
     try {
       atlas = project.atlas();
       image = atlas.image();
-      setTitle(new RelPath(project.baseDirectory(), atlas.dataFile()).display());
+      setTitle(atlas.dataFile().getPath());
     } catch (IOException e) {
       AppTools.showError("displaying atlas", e);
     }
@@ -65,7 +66,8 @@ public class AtlasDisplay extends MyFrame {
 
   /**
    * Create atlas display frame
-   * @param project 
+   * 
+   * @param project
    */
   public AtlasDisplay(File atlasFile) {
     super("ATLAS_MISC");
@@ -84,11 +86,11 @@ public class AtlasDisplay extends MyFrame {
 
     // setLayout(new BorderLayout());
 
-    //Set up the drawing area.
+    // Set up the drawing area.
     JPanel drawingPane = new DrawingPane();
     drawingPane.setBackground(Color.white);
 
-    //Put the drawing area in a scroll pane.
+    // Put the drawing area in a scroll pane.
     JScrollPane scroller = new JScrollPane(drawingPane);
 
     scroller

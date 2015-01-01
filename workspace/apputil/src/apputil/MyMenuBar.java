@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
+
 import static com.js.basic.Tools.*;
 
 /*
@@ -102,7 +103,7 @@ public class MyMenuBar {
           File f = mRecentFiles.get(i);
           if (mRecentFiles.getCurrentFile() == f)
             continue;
-          String s = new RelPath(mRecentFiles.getProjectBase(), f).display();
+          String s = mRecentFiles.displayRelativeToProjectBase(f);
           JMenuItem item = new RecentFilesMenuItem(f, s);
           this.add(item);
           item.addActionListener(this);

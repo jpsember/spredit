@@ -127,13 +127,7 @@ public class AppTools {
 
   public static File chooseFileToSave(String prompt, MyFileFilter fileFilter,
       File defaultFile) {
-    final boolean db = false;
     enableMenuBar(false);
-
-    if (db)
-      pr("chooseFileToSave\n " + prompt + "\n filter:" + fileFilter
-          + "\n defaultFile:" + defaultFile);
-
     File f = null;
     do {
 
