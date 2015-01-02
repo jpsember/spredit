@@ -6,6 +6,8 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import com.js.basic.Files;
+
 import static com.js.basic.Tools.*;
 
 /*
@@ -51,6 +53,7 @@ public class MyMenuBar {
     private File mFile;
   }
 
+  @Deprecated
   public static void updateRecentFilesFor(JMenuItem recentFilesList,
       RecentFiles recentFiles) {
     if (recentFilesList != null) {
@@ -60,14 +63,19 @@ public class MyMenuBar {
   }
 
   private static class RecentFilesMenu extends JMenu implements MenuListener,
-      ActionListener, Enableable {
+      ActionListener, Enableable, RecentFiles.Listener {
 
     public RecentFilesMenu(String title, RecentFiles rf,
         ActionHandler evtHandler) {
       super(title);
-      this.mRecentFiles = rf;
-      this.mItemHandler = evtHandler;
-      this.addMenuListener(this);
+      mRecentFiles = rf;
+      if (mRecentFiles != null)
+        mRecentFiles.addListener(this);
+      else {
+        unimp("recent files should always be defined!");
+      }
+      mItemHandler = evtHandler;
+      addMenuListener(this);
     }
 
     @Override
@@ -97,13 +105,25 @@ public class MyMenuBar {
 
     @Override
     public void menuSelected(MenuEvent arg0) {
+      rebuild();
+    }
+
+    @Override
+    public void mostRecentFileChanged(RecentFiles recentFiles) {
+      unimp("mostRecentFileChanged to " + recentFiles.getMostRecentFile());
+      rebuild();
+    }
+
+    private void rebuild() {
       removeAll();
       if (mRecentFiles != null) {
         for (int i = 0; i < mRecentFiles.size(); i++) {
           File f = mRecentFiles.get(i);
           if (mRecentFiles.getCurrentFile() == f)
             continue;
-          String s = mRecentFiles.displayRelativeToProjectBase(f);
+
+          String s = Files.fileWithinDirectory(f,
+              mRecentFiles.getProjectDirectory()).getPath();
           JMenuItem item = new RecentFilesMenuItem(f, s);
           this.add(item);
           item.addActionListener(this);
@@ -113,7 +133,6 @@ public class MyMenuBar {
 
     private ActionHandler mItemHandler;
     private RecentFiles mRecentFiles;
-
   }
 
   public MyMenuBar(JFrame frame) {

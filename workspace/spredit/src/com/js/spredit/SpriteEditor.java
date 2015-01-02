@@ -73,7 +73,7 @@ public class SpriteEditor {
     @Override
     public void writeTo(JSONObject map) throws JSONException {
       JSONObject map2 = new JSONObject();
-      map2.put(PROJECTS_TAG, recentProjects.encode());
+      recentProjects.put(map2, PROJECTS_TAG);
       map2.put(CPT_TAG, cpt.isSelected());
       map2.put(CLIP_TAG, showClip.isSelected());
       map.put(OUR_TAG, map2);
@@ -84,7 +84,7 @@ public class SpriteEditor {
       JSONObject map2 = map.optJSONObject(OUR_TAG);
       if (map2 == null)
         return;
-      recentProjects.decode(map2.getString(PROJECTS_TAG));
+      recentProjects.restore(map2, PROJECTS_TAG);
       cpt.setSelected(map2.getBoolean(CPT_TAG));
       showClip.setSelected(map2.getBoolean(CLIP_TAG));
     }
@@ -175,7 +175,7 @@ public class SpriteEditor {
 
     recentProjects.setCurrentFile(project == null ? null : project.file());
 
-    MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
+    // MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
     //
     //
     // lastProjectPath = project.file();
@@ -248,8 +248,7 @@ public class SpriteEditor {
 
       File base = recentProjects.getMostRecentFile();
 
-      projFile = AppTools.chooseFileToOpen("Open Project",
- TexProject.FILES,
+      projFile = AppTools.chooseFileToOpen("Open Project", TexProject.FILES,
           base);
     }
     if (projFile != null) {
@@ -448,7 +447,8 @@ public class SpriteEditor {
       }
     });
 
-    recentProjectsMenuItem = m.addRecentFilesList("Open Recent Project",
+    // recentProjectsMenuItem =
+    m.addRecentFilesList("Open Recent Project",
         recentProjects, new ActionHandler() {
           @Override
           public void go() {
@@ -1082,7 +1082,7 @@ public class SpriteEditor {
   };
 
   private static RecentFiles recentProjects = new RecentFiles(null);
-  private static JMenuItem recentProjectsMenuItem;
+  // private static JMenuItem recentProjectsMenuItem;
   private static JCheckBox cpt = new JCheckBox();
   private static JCheckBox showClip = new JCheckBox();
 

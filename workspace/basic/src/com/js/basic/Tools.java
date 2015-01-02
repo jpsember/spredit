@@ -13,6 +13,10 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.js.geometry.MyMath;
 
 public final class Tools {
@@ -661,6 +665,24 @@ public final class Tools {
     if (obj != null)
       s = obj.toString();
     return d(s);
+  }
+
+  public static String d(JSONObject map) {
+    try {
+      return map.toString(2);
+    } catch (JSONException e) {
+      warning("caught:" + e);
+      return map.toString();
+    }
+  }
+
+  public static String d(JSONArray array) {
+    try {
+      return array.toString(2);
+    } catch (JSONException e) {
+      warning("caught:" + e);
+      return array.toString();
+    }
   }
 
   /**

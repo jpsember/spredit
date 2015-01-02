@@ -9,8 +9,6 @@ import static com.js.basic.Tools.*;
 /**
  * Standard format for paths: enforce consistent separator char ('/'), and
  * support relative to project base directory (via a '>' prefix)
- * 
- * @deprecated
  */
 public class RelPath {
   private static final boolean db = false;

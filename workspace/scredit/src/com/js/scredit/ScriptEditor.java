@@ -532,7 +532,8 @@ public class ScriptEditor {
       }
     });
 
-    recentScriptsMenuItem = m.addRecentFilesList("Open Recent Script", null,
+    // recentScriptsMenuItem =
+    m.addRecentFilesList("Open Recent Script", null,
         new ActionHandler() {
           @Override
           public boolean shouldBeEnabled() {
@@ -1141,7 +1142,8 @@ public class ScriptEditor {
       }
     });
 
-    recentScriptSetsMenuItem = m.addRecentFilesList("Open Recent Set", null,
+    // recentScriptSetsMenuItem =
+    m.addRecentFilesList("Open Recent Set", null,
         new ActionHandler() {
           @Override
           public boolean shouldBeEnabled() {
@@ -1182,7 +1184,8 @@ public class ScriptEditor {
         }
       }
     });
-    recentProjectsMenuItem = m.addRecentFilesList("Open Recent Project",
+    // recentProjectsMenuItem =
+    m.addRecentFilesList("Open Recent Project",
         recentProjects, new ActionHandler() {
           @Override
           public void go() {
@@ -1530,8 +1533,8 @@ public class ScriptEditor {
    */
   private static void setRecentSetPath(File f) {
     mProject.setLastSetPath(f);
-    MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
-        mProject.recentScriptSets());
+    // MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
+    // mProject.recentScriptSets());
     mProject.setLastSetPath(null);
   }
 
@@ -2074,7 +2077,7 @@ public class ScriptEditor {
 
     @Override
     public void readFrom(JSONObject map) throws JSONException {
-      recentProjects.decode(map.optJSONObject(PROJECTS_TAG));
+      recentProjects.restore(map, PROJECTS_TAG);
       setOrigin(map.optBoolean("ORIGIN", true));
       setFaded(map.optBoolean("FADED"));
       zoomFactor = (float) map.optDouble("ZOOM", 1);
@@ -2089,7 +2092,7 @@ public class ScriptEditor {
 
     @Override
     public void writeTo(JSONObject map) throws JSONException {
-      map.put(PROJECTS_TAG, recentProjects.encode());
+      recentProjects.put(map, PROJECTS_TAG);
       map.put("ORIGIN", showOrigin());
       map.put("FADED", faded());
       map.put("ZOOM", zoomFactor);
@@ -2111,9 +2114,9 @@ public class ScriptEditor {
     return editor.path == null;
   }
 
-  private static JMenuItem recentScriptsMenuItem, recentProjectsMenuItem,
-      recentScriptSetsMenuItem;
-
+  // private static JMenuItem recentScriptsMenuItem, recentProjectsMenuItem,
+  // recentScriptSetsMenuItem;
+  //
   private static void writeProjectDefaults() throws JSONException {
     mProject.getDefaults().put("LAYERS", encodeLayers());
     ASSERT(pPanel != null);
@@ -2210,15 +2213,27 @@ public class ScriptEditor {
       pr("updateProject from " + mProject + " to " + p);
 
     setProjectField(p);
-    MyMenuBar.updateRecentFilesFor(recentScriptsMenuItem,
-        isProjectOpen() ? mProject.recentScripts() : null);
-
-    MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
-        isProjectOpen() ? mProject.recentScriptSets() : null);
+    // MyMenuBar.updateRecentFilesFor(recentScriptsMenuItem,
+    // isProjectOpen() ? mProject.recentScripts() : null);
+    //
+    // MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
+    // isProjectOpen() ? mProject.recentScriptSets() : null);
     recentProjects.setCurrentFile(isProjectOpen() ? mProject.file() : null);
 
     if (isProjectOpen()) {
-      mProject.recentAtlases().setComboBox(atlasCB);
+      mProject.recentAtlases().addListener(new RecentFiles.Listener(){
+        @Override
+        public void mostRecentFileChanged(RecentFiles recentFiles) {
+          JComboBox cb = atlasCB;
+          cb.removeAllItems();
+          for (int i = 0; i < recentFiles.size(); i++) {
+            unimp("where do we handle such events?");
+            cb.addItem(recentFiles.get(i)); // )new
+                                            // ComboBoxItem(recentFiles.get(i)));
+          }
+        }
+      });
+//      mProject.recentAtlases().setComboBox(atlasCB);
       atlasCB.setEnabled(true);
       atlasSelectButton.setEnabled(true);
     } else {
@@ -2226,11 +2241,11 @@ public class ScriptEditor {
       atlasCB.setEnabled(false);
       atlasSelectButton.setEnabled(false);
     }
-    if (db)
-      pr(" updateRecentFilesFor " + recentProjectsMenuItem
-          + "\n recentProjects=\n" + recentProjects);
-
-    MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
+    // if (db)
+    // pr(" updateRecentFilesFor " + recentProjectsMenuItem
+    // + "\n recentProjects=\n" + recentProjects);
+    //
+    // MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
 
   }
 

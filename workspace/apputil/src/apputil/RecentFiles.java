@@ -2,32 +2,47 @@ package apputil;
 
 import java.io.*;
 import java.util.ArrayList;
-
-import javax.swing.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.awt.event.*;
+import com.js.basic.Files;
+
 import static com.js.basic.Tools.*;
 
-
 /**
- * Maintains a list of recent files to display in an application menu
+ * Maintains a queue of recently-used files, e.g. to display in an application
+ * menu (or combo box)
  */
 public class RecentFiles {
 
   private static final int MAX = 8;
 
+  public static interface Listener {
+    public void mostRecentFileChanged(RecentFiles recentFiles);
+  }
+
   /**
    * Constructor
    * 
-   * @param projectBase
-   *          base of project tree, or null if none (absolute paths)
+   * @param projectDirectory
+   *          base of project directory tree, or null
    */
-  public RecentFiles(File projectBase) {
-    mProjectBase = projectBase;
+  public RecentFiles(File projectDirectory) {
+    if (projectDirectory != null) {
+      mProjectDirectory = projectDirectory;
+    }
+  }
+
+  public void addListener(Listener listener) {
+    mListeners.add(listener);
+  }
+
+  public void removeListener(Listener listener) {
+    mListeners.remove(listener);
   }
 
   /**
@@ -44,12 +59,17 @@ public class RecentFiles {
    * bumps one if the list is too full)
    */
   public void setCurrentFile(File file) {
-    File c = getCurrentFile();
+    if (db)
+      pr("RecentFiles.setCurrentFile " + file);
     mFileActive = false;
     if (file == null)
       return;
-
-    file = fileRelativeToDirectory(file, mProjectBase);
+    File previousCurrentFile = getCurrentFile();
+    file = Files.fileWithinDirectory(file, getProjectDirectory());
+    if (db)
+      pr(" setting to canonical form " + file);
+    if (file.equals(previousCurrentFile))
+      return;
 
     int j = mFileList.indexOf(file);
     if (j >= 0) {
@@ -60,28 +80,25 @@ public class RecentFiles {
     while (mFileList.size() > MAX)
       mFileList.remove(mFileList.size() - 1);
 
-    if (!file.equals(c)) {
-      if (mComboBox != null) {
-        mRebuildingBox = true;
-        rebuildComboBox();
-        mRebuildingBox = false;
-      }
+    if (db)
+      pr("mFileList now " + d(mFileList));
+    for (Listener listener : mListeners) {
+      listener.mostRecentFileChanged(this);
     }
+
   }
 
   /**
    * Get number of files in list
-   * 
-   * @return number of files
    */
-  int size() {
+  public int size() {
     return mFileList.size();
   }
 
   /**
    * Get nth most recently used file
    */
-  File get(int n) {
+  public File get(int n) {
     return mFileList.get(n);
   }
 
@@ -104,40 +121,44 @@ public class RecentFiles {
   }
 
   /**
-   * Get root of project tree, or null if none specified
-   * 
-   * @return directory
+   * Get root of project tree, or null if none was given
    */
-  public File getProjectBase() {
-    return mProjectBase;
+  public File getProjectDirectory() {
+    return mProjectDirectory;
   }
 
   /**
-   * Encode recent files object to JSONObject
+   * Store within JSON map
    */
-  public JSONObject encode() throws JSONException {
+  public void put(JSONObject map, String key) throws JSONException {
+    map.put(key, encode());
+  }
+
+  private JSONObject encode() throws JSONException {
     JSONObject map = new JSONObject();
     map.put("active", mFileActive);
     JSONArray a = new JSONArray();
     for (int i = 0; i < size(); i++) {
       File f = get(i);
-      // RelPath rp = new RelPath(mProjectBase, f);
       a.put(f.getPath());
-      // a.put(rp.toString());
     }
     map.put("list", a);
+    if (db)
+      pr("RecentFiles.encode produced:\n" + d(map));
     return map;
   }
 
-  public void decode(String mapAsJSONString) throws JSONException {
-    JSONObject map = new JSONObject(mapAsJSONString);
-    decode(map);
+  /**
+   * Decode file entries from JSON map, if found; otherwise, clear
+   */
+  public void restore(JSONObject map, String key) throws JSONException {
+    JSONObject recentFilesMap = map.optJSONObject(key);
+    decode(recentFilesMap);
   }
 
-  /**
-   * Decode object from JSON, if map exists
-   */
-  public void decode(JSONObject map) throws JSONException {
+  private void decode(JSONObject map) throws JSONException {
+    if (db)
+      pr("RecentFiles decode:\n" + d(map));
     clear();
     if (map == null)
       return;
@@ -147,96 +168,67 @@ public class RecentFiles {
     while (c < a.length()) {
       File f = new File(a.getString(c++));
       // RelPath rp = new RelPath(mProjectBase, a.getString(c++));
-      pr("adding recent file " + f);
+      if (db)
+        pr("adding recent file " + f);
       mFileList.add(f);
     }
   }
 
-  private class ComboBoxItem {
-    public ComboBoxItem(File f) {
-      mFile = f;
-      // this.p = new RelPath(mProjectBase, f);
-    }
-
-    public String toString() {
-      return mFile.getPath();
-      // String s = p.display(); // toString();
-      // if (p.withinProjectTree()) //s.startsWith(">"))
-      // s = s.substring(1);
-      // return s;
-    }
-
-    private File mFile;
-    // private RelPath p;
-  }
-
-  /**
-   * Connect this object to a JComboBox
-   * 
-   * @param mComboBox
-   */
-  public void setComboBox(JComboBox cbx) {
-    this.mComboBox = cbx;
-
-    mComboBox.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        ComboBoxItem itm = (ComboBoxItem) mComboBox.getSelectedItem();
-        // RelPath rp = (RelPath) cb.getSelectedItem();
-        if (!mRebuildingBox) {
-          if (itm != null) {
-            setCurrentFile(itm.mFile); // itm.p.file());
-          }
-        }
-      }
-    });
-    rebuildComboBox();
-  }
-
-  public File fileRelativeToDirectory(File file, File directory) {
-    if (directory == null)
-      return file.getAbsoluteFile();
-
-    String dirPath = directory.getAbsolutePath();
-    String filePath = file.getAbsolutePath();
-    if (!filePath.startsWith(dirPath))
-      return file.getAbsoluteFile();
-
-    String suffix = filePath.substring(dirPath.length());
-    if (suffix.startsWith(File.separator)) {
-      suffix = suffix.substring(File.separator.length());
-    }
-    return new File(suffix);
-  }
-
-  public String displayRelativeToProjectBase(File file) {
-    return fileRelativeToDirectory(file, mProjectBase).getPath();
-  }
-
+  // private class ComboBoxItem {
+  // public ComboBoxItem(File f) {
+  // pr("building ComboBoxItem for file " + f);
+  // mFile = f;
+  // // this.p = new RelPath(mProjectBase, f);
+  // }
   //
-  // String filePath = file.getPath();
-  // if (mProjectBase == null)
-  // return filePath;
-  // String projectPath = mProjectBase.getPath();
-  // if (!filePath.startsWith(projectPath))
-  // return filePath;
-  // String suffix = filePath.substring(projectPath.length());
-  // if (suffix.startsWith(File.separator)) {
-  // suffix = suffix.substring(File.separator.length());
+  // public String toString() {
+  // pr("ComboBoxItem to string, returning " + mFile);
+  // return mFile.getPath();
+  // // String s = p.display(); // toString();
+  // // if (p.withinProjectTree()) //s.startsWith(">"))
+  // // s = s.substring(1);
+  // // return s;
   // }
-  // return suffix;
+  //
+  // private File mFile;
+  // // private RelPath p;
   // }
 
-  private void rebuildComboBox() {
-    mComboBox.removeAllItems();
-    for (int i = 0; i < size(); i++) {
-      mComboBox.addItem(new ComboBoxItem(get(i)));
-    }
-  }
+  // /**
+  // * Connect this object to a JComboBox
+  // *
+  // * @param mComboBox
+  // */
+  // public void setComboBox(JComboBox cbx) {
+  // pr("RecentFiles setComboBox " + cbx);
+  // mComboBox = cbx;
+  //
+  // mComboBox.addActionListener(new ActionListener() {
+  // public void actionPerformed(ActionEvent e) {
+  // ComboBoxItem itm = (ComboBoxItem) mComboBox.getSelectedItem();
+  // // RelPath rp = (RelPath) cb.getSelectedItem();
+  // if (!mRebuildingBox) {
+  // if (itm != null) {
+  // setCurrentFile(itm.mFile); // itm.p.file());
+  // }
+  // }
+  // }
+  // });
+  // rebuildComboBox();
+  // }
+  //
+  // private void rebuildComboBox() {
+  // mComboBox.removeAllItems();
+  // for (int i = 0; i < size(); i++) {
+  // mComboBox.addItem(new ComboBoxItem(get(i)));
+  // }
+  // }
+  // private JComboBox mComboBox;
+  // private boolean mRebuildingBox;
 
-  private JComboBox mComboBox;
-  private File mProjectBase;
+  // The project directory as given (possibly null)
+  private File mProjectDirectory;
   private ArrayList<File> mFileList = new ArrayList();
-  private boolean mRebuildingBox;
   private boolean mFileActive;
-
+  private Set<Listener> mListeners = new HashSet();
 }

@@ -72,4 +72,32 @@ public class Files {
     return setExtension(file, "");
   }
 
+  /**
+   * Get file expressed relative to a containing directory, if it lies within
+   * the directory
+   * 
+   * @param file
+   * @param directory
+   *          directory, or null
+   * @return file relative to directory, if directory is not null and file lies
+   *         within directory's tree; otherwise, the absolute form of file
+   */
+  public static File fileWithinDirectory(File file, File directory) {
+    File absFile = file.getAbsoluteFile();
+    if (directory == null)
+      return absFile;
+
+    String absDirPath = directory.getAbsolutePath();
+    String absFilePath = absFile.getPath();
+
+    if (!absFilePath.startsWith(absDirPath))
+      return absFile;
+
+    String suffix = absFilePath.substring(absDirPath.length());
+    if (suffix.startsWith(File.separator)) {
+      suffix = suffix.substring(File.separator.length());
+    }
+    return new File(suffix);
+  }
+
 }

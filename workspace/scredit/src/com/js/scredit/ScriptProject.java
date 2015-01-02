@@ -45,9 +45,9 @@ public class ScriptProject {
 
   public void flush() throws IOException {
     try {
-      getDefaults().put(KEY_RECENTSCRIPTS, mRecentScripts.encode());
-      getDefaults().put(KEY_RECENTATLASES, mRecentAtlases.encode());
-      getDefaults().put(KEY_RECENTSCRIPTSETS, mRecentScriptSets.encode());
+      mRecentScripts.put(getDefaults(), KEY_RECENTSCRIPTS);
+      mRecentAtlases.put(getDefaults(), KEY_RECENTATLASES);
+      mRecentScriptSets.put(getDefaults(), KEY_RECENTSCRIPTSETS);
 
       // JSON objects (maps) are unordered by definition, but if we can assume
       // they are at least deterministically ordered, then this 'write only if
@@ -62,9 +62,9 @@ public class ScriptProject {
   private void read() throws IOException, JSONException {
     String content = FileUtils.readFileToString(mProjectFile);
     mProjectDefaults = new JSONObject(content);
-    mRecentScripts.decode(getDefaults().optJSONObject(KEY_RECENTSCRIPTS));
-    mRecentAtlases.decode(getDefaults().optJSONObject(KEY_RECENTATLASES));
-    mRecentScriptSets.decode(getDefaults().optJSONObject(KEY_RECENTSCRIPTSETS));
+    mRecentScripts.restore(getDefaults(), KEY_RECENTSCRIPTS);
+    mRecentAtlases.restore(getDefaults(), KEY_RECENTATLASES);
+    mRecentScriptSets.restore(getDefaults(), KEY_RECENTSCRIPTSETS);
   }
 
   public File file() {

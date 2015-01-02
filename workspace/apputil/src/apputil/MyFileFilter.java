@@ -7,9 +7,12 @@ import org.apache.commons.io.FilenameUtils;
 import com.js.basic.Files;
 import static com.js.basic.Tools.*;
 
-
 public class MyFileFilter extends javax.swing.filechooser.FileFilter implements
     FileFilter, FilenameFilter {
+
+  static {
+    doNothing();
+  }
 
   /**
    * Constructor
