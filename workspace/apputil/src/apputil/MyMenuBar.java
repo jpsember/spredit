@@ -8,53 +8,41 @@ import javax.swing.event.*;
 
 import static com.js.basic.Tools.*;
 
-/*
- [] trouble disabling recent files submenus
- [] support dynamic menu item labels for undo/redo, sensitive to operation to be performed 
-
- */
 public class MyMenuBar {
-  public static final int CTRL = (1 << 0);
-  public static final int SHIFT = (1 << 3);
-  public static final int META = (1 << 2);
-  public static final int ALT = (1 << 1);
 
-  private static Enableable ALWAYS_ENABLED_HANDLER = new Enableable() {
-    @Override
-    public boolean shouldBeEnabled() {
-      return true;
-    }
-  };
+  public static final int CTRL = (1 << 0);
+  public static final int ALT = (1 << 1);
+  public static final int META = (1 << 2);
+  public static final int SHIFT = (1 << 3);
+
+  private static final int TOTAL_MODIFIER_KEY_FLAGS = 4;
 
   /**
-   * Kludge to deal with OpenGL window / menu repaint conflict; generate repaint
-   * every time a menu is redrawn
+   * Constructor
    * 
-   * @param c
+   * @param frame
+   *          frame associated with menu bar
    */
-  public static void addRepaintComponent(Component c) {
-    redrawOpenGLComponent = c;
-  }
-
-  private static Component redrawOpenGLComponent;
-
   public MyMenuBar(JFrame frame) {
-    mbar = new JMenuBar();
-    frame.setJMenuBar(mbar);
+    mMenuBar = new JMenuBar();
+    frame.setJMenuBar(mMenuBar);
   }
 
-  public void addMenu(String name) {
-    addMenu(name, null);
-  }
+  /**
+   * Start a new 'current' menu, and add it to the menu bar
+   * 
+   * @param title
+   *          title of menu
+   * @param handler
+   *          optional Enableable handler
+   */
+  public void addMenu(String title, Enableable handler) {
 
-  public void addMenu(String name, Enableable handler) {
+    mMenu = new Menu(title, handler);
+    mSeparatorPending = false;
+    mMenuBar.add(mMenu);
 
-    menu = new Menu(name, handler);
-    sepPending = false;
-    itemsAdded = 0;
-    mbar.add(menu);
-
-    menu.addMenuListener(new MenuListener() {
+    mMenu.addMenuListener(new MenuListener() {
       @Override
       public void menuCanceled(MenuEvent ev) {
         JMenu m = (JMenu) ev.getSource();
@@ -75,6 +63,61 @@ public class MyMenuBar {
     });
   }
 
+  /**
+   * Start a new 'current' menu
+   * 
+   * @param title
+   *          title of menu
+   */
+  public void addMenu(String name) {
+    addMenu(name, null);
+  }
+
+  /**
+   * Add an item to the current menu
+   */
+  public void addItem(JMenuItem item) {
+    if (mSeparatorPending) {
+      mMenu.addSeparator();
+      mSeparatorPending = false;
+    }
+    mMenu.add(item);
+  }
+
+  /**
+   * Add an item to the current menu, optionally with a keyboard accelerator
+   */
+  public JMenuItem addItem(String name, int accelKey, int accelFlags,
+      ActionHandler evtHandler) {
+    MenuItem m = new MenuItem(name, evtHandler, mMenu);
+    if (accelKey != 0) {
+      int k = 0;
+      for (int i = 0; i < TOTAL_MODIFIER_KEY_FLAGS; i++) {
+        if (0 != (accelFlags & (1 << i)))
+          k |= modifierKeyMasks()[i];
+      }
+      m.setAccelerator(KeyStroke.getKeyStroke(accelKey, k));
+    }
+    addItem(m);
+    return m;
+  }
+
+  /**
+   * Insert a separator line before adding next item to the current menu
+   */
+  public void addSeparator() {
+    if (mMenu.getItemCount() > 0)
+      mSeparatorPending = true;
+  }
+
+  /**
+   * Kludge to deal with OpenGL window / menu repaint conflict; generate repaint
+   * every time a menu is redrawn
+   */
+  public static void addRepaintComponent(Component c) {
+    sRedrawOpenGLComponent = c;
+  }
+
   private static void enableItems(JMenu m, boolean showingMenu) {
     for (int i = 0; i < m.getItemCount(); i++) {
       JMenuItem item = m.getItem(i);
@@ -91,40 +134,74 @@ public class MyMenuBar {
     }
   }
 
-  public void addItem(JMenuItem item) {
-    if (sepPending) {
-      menu.addSeparator();
-      sepPending = false;
-    }
-    itemsAdded++;
-    menu.add(item);
-  }
+  /**
+   * Get masks for modifier keys. These are OS-specific
+   */
+  private static int[] modifierKeyMasks() {
+    if (sModifierKeyMasks == null) {
+      int[] m = new int[TOTAL_MODIFIER_KEY_FLAGS];
+      sModifierKeyMasks = m;
 
-  public JMenuItem addItem(String name, int accelKey, int accelFlags,
-      ActionHandler evtHandler) {
-    MenuItem m = new MenuItem(name, evtHandler, menu);
-    if (accelKey != 0) {
-      int k = 0;
-      for (int i = 0; i < 4; i++) {
-        if (0 != (accelFlags & (1 << i)))
-          k |= masks[i];
+      m[0] = KeyEvent.CTRL_MASK;
+      m[1] = KeyEvent.ALT_MASK;
+      m[2] = KeyEvent.META_MASK;
+      m[3] = KeyEvent.SHIFT_MASK;
+
+      int j = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+      for (int k = 1; k < m.length; k++) {
+        if (m[k] == j) {
+          int tmp = m[0];
+          m[0] = j;
+          m[k] = tmp;
+          break;
+        }
       }
-      m.setAccelerator(KeyStroke.getKeyStroke(accelKey, k));
     }
-    addItem(m);
-    return m;
+    return sModifierKeyMasks;
   }
 
-  public void addSeparator() {
-    if (itemsAdded > 0)
-      sepPending = true;
+  private static int[] sModifierKeyMasks;
+  private static Component sRedrawOpenGLComponent;
+
+  private Menu mMenu;
+  private JMenuBar mMenuBar;
+  private boolean mSeparatorPending;
+
+  /**
+   * Subclass of JMenu designed for use with MyMenuBar
+   */
+  private static class Menu extends JMenu {
+
+    private static Enableable ALWAYS_ENABLED_HANDLER = new Enableable() {
+      @Override
+      public boolean shouldBeEnabled() {
+        return true;
+      }
+    };
+
+    public void paint(Graphics g) {
+      super.paint(g);
+      if (sRedrawOpenGLComponent != null)
+        sRedrawOpenGLComponent.repaint(50);
+    }
+
+    public Menu(String name, Enableable handler) {
+      super(name);
+      if (handler == null)
+        handler = ALWAYS_ENABLED_HANDLER;
+      this.mHandler = handler;
+    }
+
+    public Enableable handler() {
+      return mHandler;
+    }
+
+    private Enableable mHandler;
   }
 
-  private Menu menu;
-  private JMenuBar mbar;
-  private boolean sepPending;
-  private int itemsAdded;
-
+  /**
+   * Subclass of JMenuItem designed for use with MyMenuBar
+   */
   private static class MenuItem extends JMenuItem implements Enableable {
 
     public MenuItem(String name, ActionHandler itemHandler, Menu containingMenu) {
@@ -163,52 +240,6 @@ public class MyMenuBar {
 
     private ActionHandler mItemHandler;
     private Menu mContainingMenu;
-  }
-
-  private static class Menu extends JMenu {
-
-    public void paint(Graphics g) {
-      super.paint(g);
-      if (redrawOpenGLComponent != null)
-        redrawOpenGLComponent.repaint(50);
-    }
-
-    public Menu(String name, Enableable handler) {
-      super(name);
-      if (handler == null)
-        handler = ALWAYS_ENABLED_HANDLER;
-      this.mHandler = handler;
-    }
-
-    public Enableable handler() {
-      return mHandler;
-    }
-
-    private Enableable mHandler;
-  }
-
-  // masks for modifier keys; these are lazy-initialized according
-  // to operating system
-  private static int[] masks;
-  static {
-    {
-      masks = new int[4];
-
-      masks[0] = KeyEvent.CTRL_MASK;
-      masks[1] = KeyEvent.ALT_MASK;
-      masks[2] = KeyEvent.META_MASK;
-      masks[3] = KeyEvent.SHIFT_MASK;
-
-      int j = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-      for (int k = 1; k < masks.length; k++) {
-        if (masks[k] == j) {
-          int tmp = masks[0];
-          masks[0] = j;
-          masks[k] = tmp;
-          break;
-        }
-      }
-    }
   }
 
 }
