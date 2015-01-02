@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -216,18 +215,19 @@ public class RecentFiles {
   /**
    * JMenu subclass for displaying RecentFiles sets
    */
-  public static class Menu extends JMenu implements MenuListener,
-      ActionListener, Enableable, RecentFiles.Listener {
+  public static class Menu extends MyMenuBar.Menu implements MenuListener,
+      ActionListener, RecentFiles.Listener, Enableable {
 
-    public Menu(String title, RecentFiles rf, ActionHandler evtHandler) {
+    public Menu(String title, RecentFiles recentFiles, ActionHandler evtHandler) {
       super(title);
-      setRecentFiles(rf);
+      setEnableableDelegate(this);
+      setRecentFiles(recentFiles);
       mItemHandler = evtHandler;
       addMenuListener(this);
     }
 
-    public void setRecentFiles(RecentFiles rf) {
-      mRecentFiles = rf;
+    public void setRecentFiles(RecentFiles recentFiles) {
+      mRecentFiles = recentFiles;
       if (mRecentFiles == null)
         return;
       mRecentFiles.addListener(this);
@@ -267,7 +267,6 @@ public class RecentFiles {
     }
 
     private void rebuild() {
-      unimp("ought to remove listeners from old items; maybe use weak references instead?");
       removeAll();
       RecentFiles r = mRecentFiles;
       if (r == null)

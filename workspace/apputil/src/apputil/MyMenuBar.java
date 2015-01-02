@@ -38,7 +38,8 @@ public class MyMenuBar {
    */
   public void addMenu(String title, Enableable handler) {
 
-    mMenu = new Menu(title, handler);
+    mMenu = new Menu(title);
+    mMenu.setEnableableDelegate(handler);
     mSeparatorPending = false;
     mMenuBar.add(mMenu);
 
@@ -159,9 +160,28 @@ public class MyMenuBar {
   private boolean mSeparatorPending;
 
   /**
-   * Subclass of JMenu designed for use with MyMenuBar
+   * Subclass of JMenu designed for use with MyMenuBar; supports optional
+   * Enableable delegate
    */
-  private static class Menu extends JMenu {
+  public static class Menu extends JMenu {
+
+    public Menu(String name) {
+      super(name);
+    }
+
+    /**
+     * Set (optional) Enableable delegate; if null, assumes menu is always
+     * enableable
+     */
+    public void setEnableableDelegate(Enableable e) {
+      mEnableableDelegate = e;
+    }
+
+    public Enableable enableableDelegate() {
+      if (mEnableableDelegate == null)
+        return ALWAYS_ENABLED_HANDLER;
+      return mEnableableDelegate;
+    }
 
     private static Enableable ALWAYS_ENABLED_HANDLER = new Enableable() {
       @Override
@@ -170,18 +190,7 @@ public class MyMenuBar {
       }
     };
 
-    public Menu(String name, Enableable handler) {
-      super(name);
-      if (handler == null)
-        handler = ALWAYS_ENABLED_HANDLER;
-      this.mHandler = handler;
-    }
-
-    public Enableable handler() {
-      return mHandler;
-    }
-
-    private Enableable mHandler;
+    private Enableable mEnableableDelegate;
   }
 
   /**
@@ -217,7 +226,7 @@ public class MyMenuBar {
     public boolean shouldBeEnabled() {
       // examine both the containing menu's enabled state and the item handler
       // interface
-      boolean enabled = mContainingMenu.handler().shouldBeEnabled()
+      boolean enabled = mContainingMenu.enableableDelegate().shouldBeEnabled()
           && mItemHandler.shouldBeEnabled();
       return enabled;
     }
