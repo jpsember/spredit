@@ -29,11 +29,6 @@ import static com.js.basic.Tools.*;
  * and ii) be expressed as files relative to the root directory.  Otherwise,
  * each recently used file will be an absolute file.
  * 
- * A RecentFiles object also has an optional alias, which if defined, redirects
- * method calls to the alias object.  This allows a RecentFiles object to act as 
- * (dynamic) pointer to another.   *** TODO: consider not using alias, and instead
- * have a method in the listener to support redirecting to another object.
- * 
  * </pre>
  */
 public class RecentFiles {
@@ -49,16 +44,6 @@ public class RecentFiles {
     }
   }
 
-  public void setAlias(RecentFiles alias) {
-    mAlias = alias;
-  }
-
-  public RecentFiles getAlias() {
-    if (mAlias != null)
-      return mAlias;
-    return this;
-  }
-
   public void addListener(Listener listener) {
     mListeners.add(listener);
   }
@@ -71,12 +56,11 @@ public class RecentFiles {
    * Get current file, if one exists, as an absolute file
    */
   public File getCurrentFile() {
-    RecentFiles a = getAlias();
-    if (!a.mFileActive)
+    if (!mFileActive)
       return null;
-    File file = a.get(0);
-    if (a.hasRootDirectory())
-      file = a.getAbsoluteFile(file);
+    File file = mFileList.get(0);
+    if (hasRootDirectory())
+      file = getAbsoluteFile(file);
     return file;
   }
 
@@ -85,10 +69,9 @@ public class RecentFiles {
    * if no root directory defined)
    */
   private File getCurrentFileRelative() {
-    RecentFiles a = getAlias();
-    if (!a.mFileActive)
+    if (!mFileActive)
       return null;
-    File file = a.get(0);
+    File file = mFileList.get(0);
     return file;
   }
 
@@ -101,23 +84,6 @@ public class RecentFiles {
    *          directory (if a root directory was defined)
    */
   public void setCurrentFile(File file) {
-    getAlias().setCurrentFileAux(file, this);
-  }
-
-  /**
-   * Convert a file, if it's not absolute, to an absolute file by prepending
-   * root directory (which must exist in this case)
-   */
-  private File getAbsoluteFile(File absOrRelativeFile) {
-    if (!absOrRelativeFile.isAbsolute())
-      return new File(mRootDirectory, absOrRelativeFile.getPath());
-    return absOrRelativeFile;
-  }
-
-  private void setCurrentFileAux(File file, RecentFiles original) {
-    if (db)
-      pr("RecentFiles.setCurrentFile " + file);
-
     mFileActive = false;
     if (file == null)
       return;
@@ -146,47 +112,32 @@ public class RecentFiles {
     while (mFileList.size() > MAXIMUM_RECENT_FILES)
       mFileList.remove(mFileList.size() - 1);
 
-    if (db)
-      pr("mFileList now " + d(mFileList, true));
-    pr("setCurrentFile to " + file + " for " + nameOf(this)
-        + "; notifying listeners:\n"
-        + d(mListeners, true));
-    for (Listener listener : original.mListeners) {
-      listener.mostRecentFileChanged(original);
+    for (Listener listener : mListeners) {
+      listener.mostRecentFileChanged(this);
     }
+  }
+
+  /**
+   * Convert a file, if it's not absolute, to an absolute file by prepending
+   * root directory (which must exist in this case)
+   */
+  private File getAbsoluteFile(File absOrRelativeFile) {
+    if (!absOrRelativeFile.isAbsolute())
+      return new File(mRootDirectory, absOrRelativeFile.getPath());
+    return absOrRelativeFile;
   }
 
   /**
    * Get list of files, optionally omitting the current file (if there is one)
    */
   public List<File> getList(boolean omitCurrentFile) {
-    return getAlias().getListAux(omitCurrentFile);
-  }
-
-  private List<File> getListAux(boolean omitCurrentFile) {
     int firstItem = (omitCurrentFile && getCurrentFile() != null) ? 1 : 0;
     return mFileList.subList(firstItem, mFileList.size());
-    // ArrayList<File> displayList = new ArrayList();
-    // int cursor = getCurrentFile() == null ? 0 : 1;
-    // while (cursor < mFileList.size()) {
-    // displayList.add(mFileList.get(cursor));
-    // cursor++;
-    // }
-    // return displayList;
   }
 
-  /**
-   * Get number of files in list
-   */
-  private int size() {
-    return getAlias().mFileList.size();
-  }
-
-  /**
-   * Get nth most recently used file
-   */
-  private File get(int n) {
-    return getAlias().mFileList.get(n);
+  private void clear() {
+    mFileList.clear();
+    mFileActive = false;
   }
 
   /**
@@ -194,49 +145,26 @@ public class RecentFiles {
    */
   public File getMostRecentFile() {
     File file = null;
-    if (!getAlias().mFileList.isEmpty())
-      file = getAlias().mFileList.get(0);
+    if (!mFileList.isEmpty())
+      file = mFileList.get(0);
     return file;
-  }
-
-  /**
-   * Clear history
-   */
-  public void clear() {
-    RecentFiles a = getAlias();
-    a.mFileList.clear();
-    a.mFileActive = false;
-  }
-
-  /**
-   * Get root directory, or null if none was given
-   */
-  public File getRootDirectory() {
-    return getAlias().mRootDirectory;
   }
 
   /**
    * Store within JSON map
    */
   public void put(JSONObject map, String key) throws JSONException {
-    map.put(key, getAlias().encode());
+    map.put(key, encode());
   }
 
   private JSONObject encode() throws JSONException {
-    return getAlias().encodeAux();
-  }
-
-  private JSONObject encodeAux() throws JSONException {
     JSONObject map = new JSONObject();
     map.put("active", mFileActive);
     JSONArray a = new JSONArray();
-    for (int i = 0; i < size(); i++) {
-      File f = get(i);
+    for (File f : mFileList) {
       a.put(f.getPath());
     }
     map.put("list", a);
-    if (db)
-      pr("RecentFiles.encode produced:\n" + d(map));
     return map;
   }
 
@@ -245,12 +173,10 @@ public class RecentFiles {
    */
   public void restore(JSONObject map, String key) throws JSONException {
     JSONObject recentFilesMap = map.optJSONObject(key);
-    getAlias().decode(recentFilesMap);
+    decode(recentFilesMap);
   }
 
   private void decode(JSONObject map) throws JSONException {
-    if (db)
-      pr("RecentFiles decode:\n" + d(map));
     clear();
     if (map == null)
       return;
@@ -263,8 +189,6 @@ public class RecentFiles {
         warning("ignoring absolute/relative file mismatch: " + f);
         continue;
       }
-      if (db)
-        pr("adding recent file " + f);
       mFileList.add(f);
     }
     if (mFileList.isEmpty())
@@ -281,5 +205,4 @@ public class RecentFiles {
   private ArrayList<File> mFileList = new ArrayList();
   private boolean mFileActive;
   private Set<Listener> mListeners = new HashSet();
-  private RecentFiles mAlias;
 }

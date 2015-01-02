@@ -58,10 +58,16 @@ public class MyMenuBar {
     public RecentFilesMenu(String title, RecentFiles rf,
         ActionHandler evtHandler) {
       super(title);
-      mRecentFiles = rf;
-      mRecentFiles.addListener(this);
+      setRecentFiles(rf);
       mItemHandler = evtHandler;
       addMenuListener(this);
+    }
+
+    public void setRecentFiles(RecentFiles rf) {
+      mRecentFiles = rf;
+      if (mRecentFiles == null)
+        return;
+      mRecentFiles.addListener(this);
     }
 
     @Override
@@ -93,21 +99,17 @@ public class MyMenuBar {
 
     @Override
     public void mostRecentFileChanged(RecentFiles recentFiles) {
-      pr("most recent files changing to " + recentFiles.getMostRecentFile());
       rebuild();
     }
 
     private void rebuild() {
-      RecentFiles r = mRecentFiles.getAlias();
-      if (db)
-        pr("Rebuilding recent files " + nameOf(r) + " (unaliased "
-            + nameOf(mRecentFiles) + ")");
+      unimp("ought to remove listeners from old items; maybe use weak references instead?");
       removeAll();
+      RecentFiles r = mRecentFiles;
+      if (r == null)
+        return;
       for (File f : r.getList(true)) {
         String s = f.getPath();
-        if (db)
-          pr(" file=" + f + "\n  withinDirectory " + r.getRootDirectory()
-              + " = " + s);
         JMenuItem item = new RecentFilesMenuItem(f, s);
         this.add(item);
         item.addActionListener(this);
@@ -178,6 +180,16 @@ public class MyMenuBar {
     }
   }
 
+  /**
+   * Add a menu item that displays a list of recent files
+   * 
+   * @param name
+   *          name to display in menu item
+   * @param rf
+   *          RecentFiles object; if none, leaves item disabled
+   * @param evtHandler
+   * @return
+   */
   public JMenuItem addRecentFilesList(String name, RecentFiles rf,
       ActionHandler evtHandler) {
 
@@ -190,6 +202,14 @@ public class MyMenuBar {
     JMenuItem item = new RecentFilesMenu(name, rf, evtHandler);
     menu.add(item);
     return item;
+  }
+
+  public static void setRecentFilesList(JMenuItem recentFilesListMenuItem,
+      RecentFiles recentFiles) {
+    RecentFilesMenu menu = (RecentFilesMenu) recentFilesListMenuItem;
+
+    menu.setRecentFiles(recentFiles);
+    menu.rebuild();
   }
 
   public JMenuItem addItem(String name, int accelKey, int accelFlags,
