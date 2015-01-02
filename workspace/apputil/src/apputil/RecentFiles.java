@@ -1,10 +1,17 @@
 package apputil;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -205,4 +212,92 @@ public class RecentFiles {
   private ArrayList<File> mFileList = new ArrayList();
   private boolean mFileActive;
   private Set<Listener> mListeners = new HashSet();
+
+  /**
+   * JMenu subclass for displaying RecentFiles sets
+   */
+  public static class Menu extends JMenu implements MenuListener,
+      ActionListener, Enableable, RecentFiles.Listener {
+
+    public Menu(String title, RecentFiles rf, ActionHandler evtHandler) {
+      super(title);
+      setRecentFiles(rf);
+      mItemHandler = evtHandler;
+      addMenuListener(this);
+    }
+
+    public void setRecentFiles(RecentFiles rf) {
+      mRecentFiles = rf;
+      if (mRecentFiles == null)
+        return;
+      mRecentFiles.addListener(this);
+      rebuild();
+    }
+
+    @Override
+    public boolean shouldBeEnabled() {
+      if (mRecentFiles == null)
+        return false;
+      return !mRecentFiles.getList(true).isEmpty();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent arg) {
+      MenuItem item = (MenuItem) arg.getSource();
+      mRecentFiles.setCurrentFile(item.file());
+      mItemHandler.go();
+    }
+
+    @Override
+    public void menuCanceled(MenuEvent arg0) {
+    }
+
+    @Override
+    public void menuDeselected(MenuEvent arg0) {
+    }
+
+    @Override
+    public void menuSelected(MenuEvent arg0) {
+      rebuild();
+    }
+
+    @Override
+    public void mostRecentFileChanged(RecentFiles recentFiles) {
+      rebuild();
+    }
+
+    private void rebuild() {
+      unimp("ought to remove listeners from old items; maybe use weak references instead?");
+      removeAll();
+      RecentFiles r = mRecentFiles;
+      if (r == null)
+        return;
+      for (File f : r.getList(true)) {
+        String s = f.getPath();
+        JMenuItem item = new MenuItem(f, s);
+        this.add(item);
+        item.addActionListener(this);
+      }
+    }
+
+    /**
+     * JMenuItem subclass representing RecentFiles items
+     */
+    private static class MenuItem extends JMenuItem {
+      public MenuItem(File file, String label) {
+        super(label);
+        this.mFile = file;
+      }
+
+      public File file() {
+        return mFile;
+      }
+
+      private File mFile;
+    }
+
+    private ActionHandler mItemHandler;
+    private RecentFiles mRecentFiles;
+  }
+
 }

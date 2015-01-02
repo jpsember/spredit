@@ -2,7 +2,6 @@ package apputil;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -38,87 +37,6 @@ public class MyMenuBar {
   }
 
   private static Component redrawOpenGLComponent;
-
-  private static class RecentFilesMenuItem extends JMenuItem {
-    public RecentFilesMenuItem(File file, String label) {
-      super(label);
-      this.mFile = file;
-    }
-
-    public File file() {
-      return mFile;
-    }
-
-    private File mFile;
-  }
-
-  private static class RecentFilesMenu extends JMenu implements MenuListener,
-      ActionListener, Enableable, RecentFiles.Listener {
-
-    public RecentFilesMenu(String title, RecentFiles rf,
-        ActionHandler evtHandler) {
-      super(title);
-      setRecentFiles(rf);
-      mItemHandler = evtHandler;
-      addMenuListener(this);
-    }
-
-    public void setRecentFiles(RecentFiles rf) {
-      mRecentFiles = rf;
-      if (mRecentFiles == null)
-        return;
-      mRecentFiles.addListener(this);
-    }
-
-    @Override
-    public boolean shouldBeEnabled() {
-      if (mRecentFiles == null)
-        return false;
-      return !mRecentFiles.getList(true).isEmpty();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg) {
-      RecentFilesMenuItem item = (RecentFilesMenuItem) arg.getSource();
-      mRecentFiles.setCurrentFile(item.file());
-      mItemHandler.go();
-    }
-
-    @Override
-    public void menuCanceled(MenuEvent arg0) {
-    }
-
-    @Override
-    public void menuDeselected(MenuEvent arg0) {
-    }
-
-    @Override
-    public void menuSelected(MenuEvent arg0) {
-      rebuild();
-    }
-
-    @Override
-    public void mostRecentFileChanged(RecentFiles recentFiles) {
-      rebuild();
-    }
-
-    private void rebuild() {
-      unimp("ought to remove listeners from old items; maybe use weak references instead?");
-      removeAll();
-      RecentFiles r = mRecentFiles;
-      if (r == null)
-        return;
-      for (File f : r.getList(true)) {
-        String s = f.getPath();
-        JMenuItem item = new RecentFilesMenuItem(f, s);
-        this.add(item);
-        item.addActionListener(this);
-      }
-    }
-
-    private ActionHandler mItemHandler;
-    private RecentFiles mRecentFiles;
-  }
 
   public MyMenuBar(JFrame frame) {
     mbar = new JMenuBar();
@@ -163,70 +81,28 @@ public class MyMenuBar {
       if (item == null)
         continue;
 
-      if (item instanceof MenuItem) {
+      if (item instanceof Enableable) {
+        Enableable enableable = (Enableable) item;
         // If the menu isn't showing, ALWAYS enable the items.
         // If user selects them via shortcut key, we'll perform an additional
         // call to shouldBeEnabled() before acting on them.
-        MenuItem ourMenuItem = (MenuItem) item;
-        ourMenuItem.setEnabled(!showingMenu || ourMenuItem.shouldBeEnabled());
-      } else if (item instanceof RecentFilesMenu) {
-        RecentFilesMenu rm = (RecentFilesMenu) item;
-        boolean enable = true;
-        if (showingMenu) {
-          enable = rm.shouldBeEnabled();
-        }
-        rm.setEnabled(enable);
+        item.setEnabled(!showingMenu || enableable.shouldBeEnabled());
       }
     }
   }
 
-  /**
-   * Add a menu item that displays a list of recent files
-   * 
-   * @param name
-   *          name to display in menu item
-   * @param rf
-   *          RecentFiles object; if none, leaves item disabled
-   * @param evtHandler
-   * @return
-   */
-  public JMenuItem addRecentFilesList(String name, RecentFiles rf,
-      ActionHandler evtHandler) {
-
+  public void addItem(JMenuItem item) {
     if (sepPending) {
       menu.addSeparator();
       sepPending = false;
     }
     itemsAdded++;
-
-    JMenuItem item = new RecentFilesMenu(name, rf, evtHandler);
     menu.add(item);
-    return item;
-  }
-
-  public static void setRecentFilesList(JMenuItem recentFilesListMenuItem,
-      RecentFiles recentFiles) {
-    RecentFilesMenu menu = (RecentFilesMenu) recentFilesListMenuItem;
-
-    menu.setRecentFiles(recentFiles);
-    menu.rebuild();
   }
 
   public JMenuItem addItem(String name, int accelKey, int accelFlags,
       ActionHandler evtHandler) {
-
-    if (sepPending) {
-      menu.addSeparator();
-      sepPending = false;
-    }
-    itemsAdded++;
-
     MenuItem m = new MenuItem(name, evtHandler, menu);
-
-    warning("why this special case?");
-    if (name.equals("Open"))
-      m.setEnabled(false);
-
     if (accelKey != 0) {
       int k = 0;
       for (int i = 0; i < 4; i++) {
@@ -235,7 +111,7 @@ public class MyMenuBar {
       }
       m.setAccelerator(KeyStroke.getKeyStroke(accelKey, k));
     }
-    menu.add(m);
+    addItem(m);
     return m;
   }
 

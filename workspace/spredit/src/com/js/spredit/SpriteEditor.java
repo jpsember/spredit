@@ -447,14 +447,14 @@ public class SpriteEditor {
       }
     });
 
-    m.addRecentFilesList("Open Recent Project", sRecentProjects,
+    m.addItem(new RecentFiles.Menu("Open Recent Project", sRecentProjects,
         new ActionHandler() {
           @Override
           public void go() {
             openProject(sRecentProjects.getCurrentFile());
             repaint();
           }
-        });
+        }));
 
     m.addItem("Close", KeyEvent.VK_W, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
