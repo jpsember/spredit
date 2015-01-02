@@ -142,20 +142,21 @@ public class TexProject {
    * @return full id
    */
   public String extractId(File texFile) {
-    pr("TexProject.extractId texFile '" + texFile + "', baseDirectory "
-        + mBaseDirectory);
+    if (db)
+      pr("TexProject.extractId texFile '" + texFile + "', baseDirectory "
+          + mBaseDirectory);
 
-    RelPath rp = new RelPath(mBaseDirectory, texFile);
-    if (!rp.withinProjectTree())
+    File relFile = Files.fileWithinDirectory(texFile, mBaseDirectory);
+    if (relFile.isAbsolute())
       throw new IllegalStateException("TexProject '" + texFile
           + "' is not within project tree");
 
-    String s = rp.toString();
-
     StringBuilder sb = new StringBuilder();
-    s = Files.removeExtension(rp.file()).getPath();
 
-    for (int i = 1; i < s.length(); i++) {
+    relFile = Files.removeExtension(relFile);
+    String s = relFile.getPath();
+
+    for (int i = 0; i < s.length(); i++) {
       char c = Character.toUpperCase(s.charAt(i));
       if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')))
         c = '_';
@@ -163,12 +164,11 @@ public class TexProject {
       // if underscore, and start of directory/file, skip
       // this portion
       if (c == '_') {
-        char cp = s.charAt(i - 1);
-        if (cp == '>' || cp == '/') {
+        if (i == 0 || s.charAt(i - 1) == File.separatorChar) {
           int j = i + 1;
           for (; j < s.length(); j++) {
             char cn = s.charAt(j);
-            if (cn == '/') {
+            if (cn == File.separatorChar) {
               j++;
               break;
             }
@@ -185,7 +185,6 @@ public class TexProject {
       sb.append(Character.toUpperCase(c));
     }
     String idString = sb.toString();
-    ASSERT(idString.length() < 20, "idString = " + d(idString));
     return idString;
   }
 

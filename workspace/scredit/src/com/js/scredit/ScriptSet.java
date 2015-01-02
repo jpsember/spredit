@@ -6,7 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import apputil.*;
+import com.js.basic.Files;
+
 import static com.js.basic.Tools.*;
 
 /**
@@ -39,7 +40,7 @@ public class ScriptSet {
     for (int i = 0; i < array.length(); i++) {
       String relPathString = array.getString(i);
       if (!relPathString.isEmpty()) {
-        mFiles[i] = new RelPath(mProjectBase, relPathString).file();
+        mFiles[i] = new File(mProjectBase, relPathString);
       }
     }
   }
@@ -75,7 +76,7 @@ public class ScriptSet {
         if (f == null)
           array.put("");
         else
-          array.put(new RelPath(mProjectBase, f).toString());
+          array.put(Files.fileWithinDirectory(f, mProjectBase).toString());
       }
       map.put("paths", array);
     } catch (JSONException e) {

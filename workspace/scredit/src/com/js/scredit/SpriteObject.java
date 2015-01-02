@@ -16,8 +16,8 @@ import org.json.JSONObject;
 import tex.Atlas;
 import tex.Sprite;
 import apputil.AppTools;
-import apputil.RelPath;
 
+import com.js.basic.Files;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -232,8 +232,7 @@ public class SpriteObject extends EdObject {
       SpriteObject so = new SpriteObject();
       String atlasStr = map.optString(ATLAS);
       if (atlasStr != null) {
-        File atlasPath = new RelPath(script.project().directory(), atlasStr)
-            .file();
+        File atlasPath = new File(script.project().directory(), atlasStr);
         Atlas a;
         try {
           a = script.project().getAtlas(atlasPath);
@@ -279,9 +278,10 @@ public class SpriteObject extends EdObject {
       {
         // [ATLAS] [ID]
         if (so.atlas != null && so.atlas != script.lastAtlas()) {
-          map.put(ATLAS,
-              new RelPath(script.project().directory(), so.atlas.dataFile())
-                  .toString());
+          map.put(
+              ATLAS,
+              Files.fileWithinDirectory(so.atlas.dataFile(),
+                  script.project().directory()).toString());
           script.setAtlas(so.atlas);
         }
         map.put(

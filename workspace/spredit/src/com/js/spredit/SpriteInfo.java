@@ -37,7 +37,7 @@ public class SpriteInfo {
       mSourceImageSize = IPoint.opt(map, "SIZE");
       String alias = map.optString("ALIAS");
       if (alias != null) {
-        mAliasFileRead = new RelPath(mProject.baseDirectory(), alias).file();
+        mAliasFileRead = new File(mProject.baseDirectory(), alias);
       }
     } catch (Throwable t) {
       warning("problem reading SpriteInfo: " + t);
@@ -70,7 +70,8 @@ public class SpriteInfo {
     mProject = project;
 
     String sprId = project.extractId(path);
-    pr("SpriteInfo, path " + path + ", extracted id  " + sprId);
+    if (db)
+      pr("SpriteInfo, path " + path + ", extracted id  " + sprId);
 
     mSprite = new Sprite(sprId);
 
@@ -129,7 +130,8 @@ public class SpriteInfo {
     try {
       if (isAlias()) {
         map.put("ALIAS",
-            new RelPath(mProject.baseDirectory(), imagePath()).toString());
+            Files.fileWithinDirectory(imagePath(), mProject.baseDirectory())
+                .getPath());
       }
       workImageSize().put(map, "SIZE");
       centerpoint().put(map, "CP");

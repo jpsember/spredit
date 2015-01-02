@@ -87,8 +87,7 @@ public class ScriptEditor {
           prompt = "Save changes to new file?";
         else {
           prompt = "Save changes to '"
-              + new RelPath(mProject.directory(), editor.path).display()
-              // + RelPath.toString(project.directory(), editor.path)
+              + Files.fileWithinDirectory(editor.path, mProject.directory())
               + "'?";
         }
         int code = JOptionPane.showConfirmDialog(AppTools.frame(), prompt,
@@ -379,9 +378,8 @@ public class ScriptEditor {
         int result = JOptionPane.showConfirmDialog(
             AppTools.frame(),
             "Replace existing file: '"
-                + new RelPath(mProject.directory(), f).display()
-                // + RelPath.toString(project.directory(), f)
-                + "'?", "Save Script", JOptionPane.OK_CANCEL_OPTION);
+                + Files.fileWithinDirectory(f, mProject.directory()) + "'?",
+            "Save Script", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.CANCEL_OPTION
             || result == JOptionPane.CLOSED_OPTION)
           break;
@@ -1881,7 +1879,7 @@ public class ScriptEditor {
         StringBuilder sb = new StringBuilder();
         sb.append(currentModified() ? "*" : " ");
         if (!isOrphan())
-          sb.append(new RelPath(mProject.directory(), editor.path).display());
+          sb.append(Files.fileWithinDirectory(editor.path, mProject.directory()));
         upd(filePath, sb);
         displayProjectPath(mProject.file().getName());
         // upd(projectPath, project.file().getName());
