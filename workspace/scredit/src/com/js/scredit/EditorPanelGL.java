@@ -16,8 +16,6 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
 
   public EditorPanelGL() {
     MouseOper.setView(this);
-    if (!AppTools.isMac())
-      MyMenuBar.addRepaintComponent(this.getComponent());
   }
 
   private static Atlas sOurFont;

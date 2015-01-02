@@ -110,14 +110,6 @@ public class MyMenuBar {
       mSeparatorPending = true;
   }
 
-  /**
-   * Kludge to deal with OpenGL window / menu repaint conflict; generate repaint
-   * every time a menu is redrawn
-   */
-  public static void addRepaintComponent(Component c) {
-    sRedrawOpenGLComponent = c;
-  }
-
   private static void enableItems(JMenu m, boolean showingMenu) {
     for (int i = 0; i < m.getItemCount(); i++) {
       JMenuItem item = m.getItem(i);
@@ -161,7 +153,6 @@ public class MyMenuBar {
   }
 
   private static int[] sModifierKeyMasks;
-  private static Component sRedrawOpenGLComponent;
 
   private Menu mMenu;
   private JMenuBar mMenuBar;
@@ -178,12 +169,6 @@ public class MyMenuBar {
         return true;
       }
     };
-
-    public void paint(Graphics g) {
-      super.paint(g);
-      if (sRedrawOpenGLComponent != null)
-        sRedrawOpenGLComponent.repaint(50);
-    }
 
     public Menu(String name, Enableable handler) {
       super(name);
@@ -232,7 +217,6 @@ public class MyMenuBar {
     public boolean shouldBeEnabled() {
       // examine both the containing menu's enabled state and the item handler
       // interface
-      ASSERT(mContainingMenu != null); // verify not partially constructed
       boolean enabled = mContainingMenu.handler().shouldBeEnabled()
           && mItemHandler.shouldBeEnabled();
       return enabled;
