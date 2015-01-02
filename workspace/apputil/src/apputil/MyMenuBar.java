@@ -3,10 +3,9 @@ package apputil;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
-
-import com.js.basic.Files;
 
 import static com.js.basic.Tools.*;
 
@@ -53,15 +52,6 @@ public class MyMenuBar {
     private File mFile;
   }
 
-  @Deprecated
-  public static void updateRecentFilesFor(JMenuItem recentFilesList,
-      RecentFiles recentFiles) {
-    if (recentFilesList != null) {
-      RecentFilesMenu rm = (RecentFilesMenu) recentFilesList;
-      rm.mRecentFiles = recentFiles;
-    }
-  }
-
   private static class RecentFilesMenu extends JMenu implements MenuListener,
       ActionListener, Enableable, RecentFiles.Listener {
 
@@ -69,11 +59,7 @@ public class MyMenuBar {
         ActionHandler evtHandler) {
       super(title);
       mRecentFiles = rf;
-      if (mRecentFiles != null)
-        mRecentFiles.addListener(this);
-      else {
-        unimp("recent files should always be defined!");
-      }
+      mRecentFiles.addListener(this);
       mItemHandler = evtHandler;
       addMenuListener(this);
     }
@@ -82,10 +68,7 @@ public class MyMenuBar {
     public boolean shouldBeEnabled() {
       if (mRecentFiles == null)
         return false;
-      int size = mRecentFiles.size();
-      if (mRecentFiles.getCurrentFile() != null)
-        size--;
-      return size > 0;
+      return !mRecentFiles.getList(true).isEmpty();
     }
 
     @Override
@@ -110,24 +93,24 @@ public class MyMenuBar {
 
     @Override
     public void mostRecentFileChanged(RecentFiles recentFiles) {
-      unimp("mostRecentFileChanged to " + recentFiles.getMostRecentFile());
+      pr("most recent files changing to " + recentFiles.getMostRecentFile());
       rebuild();
     }
 
     private void rebuild() {
+      RecentFiles r = mRecentFiles.getAlias();
+      if (db)
+        pr("Rebuilding recent files " + nameOf(r) + " (unaliased "
+            + nameOf(mRecentFiles) + ")");
       removeAll();
-      if (mRecentFiles != null) {
-        for (int i = 0; i < mRecentFiles.size(); i++) {
-          File f = mRecentFiles.get(i);
-          if (mRecentFiles.getCurrentFile() == f)
-            continue;
-
-          String s = Files.fileWithinDirectory(f,
-              mRecentFiles.getProjectDirectory()).getPath();
-          JMenuItem item = new RecentFilesMenuItem(f, s);
-          this.add(item);
-          item.addActionListener(this);
-        }
+      for (File f : r.getList(true)) {
+        String s = f.getPath();
+        if (db)
+          pr(" file=" + f + "\n  withinDirectory " + r.getRootDirectory()
+              + " = " + s);
+        JMenuItem item = new RecentFilesMenuItem(f, s);
+        this.add(item);
+        item.addActionListener(this);
       }
     }
 

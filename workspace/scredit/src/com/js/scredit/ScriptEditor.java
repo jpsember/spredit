@@ -154,9 +154,9 @@ public class ScriptEditor {
       }
 
       if (f == null) {
-        pr("choose file to open");
-        f = AppTools.chooseFileToOpen("Open Script", Script.FILES, mProject
-            .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
+        f = AppTools.chooseFileToOpen("Open Script", Script.FILES,
+            mProject.replaceIfMissing(mProject.recentScripts()
+                .getCurrentFile()));
       }
       if (f == null) {
         break;
@@ -360,9 +360,9 @@ public class ScriptEditor {
       if (f == null)
         f = path;
       if (f == null || alwaysAskForPath) {
-        pr("choose file to save");
-        f = AppTools.chooseFileToSave("Save Script", Script.FILES, mProject
-            .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
+        f = AppTools.chooseFileToSave("Save Script", Script.FILES,
+            mProject.replaceIfMissing(mProject.recentScripts()
+                .getCurrentFile()));
 
         if (f == null)
           break;
@@ -532,8 +532,10 @@ public class ScriptEditor {
       }
     });
 
-    // recentScriptsMenuItem =
-    m.addRecentFilesList("Open Recent Script", null,
+    // need pattern for displaying in static menus etc recent files from varying
+    // sources (e.g. when user switches projects)
+
+    m.addRecentFilesList("Open Recent Script", sRecentScripts,
         new ActionHandler() {
           @Override
           public boolean shouldBeEnabled() {
@@ -541,7 +543,7 @@ public class ScriptEditor {
           }
 
           public void go() {
-            open(mProject.recentScripts().getCurrentFile());
+            open(sRecentScripts.getCurrentFile());
             repaint();
           }
         });
@@ -1142,8 +1144,7 @@ public class ScriptEditor {
       }
     });
 
-    // recentScriptSetsMenuItem =
-    m.addRecentFilesList("Open Recent Set", null,
+    m.addRecentFilesList("Open Recent Set", sRecentScriptSets,
         new ActionHandler() {
           @Override
           public boolean shouldBeEnabled() {
@@ -1151,7 +1152,7 @@ public class ScriptEditor {
           }
 
           public void go() {
-            doOpenSet(mProject.recentScriptSets().getCurrentFile());
+            doOpenSet(sRecentScriptSets.getCurrentFile());
             repaint();
           }
         });
@@ -1184,9 +1185,8 @@ public class ScriptEditor {
         }
       }
     });
-    // recentProjectsMenuItem =
-    m.addRecentFilesList("Open Recent Project",
-        recentProjects, new ActionHandler() {
+    m.addRecentFilesList("Open Recent Project", recentProjects,
+        new ActionHandler() {
           @Override
           public void go() {
             openProject(recentProjects.getCurrentFile());
@@ -1468,7 +1468,8 @@ public class ScriptEditor {
 
       if (f == null)
         f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES, mProject
-            .replaceIfMissing(mProject.recentScriptSets().getCurrentFile()));
+            .replaceIfMissing(mProject.recentScriptSets()
+                .getCurrentFile()));
       if (f == null)
         break;
 
@@ -1505,7 +1506,8 @@ public class ScriptEditor {
         break;
 
       File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES, mProject
-          .replaceIfMissing(mProject.recentScriptSets().getCurrentFile()));
+          .replaceIfMissing(mProject.recentScriptSets()
+              .getCurrentFile()));
 
       if (f == null)
         break;
@@ -2213,27 +2215,26 @@ public class ScriptEditor {
       pr("updateProject from " + mProject + " to " + p);
 
     setProjectField(p);
-    // MyMenuBar.updateRecentFilesFor(recentScriptsMenuItem,
-    // isProjectOpen() ? mProject.recentScripts() : null);
-    //
-    // MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
-    // isProjectOpen() ? mProject.recentScriptSets() : null);
+
+    sRecentScripts.setAlias(isProjectOpen() ? mProject.recentScripts() : null);
+    sRecentScriptSets.setAlias(isProjectOpen() ? mProject.recentScriptSets()
+        : null);
+    sRecentAtlases.setAlias(isProjectOpen() ? mProject.recentAtlases() : null);
+
     recentProjects.setCurrentFile(isProjectOpen() ? mProject.file() : null);
 
+    unimp("have combo box adjust for recent atlases");
+    /*
+     * mProject.recentAtlases().addListener(new RecentFiles.Listener() {
+     * 
+     * @Override public void mostRecentFileChanged(RecentFiles recentFiles) {
+     * JComboBox cb = atlasCB; cb.removeAllItems(); for (int i = 0; i <
+     * recentFiles.size(); i++) { unimp("where do we handle such events?");
+     * cb.addItem(recentFiles.get(i)); // )new //
+     * ComboBoxItem(recentFiles.get(i))); } } });
+     */
+
     if (isProjectOpen()) {
-      mProject.recentAtlases().addListener(new RecentFiles.Listener(){
-        @Override
-        public void mostRecentFileChanged(RecentFiles recentFiles) {
-          JComboBox cb = atlasCB;
-          cb.removeAllItems();
-          for (int i = 0; i < recentFiles.size(); i++) {
-            unimp("where do we handle such events?");
-            cb.addItem(recentFiles.get(i)); // )new
-                                            // ComboBoxItem(recentFiles.get(i)));
-          }
-        }
-      });
-//      mProject.recentAtlases().setComboBox(atlasCB);
       atlasCB.setEnabled(true);
       atlasSelectButton.setEnabled(true);
     } else {
@@ -2447,6 +2448,9 @@ public class ScriptEditor {
 
   // private static JIntSpinner gridSize = new JIntSpinner(
   private static RecentFiles recentProjects = new RecentFiles(null);
+  private static RecentFiles sRecentScripts = new RecentFiles(null);
+  private static RecentFiles sRecentScriptSets = new RecentFiles(null);
+  private static RecentFiles sRecentAtlases = new RecentFiles(null);
   private static JMenuItem undoMenuItem, redoMenuItem;
   private static JMenuItem selectNoneMenuItem;
 

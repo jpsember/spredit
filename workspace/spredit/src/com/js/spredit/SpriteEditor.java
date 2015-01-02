@@ -52,7 +52,7 @@ public class SpriteEditor {
     addMenus();
 
     {
-      File base = recentProjects.getMostRecentFile();
+      File base = sRecentProjects.getMostRecentFile();
       if (base != null && !TexProject.FILES.accept(base))
         base = null;
       if (base != null && base.exists()) {
@@ -73,7 +73,7 @@ public class SpriteEditor {
     @Override
     public void writeTo(JSONObject map) throws JSONException {
       JSONObject map2 = new JSONObject();
-      recentProjects.put(map2, PROJECTS_TAG);
+      sRecentProjects.put(map2, PROJECTS_TAG);
       map2.put(CPT_TAG, cpt.isSelected());
       map2.put(CLIP_TAG, showClip.isSelected());
       map.put(OUR_TAG, map2);
@@ -84,7 +84,7 @@ public class SpriteEditor {
       JSONObject map2 = map.optJSONObject(OUR_TAG);
       if (map2 == null)
         return;
-      recentProjects.restore(map2, PROJECTS_TAG);
+      sRecentProjects.restore(map2, PROJECTS_TAG);
       cpt.setSelected(map2.getBoolean(CPT_TAG));
       showClip.setSelected(map2.getBoolean(CLIP_TAG));
     }
@@ -173,7 +173,7 @@ public class SpriteEditor {
 
     project = p;
 
-    recentProjects.setCurrentFile(project == null ? null : project.file());
+    sRecentProjects.setCurrentFile(project == null ? null : project.file());
 
     // MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
     //
@@ -246,7 +246,7 @@ public class SpriteEditor {
   private static void openProject(File projFile) {
     if (projFile == null) {
 
-      File base = recentProjects.getMostRecentFile();
+      File base = sRecentProjects.getMostRecentFile();
 
       projFile = AppTools.chooseFileToOpen("Open Project", TexProject.FILES,
           base);
@@ -447,12 +447,11 @@ public class SpriteEditor {
       }
     });
 
-    // recentProjectsMenuItem =
-    m.addRecentFilesList("Open Recent Project",
-        recentProjects, new ActionHandler() {
+    m.addRecentFilesList("Open Recent Project", sRecentProjects,
+        new ActionHandler() {
           @Override
           public void go() {
-            openProject(recentProjects.getCurrentFile());
+            openProject(sRecentProjects.getCurrentFile());
             repaint();
           }
         });
@@ -1081,8 +1080,7 @@ public class SpriteEditor {
     private IRect origClip;
   };
 
-  private static RecentFiles recentProjects = new RecentFiles(null);
-  // private static JMenuItem recentProjectsMenuItem;
+  private static RecentFiles sRecentProjects = new RecentFiles(null);
   private static JCheckBox cpt = new JCheckBox();
   private static JCheckBox showClip = new JCheckBox();
 

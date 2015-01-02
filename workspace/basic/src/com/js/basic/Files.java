@@ -4,8 +4,13 @@ import java.io.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import static com.js.basic.Tools.*;
 
 public class Files {
+
+  static { // Suppress warning of unused basic.Tools import
+    doNothing();
+  }
 
   public static void writeStringToFileIfChanged(File file, String content)
       throws IOException {
@@ -77,17 +82,18 @@ public class Files {
    * the directory
    * 
    * @param file
+   *          an absolute file
    * @param directory
-   *          directory, or null
+   *          an absolute directory, or null
    * @return file relative to directory, if directory is not null and file lies
    *         within directory's tree; otherwise, the absolute form of file
    */
-  public static File fileWithinDirectory(File file, File directory) {
-    File absFile = file.getAbsoluteFile();
-    if (directory == null)
+  public static File fileWithinDirectory(File absFile, File absDirectory) {
+    Files.verifyAbsolute(absFile);
+    if (absDirectory == null)
       return absFile;
-
-    String absDirPath = directory.getAbsolutePath();
+    Files.verifyAbsolute(absDirectory);
+    String absDirPath = absDirectory.getPath();
     String absFilePath = absFile.getPath();
 
     if (!absFilePath.startsWith(absDirPath))
@@ -98,6 +104,12 @@ public class Files {
       suffix = suffix.substring(File.separator.length());
     }
     return new File(suffix);
+  }
+
+  public static void verifyAbsolute(File file) {
+    if (!file.isAbsolute())
+      throw new IllegalArgumentException("expected absolute file, but was '"
+          + file + "'");
   }
 
 }
