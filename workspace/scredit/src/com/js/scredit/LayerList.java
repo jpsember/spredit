@@ -21,23 +21,9 @@ public class LayerList {
    * @param callback
    *          method to call when script becomes active
    */
-  public LayerList(ICallback callback) {
-    mCallback = callback;
+  public LayerList() {
     mLayers = new ArrayList();
     insert(false);
-  }
-
-  /**
-   * Callback for LayerSet
-   */
-  public static interface ICallback {
-    /**
-     * Called by useLayer()
-     * 
-     * @param editor
-     *          active editor
-     */
-    public void useEditor(ScriptEditor editor);
   }
 
   /**
@@ -107,7 +93,7 @@ public class LayerList {
    */
   public void select(int slot) {
     mCursor = slot;
-    doCallback();
+    activateCursorScript();
   }
 
   /**
@@ -119,11 +105,11 @@ public class LayerList {
    */
   public void useCopyOf(int slot) {
     mLayers.set(mCursor, mLayers.get(slot));
-    doCallback();
+    activateCursorScript();
   }
 
-  private void doCallback() {
-    mCallback.useEditor(layer(mCursor));
+  private void activateCursorScript() {
+    layer(mCursor).activate();
   }
 
   /**
@@ -170,7 +156,7 @@ public class LayerList {
    */
   public void resetCurrent() {
     mLayers.set(mCursor, new ScriptEditor());
-    doCallback();
+    activateCursorScript();
   }
 
   /**
@@ -229,7 +215,6 @@ public class LayerList {
   }
 
   private int mForegroundStart;
-  private ICallback mCallback;
   private ArrayList<ScriptEditor> mLayers;
   // Index of 'active' script, the one currently being edited
   private int mCursor;

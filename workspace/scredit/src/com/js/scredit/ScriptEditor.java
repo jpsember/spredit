@@ -1653,12 +1653,7 @@ public class ScriptEditor {
       ac.add(pnl, BorderLayout.NORTH);
     }
 
-    layers = new LayerList(new LayerList.ICallback() {
-      public void useEditor(ScriptEditor ed) {
-        editor = ed;
-        // resetUndo();
-      }
-    });
+    layers = new LayerList();
 
     addMenus();
 
@@ -2155,6 +2150,13 @@ public class ScriptEditor {
 
   public File path() {
     return path;
+  }
+
+  /**
+   * Activate this script (called when it becomes the active script)
+   */
+  public void activate() {
+    editor = this;
   }
 
   private static void setProjectField(ScriptProject p) {
