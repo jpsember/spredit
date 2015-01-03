@@ -64,6 +64,20 @@ public class MyMenuBar {
     });
   }
 
+  public void addAppMenu() {
+    if (AppTools.isMac()) {
+      MacUtils.setQuitHandler();
+    } else {
+      addMenu(AppTools.app().getName());
+      addItem("Quit", KeyEvent.VK_Q, CTRL, new ActionHandler() {
+        public void go() {
+          if (AppTools.app().exitProgram())
+            System.exit(0);
+        }
+      });
+    }
+  }
+
   /**
    * Start a new 'current' menu
    * 

@@ -3,19 +3,21 @@ package apputil;
 import com.apple.eawt.*;
 import com.apple.eawt.AppEvent.QuitEvent;
 
-public class MacUtils {
+class MacUtils {
 
   public static void useScreenMenuBar(String app) {
     System.setProperty("apple.laf.useScreenMenuBar", "true");
     System.setProperty("com.apple.mrj.application.apple.menu.about.name", app);
   }
 
-  // No longer sure if this is required
-  @Deprecated
-  public static void setQuitHandler(IApplication ap) {
-    Application a = com.apple.eawt.Application.getApplication();
-    a.disableSuddenTermination();
-    a.setQuitHandler(new QuitHandler() {
+  /**
+   * Connect 'quit program' verification code to the system-generated
+   * application menu
+   */
+  public static void setQuitHandler() {
+    Application app = com.apple.eawt.Application.getApplication();
+    app.disableSuddenTermination();
+    app.setQuitHandler(new QuitHandler() {
       @Override
       public void handleQuitRequestWith(QuitEvent evt, QuitResponse response) {
         if (AppTools.app().exitProgram())

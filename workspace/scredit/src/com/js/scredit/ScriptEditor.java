@@ -69,6 +69,8 @@ public class ScriptEditor {
           if (i != layers.currentSlot()
               && editor.path().equals(layers.layer(i).path())) {
             success = true;
+            // TODO: have every copy of a particular script point to the same
+            // editor
             break outer;
           }
         }
@@ -504,15 +506,8 @@ public class ScriptEditor {
 
     MyMenuBar m = new MyMenuBar(AppTools.frame());
 
-    if (!AppTools.isMac()) {
-      m.addMenu("ScrEdit");
-      m.addItem("Quit", KeyEvent.VK_Q, CTRL, new ActionHandler() {
-        public void go() {
-          if (AppTools.app().exitProgram())
-            System.exit(0);
-        }
-      });
-    }
+    m.addAppMenu();
+
     // -----------------------------------
     m.addMenu("File", projectMustBeOpenHandler);
     m.addItem("New", KeyEvent.VK_N, CTRL, new ActionHandler() {
@@ -1193,49 +1188,21 @@ public class ScriptEditor {
   // private static MyFrame gridFrame;
 
   public static boolean doCloseProject() {
-    final boolean db = false;
-
-    if (db) {
-      warning("db:doCloseProject");
-      pr("doCloseProject " + mProject);
-    }
     do {
       if (!isProjectOpen())
         break;
 
       try {
-        if (db)
-          pr(" flushAll()");
-
         if (!allowQuitWithoutSave()) {
           if (!flushAll())
             break;
         }
-
-        if (db)
-          pr(" writeProjectDefaults()");
-
         writeProjectDefaults();
-
-        if (db)
-          pr(" project.flush()");
-
         mProject.flush();
-
-        if (db)
-          pr(" closeAll()");
-
         closeAll();
-
         updateProject(null);
-
-        if (db)
-          pr(" selectAtlas(null)");
-
         selectAtlas(null);
-
         editor = null;
-
       } catch (JSONException e) {
         AppTools.showError("closing project", e);
       } catch (IOException e) {
