@@ -7,10 +7,25 @@ import java.util.ArrayList;
 import com.js.geometry.MyMath;
 
 /**
- * Organizes layers of editors, background / foreground partitions
+ * Organizes layers of scripts, including a background / foreground partition
  */
-public class LayerSet {
-  private static final boolean db = false;
+public class LayerList {
+
+  static { // Suppress warning of unused basic.Tools import
+    doNothing();
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param callback
+   *          method to call when script becomes active
+   */
+  public LayerList(ICallback callback) {
+    mCallback = callback;
+    mLayers = new ArrayList();
+    insert(false);
+  }
 
   /**
    * Callback for LayerSet
@@ -30,41 +45,34 @@ public class LayerSet {
    * last layer); first layer cannot be deleted
    */
   public void delete() {
-    if (db)
-      pr("deleteLayer " + currentSlot);
-    if (layers.size() <= 1)
+    if (mLayers.size() <= 1)
       throw new IllegalStateException();
 
-    layers.remove(currentSlot);
-    if (currentSlot < foregroundStart)
-      foregroundStart--;
-    select(Math.min(currentSlot, layers.size() - 1));
+    mLayers.remove(mCursor);
+    if (mCursor < mForegroundStart)
+      mForegroundStart--;
+    select(Math.min(mCursor, mLayers.size() - 1));
   }
 
   /**
    * Determine if current layer is a background layer
-   * 
-   * @return true if so
    */
   public boolean isBackground() {
-    return currentSlot < foregroundStart;
+    return mCursor < mForegroundStart;
   }
 
   /**
-   * Insert an orphan
+   * Insert an orphan (a new script, one without a filename)
    * 
    * @param afterCurrentPos
    *          if true, inserts it after current layer; otherwise, before
    */
   public void insert(boolean afterCurrentPos) {
-    if (db)
-      pr("insertLayer, index= " + currentSlot);
     ScriptEditor editor = new ScriptEditor();
-    int newInd = currentSlot + (afterCurrentPos ? 1 : 0);
-    layers.add(newInd, editor);
-    if (newInd < foregroundStart)
-      foregroundStart++;
-
+    int newInd = mCursor + (afterCurrentPos ? 1 : 0);
+    mLayers.add(newInd, editor);
+    if (newInd < mForegroundStart)
+      mForegroundStart++;
     select(newInd);
   }
 
@@ -72,15 +80,14 @@ public class LayerSet {
    * Move to layer following active one
    */
   public void next() {
-    select(MyMath.myMod(currentSlot + 1, size()));
-
+    select(MyMath.myMod(mCursor + 1, size()));
   }
 
   /**
    * Move to layer preceding active one
    */
   public void prev() {
-    select(MyMath.myMod(currentSlot - 1, size()));
+    select(MyMath.myMod(mCursor - 1, size()));
   }
 
   /**
@@ -89,7 +96,7 @@ public class LayerSet {
    * @return
    */
   public int currentSlot() {
-    return currentSlot;
+    return mCursor;
   }
 
   /**
@@ -99,7 +106,7 @@ public class LayerSet {
    *          slot of layer to make current
    */
   public void select(int slot) {
-    currentSlot = slot;
+    mCursor = slot;
     doCallback();
   }
 
@@ -108,28 +115,22 @@ public class LayerSet {
    * 
    * @param slot
    *          slot containing other layer
+   * @deprecated
    */
   public void useCopyOf(int slot) {
-    layers.set(currentSlot, layers.get(slot));
+    mLayers.set(mCursor, mLayers.get(slot));
     doCallback();
   }
 
   private void doCallback() {
-    if (db)
-      pr("using editor " + layer(currentSlot));
-
-    cb.useEditor(layer(currentSlot));
+    mCallback.useEditor(layer(mCursor));
   }
 
   /**
    * Get editor
-   * 
-   * @param slot
-   *          slot
-   * @return editor editor within slot
    */
   public ScriptEditor layer(int slot) {
-    return (ScriptEditor) layers.get(slot);
+    return (ScriptEditor) mLayers.get(slot);
   }
 
   /**
@@ -138,6 +139,7 @@ public class LayerSet {
    * @param f
    *          file associated with editor
    * @return first slot containing file, or -1 if none
+   * @deprecated
    */
   public int indexOf(File f) {
     int ret = -1;
@@ -157,47 +159,41 @@ public class LayerSet {
   public void reset() {
     while (size() > 1)
       delete();
-    foregroundStart = 0;
+    mForegroundStart = 0;
     resetCurrent();
   }
 
   /**
    * Reset the current layer
+   * 
+   * @deprecated
    */
   public void resetCurrent() {
-    layers.set(currentSlot, new ScriptEditor());
+    mLayers.set(mCursor, new ScriptEditor());
     doCallback();
   }
 
   /**
    * Get number of layers
-   * 
-   * @return number of layers
    */
   public int size() {
-    return layers.size();
-  }
-
-  public LayerSet(ICallback callback) {
-    cb = callback;
-    layers = new ArrayList();
-    insert(false);
+    return mLayers.size();
   }
 
   /**
    * Move foreground/background partition to include/exclude current layer
    * 
-   * @param f
+   * @param backgroundFlag
    *          if true, ensures current layer is background; else, ensures
    *          current layer is foreground
    */
-  public void setBackground(boolean f) {
-    if (currentSlot < foregroundStart) {
-      if (!f)
-        foregroundStart = currentSlot;
+  public void setBackground(boolean backgroundFlag) {
+    if (mCursor < mForegroundStart) {
+      if (!backgroundFlag)
+        mForegroundStart = mCursor;
     } else {
-      if (f)
-        foregroundStart = currentSlot + 1;
+      if (backgroundFlag)
+        mForegroundStart = mCursor + 1;
     }
   }
 
@@ -207,7 +203,7 @@ public class LayerSet {
    * @return slot of first foreground editor
    */
   public int foregroundStart() {
-    return foregroundStart;
+    return mForegroundStart;
   }
 
   /**
@@ -217,24 +213,25 @@ public class LayerSet {
    *          slot of first foreground layer
    */
   public void setForeground(int fg) {
-    foregroundStart = MyMath.clamp(fg, 0, size());
+    mForegroundStart = MyMath.clamp(fg, 0, size());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("LayerSet");
-    sb.append(" size:" + layers.size());
-    sb.append(" current slot:" + currentSlot);
-    sb.append(" foreground:" + foregroundStart);
-    for (ScriptEditor editor : layers) {
+    sb.append(" size:" + mLayers.size());
+    sb.append(" current slot:" + mCursor);
+    sb.append(" foreground:" + mForegroundStart);
+    for (ScriptEditor editor : mLayers) {
       sb.append("\n  editor: " + editor);
     }
     return sb.toString();
   }
 
-  private int foregroundStart;
-  private ICallback cb;
-  private ArrayList<ScriptEditor> layers;
-  private int currentSlot;
+  private int mForegroundStart;
+  private ICallback mCallback;
+  private ArrayList<ScriptEditor> mLayers;
+  // Index of 'active' script, the one currently being edited
+  private int mCursor;
 
 }

@@ -69,7 +69,8 @@ public class ScriptEditor {
           if (i != layers.currentSlot()
               && editor.path().equals(layers.layer(i).path())) {
             success = true;
-            // TODO: have every copy of a particular script point to the same
+            // Issue #24: have every copy of a particular script point to the
+            // same
             // editor
             break outer;
           }
@@ -85,7 +86,7 @@ public class ScriptEditor {
 
       if (askUser) {
         String prompt;
-        if (isOrphan())
+        if (editor.isOrphan())
           prompt = "Save changes to new file?";
         else {
           prompt = "Save changes to '"
@@ -534,7 +535,7 @@ public class ScriptEditor {
 
     m.addItem("Open Layer...", KeyEvent.VK_O, META, new ActionHandler() {
       public void go() {
-        if (!(isOrphan() && !currentModified())) {
+        if (!(editor.isOrphan() && !currentModified())) {
           layers.insert(true);
         }
         open(null);
@@ -544,7 +545,7 @@ public class ScriptEditor {
     m.addItem("Open Next File...", KeyEvent.VK_O, CTRL | SHIFT,
         new ActionHandler() {
           public boolean shouldBeEnabled() {
-            return !isOrphan();
+            return !editor.isOrphan();
           }
 
           public void go() {
@@ -585,7 +586,7 @@ public class ScriptEditor {
 
     m.addItem("Save", KeyEvent.VK_S, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return isOrphan() || editor.modified();
+        return editor.isOrphan() || editor.modified();
       }
 
       public void go() {
@@ -625,7 +626,7 @@ public class ScriptEditor {
     });
     m.addItem("Save As Next", KeyEvent.VK_S, META | SHIFT, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return !isOrphan();
+        return !editor.isOrphan();
       }
 
       public void go() {
@@ -1401,7 +1402,7 @@ public class ScriptEditor {
 
   private static void doNewScript() {
     do {
-      if (!isOrphan()) {
+      if (!editor.isOrphan()) {
         layers.insert(true);
       }
       if (!flush(true))
@@ -1652,7 +1653,7 @@ public class ScriptEditor {
       ac.add(pnl, BorderLayout.NORTH);
     }
 
-    layers = new LayerSet(new LayerSet.ICallback() {
+    layers = new LayerList(new LayerList.ICallback() {
       public void useEditor(ScriptEditor ed) {
         editor = ed;
         // resetUndo();
@@ -1738,9 +1739,9 @@ public class ScriptEditor {
   }
 
   private static class InfoPanel extends MyPanel implements ActionListener {
-    private LayerSet layers;
+    private LayerList layers;
 
-    public InfoPanel(LayerSet lyr) {
+    public InfoPanel(LayerList lyr) {
       super(true);
 
       this.layers = lyr;
@@ -1845,7 +1846,7 @@ public class ScriptEditor {
 
         StringBuilder sb = new StringBuilder();
         sb.append(currentModified() ? "*" : " ");
-        if (!isOrphan())
+        if (!editor.isOrphan())
           sb.append(Files.fileWithinDirectory(editor.path, mProject.directory()));
         upd(filePath, sb);
         displayProjectPath(mProject.file().getName());
@@ -2061,8 +2062,12 @@ public class ScriptEditor {
     return noSaveNecessary;
   }
 
-  private static boolean isOrphan() {
-    return editor.path == null;
+  /**
+   * Determine if this script is an orphan: one that has never been saved, and
+   * thus has no filename
+   */
+  private boolean isOrphan() {
+    return path == null;
   }
 
   // private static JMenuItem recentScriptsMenuItem, recentProjectsMenuItem,
@@ -2144,7 +2149,7 @@ public class ScriptEditor {
    * 
    * @return Layer object
    */
-  public static LayerSet layers() {
+  public static LayerList layers() {
     return layers;
   }
 
@@ -2390,7 +2395,7 @@ public class ScriptEditor {
   private static IPoint focus = new IPoint();
   private static ObjArray clipboard = new ObjArray();
   private static ScriptProject mProject;
-  private static LayerSet layers;
+  private static LayerList layers;
   private static AtlasPanel atlasPanel;
   private static PalettePanel pPanel;
   private static JComboBox atlasCB;

@@ -52,7 +52,7 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
 
     // int fadeLayer = -1;
     {
-      LayerSet layers = ScriptEditor.layers();
+      LayerList layers = ScriptEditor.layers();
 
       if (ScriptEditor.faded()) {
 
