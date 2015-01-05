@@ -54,8 +54,6 @@ public class ScriptsFile {
 
       for (int j = 0; j < ls.size(); j++) {
         Script sc = ls.script(j);
-        if (db)
-          pr(" looking through script #" + j + ": " + sc.path());
 
         ObjArray itms = sc.items();
         for (int k = 0; k < itms.size(); k++) {

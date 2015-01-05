@@ -158,7 +158,9 @@ public class ScriptCompiler {
     if (db)
       pr("processScript: " + f);
 
-    Script scr = new Script(project, f);
+    Script scr = new Script(project);
+    if (f.exists())
+      scr.read(f);
     labelSet.add(scr);
   }
 

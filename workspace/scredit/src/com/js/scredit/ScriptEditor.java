@@ -99,7 +99,10 @@ public class ScriptEditor {
 
         sScriptSet.set(sScriptSet.getCursor(), f);
 
-        Script s = new Script(sProject, f);
+        Script s = new Script(sProject);
+        if (f.exists())
+          s.read(f);
+        // , f);
         // Create a new editor to hold this
         // mScriptSet.setFile(mScriptSet.currentSlot(), f);
         ScriptEditor theEditor = sScriptSet.get();
@@ -1939,9 +1942,8 @@ public class ScriptEditor {
       Script s = new Script(sProject);
       unimp("disallow saving as script already in set");
       sScriptSet.setName(sScriptSet.getCursor(), f);
-      s.setPath(f);
       writeScript(s);
-      s.flush();
+      s.flush(f);
       success = true;
     } catch (IOException e) {
       AppTools.showError("saving script", e);

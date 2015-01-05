@@ -38,44 +38,9 @@ public class Script {
     this.mProject = project;
   }
 
-  // Shouldn't have 'path' field for Script
-  @Deprecated
-  public void setPath(File p) {
-    this.mPath = p;
-  }
-
-  /**
-   * Read script
-   * 
-   * @param baseDir
-   *          location of base directory containing project file; if no project
-   *          file found here, creates it
-   * @throws IOException
-   * @deprecated shouldn't include path information
-   */
-  public Script(ScriptProject project, File path) throws IOException {
-
-    final boolean db = false;
-
-    if (db)
-      pr("Script constructor: " + path);
-    this.mProject = project;
-
-    this.mPath = path;
-
-    File f = path;
-    if (f.exists()) {
-      try {
-        read();
-      } catch (FileNotFoundException e) {
-        throw new IOException(e);
-      }
-    }
-  }
-
   private static final String ITEMS_TAG = "ITEMS";
 
-  public void flush() throws IOException {
+  public void flush(File path) throws IOException {
     String content = null;
     try {
       JSONObject scriptMap = new JSONObject();
@@ -104,15 +69,7 @@ public class Script {
     } catch (JSONException e) {
       die(e);
     }
-    if (mPath == null)
-      throw new IllegalStateException("path undefined");
-
-    Files.writeStringToFileIfChanged(mPath, content);
-  }
-
-  @Deprecated
-  public File path() {
-    return mPath;
+    Files.writeStringToFileIfChanged(path, content);
   }
 
   public Atlas lastAtlas() {
@@ -135,7 +92,7 @@ public class Script {
     return mProject;
   }
 
-  private void read() throws IOException {
+  public void read(File mPath) throws IOException {
     String content = FileUtils.readFileToString(mPath);
     try {
       JSONObject fileMap = new JSONObject(content);
@@ -169,7 +126,6 @@ public class Script {
   }
 
   private Atlas mLastAtlas;
-  private File mPath;
   private Map mDefaults = new HashMap();
   private ObjArray mObjects = new ObjArray();
   private ScriptProject mProject;
