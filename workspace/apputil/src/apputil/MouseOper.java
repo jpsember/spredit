@@ -17,13 +17,16 @@ public abstract class MouseOper {
 
   /**
    * Determine if this operation should start in response to a mouse down event
+   * 
    * @return true if event has started
    */
   public abstract boolean mouseDown();
 
   /**
    * Update this operation in response to a mouse drag / move event
-   * @param drag true if drag; false if hover
+   * 
+   * @param drag
+   *          true if drag; false if hover
    */
   public void mouseMove(boolean drag) {
   }
@@ -45,13 +48,16 @@ public abstract class MouseOper {
    */
   public void start() {
   }
+
   /**
    * Called when operation is stopping
    */
   public void stop() {
   }
+
   /**
    * Determine if mouse up/down was right button
+   * 
    * @return
    */
   public boolean right() {
@@ -60,6 +66,7 @@ public abstract class MouseOper {
 
   /**
    * Specify view associated with mouse operations
+   * 
    * @param view
    */
   public static void setView(IEditorView view) {
@@ -74,6 +81,7 @@ public abstract class MouseOper {
 
   /**
    * Construct a string describing the mouse button, modifier key states
+   * 
    * @return
    */
   public String mouseStateString() {
@@ -87,8 +95,10 @@ public abstract class MouseOper {
     sb.append(" meta:" + d(ev.isMetaDown()));
     return sb.toString();
   }
+
   /**
    * Get current operation
+   * 
    * @return current operation, or null if none
    */
   public static MouseOper getOperation() {
@@ -97,7 +107,9 @@ public abstract class MouseOper {
 
   /**
    * Set current operation
-   * @param oper operation 
+   * 
+   * @param oper
+   *          operation
    */
   public static void setOperation(MouseOper oper) {
     // ASSERT(oper != null);
@@ -123,31 +135,44 @@ public abstract class MouseOper {
 
   public static void clearOperation() {
     setOperation(null);
-    //    if (editOper != null) {
-    //      editOper = null;
-    //      notifyListeners();
-    //    }
+    // if (editOper != null) {
+    // editOper = null;
+    // notifyListeners();
+    // }
   }
 
   public static void addListener(Listener listener) {
     listeners.add(listener);
   }
+
   public static void removeListener(Listener listener) {
     listeners.remove(listener);
   }
+
   private static Set listeners = new HashSet();
 
   /**
    * Add an operation to the sequence
+   * 
    * @param oper
    */
   public static void add(MouseOper oper) {
     opers.add(oper);
   }
 
+  public static void setEnabled(boolean enabled) {
+    sEnabled = enabled;
+    if (!enabled) {
+      // Cancel any active operation
+      editOper = null;
+    }
+  }
+
   /**
    * Construct IPoint from MouseEvent
-   * @param ev mouse event
+   * 
+   * @param ev
+   *          mouse event
    * @return IPoint containing mouse (view) coordinates
    */
   private static IPoint viewLoc(MouseEvent ev) {
@@ -168,6 +193,8 @@ public abstract class MouseOper {
     @Override
     public void mousePressed(MouseEvent ev) {
       final boolean db = false;
+      if (!sEnabled)
+        return;
 
       updateEventGlobals(ev);
       startPtView = currentPtView;
@@ -257,6 +284,7 @@ public abstract class MouseOper {
 
   // active operation, or null
   private static MouseOper editOper;
+  private static boolean sEnabled = true;
 
   public static interface Listener {
     public void operationChanged(MouseOper oper);

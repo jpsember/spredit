@@ -75,7 +75,7 @@ public class MyFrame extends JFrame {
         }
       });
 
-    Tools.quitProgramAfterDelay(this, 60);
+    Tools.quitProgramAfterDelay(this, 5 * 60);
   }
 
   public MyFrame(String persistId, String title, Component contents) {

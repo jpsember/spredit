@@ -103,7 +103,7 @@ public class MouseOperSelectItems extends MouseOper {
 
         if (mouseItem < 0) {
           resetDup = true;
-          ScriptEditor.unselectAll();
+          ScriptEditor.items().clearAllSelected();
           ScriptEditor.repaint();
           setState(STATE_WAITFORDRAG1);
           f = true;
@@ -111,9 +111,9 @@ public class MouseOperSelectItems extends MouseOper {
           if (db)
             pr(" starting MoveObjectsReversible");
 
-          EdObject obj = ScriptEditor.item(mouseItem);
+          EdObject obj = ScriptEditor.items().get(mouseItem);
           if (!obj.isSelected()) {
-            ScriptEditor.unselectAll();
+            ScriptEditor.items().clearAllSelected();
             obj.setSelected(true);
             ScriptEditor.repaint();
           }
@@ -201,7 +201,7 @@ public class MouseOperSelectItems extends MouseOper {
       setState(STATE_NONE);
       break;
     case STATE_WAITFORDRAG2: {
-      ScriptEditor.item(pressedAtItem).toggleSelected();
+      ScriptEditor.items().get(pressedAtItem).toggleSelected();
       setState(STATE_NONE);
     }
       break;

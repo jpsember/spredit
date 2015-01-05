@@ -15,7 +15,7 @@ public class AddSpriteOper extends MouseOper {
     do {
       SpriteObject sp = new SpriteObject();
       sp.setLocation(currentPtF);
-      ScriptEditor.unselectAll();
+      ScriptEditor.items().clearAllSelected();
 
       // get id of sprite from panel
       SpriteObject sr = ScriptEditor.lastSprite();

@@ -3,7 +3,6 @@ package com.js.scredit;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -28,95 +27,21 @@ import static apputil.MyMenuBar.*;
 
 public class ScriptEditor {
 
-  public ScriptEditor() {
-    MouseOper.addListener(new MouseOper.Listener() {
-      @Override
-      public void operationChanged(MouseOper oper) {
-        if (selectNoneMenuItem != null) {
-          if (oper != null)
-            selectNoneMenuItem.setText("Stop " + oper);
-          else
-            selectNoneMenuItem.setText("Select None");
-        }
-      }
-    });
-    resetUndo();
-  }
-
   /**
    * If current script defined, and has changes, save them.
-   * 
-   * Doesn't save changes if there is an additional copy of this editor in
-   * another slot.
    * 
    * @param askUser
    *          if true, and save required, asks user
    * @return true if success (false if error, or user cancelled save)
    */
   private static boolean flush(boolean askUser) {
-
-    boolean success = false;
-    outer: do {
-      if (!isProjectOpen() || !editor.modified()) {
-        success = true;
-        break;
-      }
-
-      // if there is a copy of this editor in another layer,
-      // don't save before closing.
-      if (editor.path != null) {
-        for (int i = 0; i < layers.size(); i++) {
-          if (i != layers.currentSlot()
-              && editor.path().equals(layers.layer(i).path())) {
-            success = true;
-            // Issue #24: have every copy of a particular script point to the
-            // same
-            // editor
-            break outer;
-          }
-        }
-      }
-
-      if (allowQuitWithoutSave()) {
-        if (askUser) {
-          success = true;
-          break;
-        }
-      }
-
-      if (askUser) {
-        String prompt;
-        if (editor.isOrphan())
-          prompt = "Save changes to new file?";
-        else {
-          prompt = "Save changes to '"
-              + Files.fileWithinDirectory(editor.path, mProject.directory())
-              + "'?";
-        }
-        int code = JOptionPane.showConfirmDialog(AppTools.frame(), prompt,
-            "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION,
-            JOptionPane.WARNING_MESSAGE);
-
-        if (code == JOptionPane.CANCEL_OPTION
-            || code == JOptionPane.CLOSED_OPTION)
-          break;
-        if (code == JOptionPane.NO_OPTION) {
-          success = true;
-          break;
-        }
-      }
-      editor.doSave(null, false, false);
-      success = !editor.modified();
-    } while (false);
-    return success;
-  }
-
-  private static boolean currentModified() {
-    return editor.modified();
+    if (!isProjectOpen())
+      return true;
+    return editor().flushAux(askUser);
   }
 
   public static Color color() {
-    return pPanel.getSelectedColor();
+    return sPalettePanel.getSelectedColor();
   }
 
   /**
@@ -125,22 +50,18 @@ public class ScriptEditor {
    * @return world location of center of editor window
    */
   public static IPoint focus() {
-    return focus;
+    return sFocus;
   }
 
   /**
-   * Close current script if it exists
+   * Replace current editor with a fresh, anonymous editor; does nothing if no
+   * project is open
    */
-  private static void close() {
-    do {
-
-      if (!isProjectOpen())
-        break;
-      layers.resetCurrent();
-
-      // clearCurrentSet();
-
-    } while (false);
+  private static void disposeOfCurrentEditor() {
+    ASSERT(isProjectOpen());
+    // if (!isProjectOpen())
+    // return;
+    sScriptSet.set(sScriptSet.getCursor(), null);
   }
 
   /**
@@ -148,7 +69,7 @@ public class ScriptEditor {
    * 
    * @return true if successful
    */
-  private static boolean open(File f) {
+  private static boolean openScript(File f) {
     boolean success = false;
     do {
       if (!flush(true)) {
@@ -156,8 +77,8 @@ public class ScriptEditor {
       }
 
       if (f == null) {
-        f = AppTools.chooseFileToOpen("Open Script", Script.FILES, mProject
-            .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
+        f = AppTools.chooseFileToOpen("Open Script", Script.FILES, sProject
+            .replaceIfMissing(sProject.recentScripts().getCurrentFile()));
       }
       if (f == null) {
         break;
@@ -165,150 +86,99 @@ public class ScriptEditor {
       if (notInProject(f)) {
         break;
       }
-      close();
 
-      // if layers contain this file elsewhere, just use its editor
+      try {
+        unimp("if editor exists in another slot, don't build new");
 
-      int slot = layers.indexOf(f);
-      if (slot >= 0) {
-        layers.useCopyOf(slot);
-        success = true;
-      } else {
-
-        try {
-          Script s = new Script(mProject, f);
-          editor.items = s.items();
-          editor.path = f;
-
+        int slot = sScriptSet.findEditorForNamedFile(f);
+        if (slot >= 0) {
+          sScriptSet.set(sScriptSet.getCursor(), f);
           success = true;
-          if (!updateLastScriptDisabled)
-            mProject.setLastScriptPath(f);
-        } catch (Throwable e) {
-          AppTools.showError("opening script", e);
+          break;
         }
+
+        sScriptSet.set(sScriptSet.getCursor(), f);
+
+        Script s = new Script(sProject, f);
+        // Create a new editor to hold this
+        // mScriptSet.setFile(mScriptSet.currentSlot(), f);
+        ScriptEditor theEditor = sScriptSet.get();
+        theEditor.mItems = s.items();
+
+        success = true;
+        if (!sUpdateLastScriptDisabled)
+          sProject.setLastScriptPath(f);
+      } catch (Throwable e) {
+        AppTools.showError("opening script", e);
       }
     } while (false);
-    updateLastScriptDisabled = false;
+    sUpdateLastScriptDisabled = false;
     return success;
   }
 
   /**
-   * Encode object to string
+   * Change current script set; if defined, read editor contents from their
+   * respective files
    * 
-   * @return
+   * @param set
+   *          new script set, or null
    */
-  private static JSONObject encodeLayers() {
-    ScriptSet ss = new ScriptSet(mProject.directory(), layers.size(),
-        layers.currentSlot(), layers.foregroundStart());
-    for (int i = 0; i < ss.size(); i++) {
-      ScriptEditor ed = layers.layer(i);
-      File f = ed.path();
-      if (f != null) {
-        ss.setFile(i, f);
+  private static void setScriptSet(ScriptSet set) {
+    sScriptSet = set;
+    if (sScriptSet == null)
+      return;
+
+    int originalSlot = set.getCursor();
+
+    for (int i = 0; i < set.size(); i++) {
+      set.setCursor(i);
+      ScriptEditor editor = sScriptSet.get();
+      if (editor.isUnnamed())
+        continue;
+      sUpdateLastScriptDisabled = true;
+      if (!openScript(editor.file())) {
+        AppTools.showMsg("Unable to open " + editor.file());
+        sScriptSet.set(i, null);
+        // Since an error occurred, throw out any following editors
+        originalSlot = i;
+        i++;
+        while (set.size() != i)
+          sScriptSet.remove(set.size() - 1);
+        break;
       }
     }
-    return ss.encode();
-  }
-
-  private static void decodeLayers(ScriptSet set) {
-    layers.reset();
-    {
-      for (int i = 0; i < set.size(); i++) {
-        if (i > 0)
-          layers.insert(true);
-        File f = set.file(i);
-        if (f != null) {
-          updateLastScriptDisabled = true;
-          if (!open(f)) {
-            AppTools.showMsg("Unable to open " + f);
-            break;
-          }
-        }
-      }
-      layers.setForeground(set.getForegroundLayer());
-      layers.select(set.getCurrentLayer());
-    }
-  }
-
-  // /**
-  // * Decode object from string
-  // * @param s
-  // */
-  // private static void decodeLayers(String s) {
-  // layers.reset();
-  // if (s != null) {
-  // DefScanner sc = new DefScanner(s);
-  // int sz = sc.sInt();
-  // int curr = sc.sInt();
-  // int fg = sc.sInt();
-  // for (int i = 0; i < sz; i++) {
-  // if (i > 0)
-  // layers.insert(true); //layers.insert(i > 0);
-  // if (sc.sBool()) {
-  // File f = sc.sPath(project.directory());
-  // updateLastScriptDisabled = true;
-  // if (!open(f)) {
-  // AppTools.showMsg("Unable to open " + f);
-  // break;
-  // }
-  // }
-  // }
-  // layers.setForeground(fg);
-  // layers.select(curr);
-  // }
-  // }
-
-  private static boolean updateLastScriptDisabled;
-
-  private static void setProject(ScriptProject project) {
-    updateProject(project);
-    closeAll();
-  }
-
-  public void render(GLPanel panel, boolean toBgnd) {
-    for (int i = 0; i < items.size(); i++) {
-
-      panel.lineWidth(1.5f / zoomFactor());
-
-      EdObject obj = items.get(i);
-      if (toBgnd) {
-        boolean f = obj.isSelected();
-        obj.setSelected(false);
-        obj.render(panel);
-        obj.setSelected(f);
-      } else
-        obj.render(panel);
-    }
+    set.setCursor(originalSlot);
   }
 
   /**
    * Get the ObjArray manipulated by the current editor
    */
   public static ObjArray items() {
-    return editor.items;
-  }
-
-  public static EdObject item(int i) {
-    return editor.items.get(i);
-  }
-
-  public static void setItems(ObjArray items) {
-    ASSERT(items != null);
-    editor.items = items;
+    return editor().mItems;
   }
 
   /**
-   * Get the active editor
-   * 
-   * @return Editor
+   * Replace ObjArray for current editor
    */
-  public static ScriptEditor editor() {
-    return editor;
+  public static void setItems(ObjArray items) {
+    editor().mItems = items;
   }
 
+  /**
+   * Get the active editor, or null if there isn't one
+   */
+  public static ScriptEditor editor() {
+    assertProjectOpen();
+    return sScriptSet.get();
+  }
+
+  /**
+   * Repaint the current editor, and its associated components
+   */
   public static void repaint() {
-    infoPanel.refresh();
-    editorPanel.repaint();
+    sInfoPanel
+        .refresh(isProjectOpen() ? editor() : null, project(), sScriptSet);
+    sEditorPanelComponent.repaint();
   }
 
   /**
@@ -320,81 +190,29 @@ public class ScriptEditor {
   private static void doAdjustZoom(int code) {
     switch (code) {
     default:
-      zoomFactor = 1;
+      sZoomFactor = 1;
       break;
     case 1:
-      zoomFactor *= .8f;
+      sZoomFactor *= .8f;
       break;
     case -1:
-      zoomFactor *= 1 / .8f;
+      sZoomFactor *= 1 / .8f;
       break;
     }
     repaint();
   }
 
-  /**
-   * Determine if an editor is open
-   */
-  private static boolean isProjectOpen() {
+  public static boolean isProjectOpen() {
     return project() != null;
   }
 
   private static boolean notInProject(File scriptFile) {
-    boolean inProj = mProject.isDescendant(scriptFile);
+    boolean inProj = sProject.isDescendant(scriptFile);
     if (!inProj)
       JOptionPane.showMessageDialog(AppTools.frame(), "File '" + scriptFile
           + "' is not within the project", "Error", JOptionPane.ERROR_MESSAGE);
 
     return !inProj;
-  }
-
-  private void doSave(File initialPath, boolean alwaysAskForPath,
-      boolean alwaysVerifyReplaceExisting) {
-
-    final boolean db = false;
-
-    if (db)
-      pr("doSave ask=" + alwaysAskForPath + " path=" + path);
-
-    do {
-      File f = initialPath;
-      if (f == null)
-        f = path;
-      if (f == null || alwaysAskForPath) {
-        f = AppTools.chooseFileToSave("Save Script", Script.FILES, mProject
-            .replaceIfMissing(mProject.recentScripts().getCurrentFile()));
-
-        if (f == null)
-          break;
-
-        if (db)
-          pr(" requested " + f + " (project=" + mProject.directory() + ")");
-
-        if (notInProject(f))
-          break;
-
-        alwaysVerifyReplaceExisting = true;
-      }
-
-      if (f.exists() && (alwaysVerifyReplaceExisting || !f.equals(path))) {
-        // custom title, warning icon
-        int result = JOptionPane.showConfirmDialog(
-            AppTools.frame(),
-            "Replace existing file: '"
-                + Files.fileWithinDirectory(f, mProject.directory()) + "'?",
-            "Save Script", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.CANCEL_OPTION
-            || result == JOptionPane.CLOSED_OPTION)
-          break;
-      }
-
-      if (saveAs(f)) {
-        mProject.setLastScriptPath(f);
-        path = f;
-        setChanges(0);
-        // resetUndo();
-      }
-    } while (false);
   }
 
   /**
@@ -466,7 +284,7 @@ public class ScriptEditor {
     private int dir;
 
     public boolean shouldBeEnabled() {
-      return editor.items.hasSelected();
+      return editor().mItems.hasSelected();
     }
 
     public void go() {
@@ -517,9 +335,9 @@ public class ScriptEditor {
         repaint();
       }
     });
-    m.addItem("Open File...", KeyEvent.VK_O, CTRL, new ActionHandler() {
+    m.addItem("Open Script...", KeyEvent.VK_O, CTRL, new ActionHandler() {
       public void go() {
-        open(null);
+        openScript(null);
         repaint();
       }
     });
@@ -527,7 +345,7 @@ public class ScriptEditor {
     sRecentScriptsMenuItem = new RecentFiles.Menu("Open Recent Script", null,
         new ActionHandler() {
           public void go() {
-            open(mProject.recentScripts().getCurrentFile());
+            openScript(sProject.recentScripts().getCurrentFile());
             repaint();
           }
         });
@@ -535,17 +353,20 @@ public class ScriptEditor {
 
     m.addItem("Open Layer...", KeyEvent.VK_O, META, new ActionHandler() {
       public void go() {
-        if (!(editor.isOrphan() && !currentModified())) {
-          layers.insert(true);
+        // If current editor is anonymous, and unmodified, don't insert a new
+        // one
+        if (!(editor().isUnnamed() && !editor().modified())) {
+          sScriptSet.insert(sScriptSet.getCursor(), null);
+          unimp("update editor to reflect mScriptSet");
         }
-        open(null);
+        openScript(null);
         repaint();
       }
     });
     m.addItem("Open Next File...", KeyEvent.VK_O, CTRL | SHIFT,
         new ActionHandler() {
           public boolean shouldBeEnabled() {
-            return !editor.isOrphan();
+            return !editor().isUnnamed();
           }
 
           public void go() {
@@ -555,28 +376,30 @@ public class ScriptEditor {
         });
 
     m.addSeparator();
+
     m.addItem("Close", KeyEvent.VK_W, CTRL, new ActionHandler() {
       public void go() {
         do {
           if (!flush(true))
             break;
-          close();
-          if (layers.size() > 1)
-            layers.delete();
+          disposeOfCurrentEditor();
+          // If this is not the only editor in the set, remove it
+          if (sScriptSet.size() > 1)
+            sScriptSet.remove(sScriptSet.getCursor());
         } while (false);
         repaint();
       }
     });
     m.addItem("Close All", KeyEvent.VK_W, CTRL | SHIFT, new ActionHandler() {
       public void go() {
-        layers.select(layers.size() - 1);
+        sScriptSet.setCursor(sScriptSet.size() - 1);
         do {
           repaint();
           if (!flush(true))
             break;
-          close();
-          if (layers.size() > 1)
-            layers.delete();
+          disposeOfCurrentEditor();
+          if (sScriptSet.size() > 1)
+            sScriptSet.remove(sScriptSet.size() - 1);
           else
             break;
         } while (true);
@@ -586,18 +409,18 @@ public class ScriptEditor {
 
     m.addItem("Save", KeyEvent.VK_S, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return editor.isOrphan() || editor.modified();
+        return editor().isUnnamed() || editor().modified();
       }
 
       public void go() {
-        editor.doSave(null, false, false);
+        editor().doSave(null, false, false);
         repaint();
       }
     });
 
     m.addItem("Save As...", KeyEvent.VK_A, CTRL | SHIFT, new ActionHandler() {
       public void go() {
-        editor.doSave(null, true, false);
+        editor().doSave(null, true, false);
         repaint();
       }
     });
@@ -605,58 +428,59 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         boolean ret = false;
-        for (int i = 0; i < layers.size(); i++) {
-          ScriptEditor ed = layers.layer(i);
-          if (ed.path() == null || ed.modified())
+        for (int i = 0; i < sScriptSet.size(); i++) {
+          ScriptEditor ed = sScriptSet.get(i);
+          if (ed.file() == null || ed.modified())
             ret = true;
         }
         return ret;
       }
 
       public void go() {
-        for (int i = 0; i < layers.size(); i++) {
-          ScriptEditor ed = layers.layer(i);
-          if (ed.path() == null || ed.modified()) {
-            layers.select(i);
-            editor.doSave(null, false, false);
+        int previousSlot = sScriptSet.getCursor();
+        for (int i = 0; i < sScriptSet.size(); i++) {
+          ScriptEditor ed = sScriptSet.get(i);
+          if (ed.file() == null || ed.modified()) {
+            sScriptSet.setCursor(i);
+            editor().doSave(null, false, false);
           }
         }
+        sScriptSet.setCursor(previousSlot);
         repaint();
       }
     });
     m.addItem("Save As Next", KeyEvent.VK_S, META | SHIFT, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return !editor.isOrphan();
+        return !editor().isUnnamed();
       }
 
       public void go() {
-        File f = AppTools.incrementFile(editor.path);
-        editor.doSave(f, false, true);
+        File f = AppTools.incrementFile(editor().file());
+        editor().doSave(f, false, true);
         repaint();
       }
     });
-    // ------------------------------------
 
     // -----------------------------------
     m.addMenu("Edit", projectMustBeOpenHandler);
-    undoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new ActionHandler() {
+    sUndoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return editor.undoCursor > 0;
+        return editor().mUndoCursor > 0;
       }
 
       public void go() {
-        editor.doUndo();
+        editor().doUndo();
         repaint();
       }
     });
 
-    redoMenuItem = m.addItem("Redo", KeyEvent.VK_Y, CTRL, new ActionHandler() {
+    sRedoMenuItem = m.addItem("Redo", KeyEvent.VK_Y, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return editor.getRedoOper() != null;
+        return editor().getRedoOper() != null;
       }
 
       public void go() {
-        editor.doRedo();
+        editor().doRedo();
         repaint();
       }
     });
@@ -739,17 +563,17 @@ public class ScriptEditor {
     m.addSeparator();
     m.addItem("Select All", KeyEvent.VK_A, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return !editor.items.isEmpty();
+        return !editor().mItems.isEmpty();
       }
 
       public void go() {
-        ObjArray a = editor.items;
+        ObjArray a = editor().mItems;
         for (int i = 0; i < a.size(); i++)
           a.get(i).setSelected(true);
         repaint();
       }
     });
-    selectNoneMenuItem = m.addItem("Select None", KeyEvent.VK_ESCAPE, 0,
+    sSelectNoneMenuItem = m.addItem("Select None", KeyEvent.VK_ESCAPE, 0,
         new ActionHandler() {
           private SelectNoneOper r;
 
@@ -950,7 +774,7 @@ public class ScriptEditor {
       }
 
       public boolean shouldBeEnabled() {
-        return zoomFactor < 20;
+        return sZoomFactor < 20;
       }
     });
 
@@ -960,12 +784,12 @@ public class ScriptEditor {
       }
 
       public boolean shouldBeEnabled() {
-        return zoomFactor > .1f;
+        return sZoomFactor > .1f;
       }
     });
     m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return zoomFactor != 1;
+        return sZoomFactor != 1;
       }
 
       public void go() {
@@ -1007,7 +831,7 @@ public class ScriptEditor {
     m.addMenu("Objects", projectMustBeOpenHandler);
     m.addItem("Add Sprite", KeyEvent.VK_S, 0, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return lastSprite != null;
+        return sSelectedSprite != null;
       }
 
       public void go() {
@@ -1103,21 +927,23 @@ public class ScriptEditor {
     m.addMenu("Layer", projectMustBeOpenHandler);
     m.addItem("Next", KeyEvent.VK_EQUALS, 0, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return layers.size() > 1;
+        return sScriptSet.size() > 1;
       }
 
       public void go() {
-        layers.next();
+        sScriptSet.setCursor(MyMath.myMod(sScriptSet.getCursor() + 1,
+            sScriptSet.size()));
         repaint();
       }
     });
     m.addItem("Previous", KeyEvent.VK_MINUS, 0, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return layers.size() > 1;
+        return sScriptSet.size() > 1;
       }
 
       public void go() {
-        layers.prev();
+        sScriptSet.setCursor(MyMath.myMod(sScriptSet.getCursor() - 1,
+            sScriptSet.size()));
         repaint();
       }
     });
@@ -1165,11 +991,11 @@ public class ScriptEditor {
         }
       }
     });
-    m.addItem(new RecentFiles.Menu("Open Recent Project", recentProjects,
+    m.addItem(new RecentFiles.Menu("Open Recent Project", sRecentProjects,
         new ActionHandler() {
           @Override
           public void go() {
-            openProject(recentProjects.getCurrentFile());
+            openProject(sRecentProjects.getCurrentFile());
             repaint();
           }
         }));
@@ -1186,24 +1012,29 @@ public class ScriptEditor {
     });
   }
 
-  // private static MyFrame gridFrame;
-
   public static boolean doCloseProject() {
     do {
       if (!isProjectOpen())
         break;
 
       try {
-        if (!allowQuitWithoutSave()) {
-          if (!flushAll())
-            break;
-        }
+        if (!flushAll())
+          break;
         writeProjectDefaults();
-        mProject.flush();
-        closeAll();
-        updateProject(null);
+        sProject.flush();
+        sProject = null;
+        MouseOper.setEnabled(false);
+        sRecentScriptsMenuItem.setRecentFiles(null);
+        sRecentScriptSetsMenuItem.setRecentFiles(null);
+        unimp("update recent atlas list");
+        // sRecentAtlases.setAlias(isProjectOpen() ? mProject.recentAtlases() :
+        // null);
+        sRecentProjects.setCurrentFile(null);
+        sAtlasCB.removeAllItems();
+        sAtlasCB.setEnabled(false);
+        sAtlasSelectButton.setEnabled(false);
+        sScriptSet = null;
         selectAtlas(null);
-        editor = null;
       } catch (JSONException e) {
         AppTools.showError("closing project", e);
       } catch (IOException e) {
@@ -1330,7 +1161,7 @@ public class ScriptEditor {
   // }
 
   private static void openNextFile() {
-    File currentFile = editor.path;
+    File currentFile = editor().file();
     TreeSet<File> candidates = new TreeSet();
     File[] array = currentFile.getParentFile().listFiles(
         (FilenameFilter) Script.FILES);
@@ -1342,8 +1173,8 @@ public class ScriptEditor {
       candidate = candidates.first();
     if (candidate.equals(currentFile))
       return;
-    layers.insert(true);
-    open(candidate);
+    sScriptSet.insert(sScriptSet.getCursor(), null);
+    openScript(candidate);
   }
 
   /**
@@ -1384,7 +1215,7 @@ public class ScriptEditor {
 
       if (fx == null)
         fx = AppTools.chooseFileToOpen("Select Atlas", Atlas.DATA_FILES,
-            mProject.replaceIfMissing(atlasPanel.file()));
+            sProject.replaceIfMissing(sAtlasPanel.file()));
 
       if (fx == null)
         break;
@@ -1397,18 +1228,21 @@ public class ScriptEditor {
 
   private static void selectAtlas(File f) {
     if (f != null)
-      mProject.recentAtlases().setCurrentFile(f);
+      sProject.recentAtlases().setCurrentFile(f);
   }
 
   private static void doNewScript() {
+    // If current editor is an anonymous script, replace it with a fresh one
+    // (after verifying with user);
+    // otherwise, insert a fresh one
     do {
-      if (!editor.isOrphan()) {
-        layers.insert(true);
+      if (!editor().isUnnamed()) {
+        sScriptSet.insert(sScriptSet.getCursor(), null);
+      } else {
+        if (!flush(true))
+          break;
+        disposeOfCurrentEditor();
       }
-      if (!flush(true))
-        break;
-
-      close();
     } while (false);
   }
 
@@ -1419,8 +1253,8 @@ public class ScriptEditor {
         break;
 
       if (f == null)
-        f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES, mProject
-            .replaceIfMissing(mProject.recentScriptSets().getCurrentFile()));
+        f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES, sProject
+            .replaceIfMissing(sProject.recentScriptSets().getCurrentFile()));
       if (f == null)
         break;
 
@@ -1428,10 +1262,10 @@ public class ScriptEditor {
         break;
       try {
 
-        ScriptSet ss = new ScriptSet(mProject.directory(), new JSONObject(
+        ScriptSet ss = new ScriptSet(sProject.directory(), new JSONObject(
             FileUtils.readFileToString(f)));
 
-        decodeLayers(ss);
+        setScriptSet(ss);
         setRecentSetPath(f);
 
       } catch (Throwable e) {
@@ -1444,20 +1278,25 @@ public class ScriptEditor {
 
   private static void doSaveSet() {
 
-    /*
+    /**
+     * <pre>
      * 
-     * [] flush files [] if any are still orphans, or are modified, abort []
-     * serialize layers into string [] write string to file
+     * [] flush files 
+     * [] if any are still orphans, or are modified, abort
+     * [] serialize layers into string 
+     * [] write string to file
+     * 
+     * </pre>
+     * 
      */
-    int origLayer = layers.currentSlot();
-    // outer:
+    int origLayer = sScriptSet.getCursor();
     do {
 
       if (!flushAll())
         break;
 
-      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES, mProject
-          .replaceIfMissing(mProject.recentScriptSets().getCurrentFile()));
+      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES, sProject
+          .replaceIfMissing(sProject.recentScriptSets().getCurrentFile()));
 
       if (f == null)
         break;
@@ -1467,12 +1306,12 @@ public class ScriptEditor {
       setRecentSetPath(f);
 
       try {
-        Files.writeStringToFileIfChanged(f, encodeLayers().toString(2));
+        Files.writeStringToFileIfChanged(f, sScriptSet.encode().toString(2));
       } catch (Throwable e) {
         AppTools.showError("writing script set", e);
       }
     } while (false);
-    layers.select(origLayer);
+    sScriptSet.setCursor(origLayer);
     repaint();
   }
 
@@ -1484,18 +1323,12 @@ public class ScriptEditor {
    *          script set file
    */
   private static void setRecentSetPath(File f) {
-    mProject.setLastSetPath(f);
-    // MyMenuBar.updateRecentFilesFor(recentScriptSetsMenuItem,
-    // mProject.recentScriptSets());
-    mProject.setLastSetPath(null);
-  }
-
-  public static void unselectAll() {
-    items().clearAllSelected();
+    sProject.setLastSetPath(f);
+    sProject.setLastSetPath(null);
   }
 
   public static SpriteObject lastSprite() {
-    return lastSprite;
+    return sSelectedSprite;
   }
 
   /**
@@ -1505,7 +1338,7 @@ public class ScriptEditor {
    *          object specifying new atlas and sprite
    */
   public static void doSetSpritesTo(SpriteObject si) {
-    lastSprite = si;
+    sSelectedSprite = si;
 
     final SpriteObject si2 = si;
     // final SpriteObject spriteInfo = si;
@@ -1539,7 +1372,7 @@ public class ScriptEditor {
   }
 
   public static ObjArray clipboard() {
-    return clipboard;
+    return sClipboard;
   }
 
   /**
@@ -1549,83 +1382,43 @@ public class ScriptEditor {
    *          new clipboard
    */
   public static void setClipboard(ObjArray newClip) {
-    clipboard = newClip;
-  }
-
-  /**
-   * Save script
-   * 
-   * @param f
-   * @return true if successfully saved
-   */
-  private boolean saveAs(File f) {
-    final boolean db = false;
-
-    if (db)
-      pr("saveAs " + f);
-
-    boolean success = false;
-    try {
-      Script s = new Script(mProject);
-      s.setPath(f);
-      if (db)
-        pr(" constructed script=" + s + ", lastAtlas=" + s.lastAtlas());
-
-      writeScript(s);
-
-      if (db)
-        pr(" flushing script");
-
-      s.flush();
-      success = true;
-      this.path = f;
-
-    } catch (IOException e) {
-      AppTools.showError("saving script", e);
-    }
-    return success;
-  }
-
-  private void writeScript(Script s) {
-    s.setItems(items);
-
+    sClipboard = newClip;
   }
 
   private static boolean flushAll() {
-    editor.resetUndo();
-    int currLayer = layers.currentSlot();
+    editor().resetUndo();
+    int currLayer = sScriptSet.getCursor();
     boolean success = true;
-    for (int i = 0; i < layers.size(); i++) {
-      layers.select(i);
+    for (int i = 0; i < sScriptSet.size(); i++) {
+      sScriptSet.setCursor(i);
       if (!flush(true)) {
         success = false;
         break;
       }
     }
-    if (success)
-      layers.select(currLayer);
+    if (success) {
+      sScriptSet.setCursor(currLayer);
+    }
     return success;
-  }
-
-  private static void closeAll() {
-    layers.reset();
   }
 
   public static void init(JComponent p) {
 
+    MouseOper.setEnabled(false);
+
     JPanel ac = new JPanel(new BorderLayout());
     p.add(ac, BorderLayout.EAST);
 
-    atlasPanel = new AtlasPanel();
-    ac.add(atlasPanel, BorderLayout.CENTER);
-    pPanel = new PalettePanel();
-    ac.add(pPanel, BorderLayout.SOUTH);
+    sAtlasPanel = new AtlasPanel();
+    ac.add(sAtlasPanel, BorderLayout.CENTER);
+    sPalettePanel = new PalettePanel();
+    ac.add(sPalettePanel, BorderLayout.SOUTH);
 
     {
       JPanel pnl = new JPanel();
 
-      atlasCB = new JComboBox();
-      atlasCB.addActionListener(new ActionListener() {
+      sAtlasCB = new JComboBox();
+      sAtlasCB.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent ev) {
           final boolean db = false;
@@ -1634,31 +1427,31 @@ public class ScriptEditor {
           File af = null;
 
           if (isProjectOpen())
-            af = mProject.recentAtlases().getCurrentFile();
-          if (atlasPanel != null)
-            atlasPanel.setAtlas(mProject, af);
+            af = sProject.recentAtlases().getCurrentFile();
+          if (sAtlasPanel != null)
+            sAtlasPanel.setAtlas(sProject, af);
         }
       });
 
-      atlasSelectButton = new JButton("Open");
-      atlasSelectButton.addActionListener(new ActionListener() {
+      sAtlasSelectButton = new JButton("Open");
+      sAtlasSelectButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           doSelectAtlas(null);
         }
       });
 
-      pnl.add(atlasSelectButton);
+      pnl.add(sAtlasSelectButton);
 
-      pnl.add(atlasCB);
+      pnl.add(sAtlasCB);
       ac.add(pnl, BorderLayout.NORTH);
     }
 
-    layers = new LayerList();
+    setScriptSet(null);
 
     addMenus();
 
     {
-      File base = recentProjects.getMostRecentFile();
+      File base = sRecentProjects.getMostRecentFile();
       if (base != null && !ScriptProject.FILES.accept(base))
         base = null;
       if (base != null && base.exists()) {
@@ -1668,12 +1461,11 @@ public class ScriptEditor {
 
     {
       JPanel pnl = new JPanel(new BorderLayout());
-      editorPanel = new EditorPanelGL();
+      EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel);
+      sEditorPanelComponent = editorPanel.getComponent();
+      pnl.add(sEditorPanelComponent, BorderLayout.CENTER);
 
-      pnl.add(editorPanel.getComponent(), BorderLayout.CENTER);
-
-      infoPanel = new InfoPanel(layers);
-      pnl.add(infoPanel, BorderLayout.SOUTH);
+      pnl.add(sInfoPanel, BorderLayout.SOUTH);
       p.add(pnl, BorderLayout.CENTER);
     }
 
@@ -1687,9 +1479,8 @@ public class ScriptEditor {
     // MouseOper.add(new MouseOperMoveItems());
     // MouseOper.add(new BoxOper());
     // }
+    repaint();
   }
-
-  private static InfoPanel infoPanel;
 
   public static void setInfo(EdObject obj) {
     if (obj == null)
@@ -1699,404 +1490,65 @@ public class ScriptEditor {
   }
 
   public static void setInfo(String msg) {
-    if (msg == null)
-      msg = "";
-    infoPanel.msg.setText(msg);
-    // infoPanel.msg.setText(msg);
-    // infoPanel.refresh();
-    // infoLabel.setText(msg);
+    sInfoPanel.setMessage(msg);
   }
-
-  /**
-   * Read 'show origin' button value
-   * 
-   * @return true to plot origin
-   */
-  public static boolean showOrigin() {
-    return origin.isSelected();
-  }
-
-  private static void setOrigin(boolean f) {
-    origin.setSelected(f);
-  }
-
-  /**
-   * Read 'faded' option
-   * 
-   * @return faded value
-   */
-  public static boolean faded() {
-    return faded.isSelected();
-  }
-
-  private static void setFaded(boolean f) {
-    faded.setSelected(f);
-  }
-
-  private static class InfoPanel extends MyPanel implements ActionListener {
-    private LayerList layers;
-
-    public InfoPanel(LayerList lyr) {
-      super(true);
-
-      this.layers = lyr;
-
-      setBorder(BorderFactory.createRaisedBevelBorder());
-
-      {
-        JPanel c1 = vertPanel();
-
-        {
-          JPanel c = horzPanel();
-
-          c.add(new JLabel("Script:"));
-          slotNumber = text(5, false);
-          slotNumber.setHorizontalAlignment(SwingConstants.CENTER);
-          c.add(slotNumber);
-          filePath = text(24, false);
-          c.add(filePath);
-          c.add(stretch());
-
-          c1.add(c);
-        }
-        {
-          JPanel c = horzPanel();
-          bgnd = new JCheckBox("Bgnd");
-          bgnd.addActionListener(this);
-          bgnd.setToolTipText("Plot this, and preceding scripts, as background");
-          c.add(bgnd);
-
-          c.add(origin);
-          origin.addActionListener(this);
-          origin.setToolTipText("Plot origin crosshairs");
-
-          c.add(faded);
-          faded.addActionListener(this);
-          faded.setToolTipText("Plot faded previous foreground script");
-
-          c.add(Grid.intGridActiveCtrl());
-          c.add(new JLabel("Size:"));
-          c.add(Grid.gridSizeCtrl());
-
-          c.add(stretch());
-
-          c1.add(c);
-        }
-        {
-          JPanel c = horzPanel();
-
-          msg = text(50, true);
-          c.add(msg);
-
-          // infoLabel = new JLabel();
-          // infoLabel.setFont(AppTools.getSmallFixedWidthFont());
-          // infoLabel.setPreferredSize(new Dimension(30, infoLabel.getFont()
-          // .getSize()));
-          // size(infoLabel, 40);
-          // c.add(infoLabel);
-          // infoLabel.setText("har");
-          c.add(stretch());
-          c1.add(c);
-        }
-
-        c1.add(stretch());
-
-        this.add(c1);
-      }
-      this.add(hSpace(8));
-
-      this.add(stretch());
-      refresh();
-    }
-
-    private static JTextField text(int chars, boolean small) {
-      JTextField tf = new JTextField();
-      tf.setEditable(false);
-      tf.setFont(small ? AppTools.getSmallFixedWidthFont() : AppTools
-          .getFixedWidthFont());
-      size(tf, chars);
-      return tf;
-    }
-
-    private static void size(Component c, int chars) {
-      Dimension d = new Dimension(chars * 13, Short.MAX_VALUE);
-      Dimension cs = c.getPreferredSize();
-      c.setPreferredSize(new Dimension(d.width, cs.height));
-    }
-
-    public void refresh() {
-      final boolean db = false;
-      if (db)
-        pr("InfoPanel update(); projectOpen=" + isProjectOpen());
-
-      if (isProjectOpen()) {
-        {
-          int i = layers.currentSlot();
-
-          if (layers.size() > 1) {
-            upd(slotNumber, (i + 1) + "/" + (layers.size()));
-          } else
-            upd(slotNumber, null);
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(currentModified() ? "*" : " ");
-        if (!editor.isOrphan())
-          sb.append(Files.fileWithinDirectory(editor.path, mProject.directory()));
-        upd(filePath, sb);
-        displayProjectPath(mProject.file().getName());
-        // upd(projectPath, project.file().getName());
-        upd(bgnd, true, layers.isBackground());
-
-      } else {
-        upd(slotNumber, null);
-        upd(filePath, null);
-        displayProjectPath(null);
-        // upd(projectPath, null);
-        upd(bgnd, false, false);
-      }
-    }
-
-    private void displayProjectPath(String s) {
-      StringBuilder t = new StringBuilder("ScrEdit");
-      if (s != null) {
-        t.append(" (Project:");
-        t.append(s);
-        t.append(")");
-      }
-      String nt = t.toString();
-      if (!nt.equals(prevTitle)) {
-        prevTitle = nt;
-        AppTools.frame().setTitle(prevTitle);
-      }
-    }
-
-    private static String prevTitle;
-
-    private void upd(JCheckBox cb, boolean enabled, boolean value) {
-      cb.setSelected(enabled && value);
-      cb.setEnabled(enabled);
-    }
-
-    private void upd(JTextField tf, Object content) {
-      if (content == null)
-        content = "";
-      String cs = content.toString();
-      String prev = tf.getText();
-      if (!prev.equals(cs)) {
-        tf.setText(cs);
-      }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-      layers.setBackground(bgnd.isSelected());
-      ScriptEditor.repaint();
-    }
-
-    private JCheckBox bgnd;
-    // private JTextField projectPath;
-    private JTextField slotNumber;
-    private JTextField filePath;
-    private JTextField msg;
-  }
-
-  // private static class InfoPanel extends JPanel implements ActionListener {
-  // private LayerSet layers;
-  // public InfoPanel(LayerSet lyr) {
-  // this.layers = lyr;
-  // setBorder(BorderFactory.createRaisedBevelBorder());
-  // setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-  // spc(5);
-  //
-  // add(new JLabel("B:"));
-  // bgnd = new JCheckBox();
-  // add(bgnd);
-  // bgnd.addActionListener(this);
-  // bgnd.setToolTipText("Plot this, and preceding scripts, as background");
-  //
-  // add(new JLabel("Script:"));
-  // slotNumber = text(5);
-  // slotNumber.setHorizontalAlignment(SwingConstants.CENTER);
-  // add(slotNumber);
-  //
-  // filePath = text(24);
-  // add(filePath);
-  //
-  // add(new JLabel("O:"));
-  // add(origin);
-  // origin.addActionListener(this);
-  // origin.setToolTipText("Plot origin crosshairs");
-  // add(new JLabel("F:"));
-  // add(faded);
-  // faded.addActionListener(this);
-  // faded.setToolTipText("Plot faded previous foreground script");
-  //
-  //
-  // add(Box.createHorizontalGlue());
-  //
-  // add(new JLabel("Project:"));
-  // projectPath = text(18);
-  // add(projectPath);
-  // spc(5);
-  //
-  // refresh();
-  // }
-  //
-  //
-  // private static JTextField text(int chars) {
-  // JTextField tf = new JTextField();
-  // tf.setEditable(false);
-  // tf.setFont(AppTools.getFixedWidthFont());
-  // size(tf, chars);
-  // return tf;
-  // }
-  //
-  // private static void size(Component c, int chars) {
-  // Dimension d = new Dimension(chars * 13, Short.MAX_VALUE);
-  // Dimension cs = c.getPreferredSize();
-  // c.setPreferredSize(new Dimension(d.width, cs.height));
-  // c.setMaximumSize(d);
-  // }
-  // private void spc(int x) {
-  // add(Box.createRigidArea(new Dimension(x, 0)));
-  // }
-  //
-  // public void refresh() {
-  // final boolean db = false;
-  // if (db)
-  // pr("InfoPanel update(); projectOpen=" + isProjectOpen());
-  //
-  // if (isProjectOpen()) {
-  // {
-  // int i = layers.currentSlot();
-  //
-  // if (layers.size() > 1) {
-  // upd(slotNumber, (i + 1) + "/" + (layers.size()));
-  // } else
-  // upd(slotNumber, null);
-  // }
-  //
-  // StringBuilder sb = new StringBuilder();
-  // sb.append(currentModified() ? "*" : " ");
-  // //sb.append("<" + editor.ourID + ">");
-  // if (!isOrphan())
-  // sb.append(new RelPath(project.directory(), editor.path).display());
-  // upd(filePath, sb);
-  // upd(projectPath, project.file().getName());
-  // upd(bgnd, true, layers.isBackground());
-  //
-  // } else {
-  // upd(slotNumber, null);
-  // upd(filePath, null);
-  // upd(projectPath, null);
-  // upd(bgnd, false, false);
-  // }
-  // }
-  // private void upd(JCheckBox cb, boolean enabled, boolean value) {
-  // cb.setSelected(enabled && value);
-  // cb.setEnabled(enabled);
-  // }
-  //
-  // private void upd(JTextField tf, Object content) {
-  // if (content == null)
-  // content = "";
-  // String cs = content.toString();
-  // String prev = tf.getText();
-  // if (!prev.equals(cs)) {
-  // tf.setText(cs);
-  // }
-  // }
-  // private JCheckBox bgnd;
-  // private JTextField projectPath;
-  // private JTextField slotNumber;
-  // private JTextField filePath;
-  // @Override
-  // public void actionPerformed(ActionEvent arg0) {
-  // layers.setBackground(bgnd.isSelected());
-  // ScriptEditor.repaint();
-  // }
-  // }
-  private static final String NOSAVENECESSARY_TAG = "NOSAVEPROMPT";
 
   public static ConfigSet.Interface CONFIG = new ConfigSet.Interface() {
     private static final String PROJECTS_TAG = "RECENTPROJECTS";
 
     @Override
     public void readFrom(JSONObject map) throws JSONException {
-      recentProjects.restore(map, PROJECTS_TAG);
-      setOrigin(map.optBoolean("ORIGIN", true));
-      setFaded(map.optBoolean("FADED"));
-      zoomFactor = (float) map.optDouble("ZOOM", 1);
+      sRecentProjects.restore(map, PROJECTS_TAG);
+      sInfoPanel.setOriginShowing(map.optBoolean("ORIGIN", true));
+      sInfoPanel.setFaded(map.optBoolean("FADED"));
+      sZoomFactor = (float) map.optDouble("ZOOM", 1);
       IPoint focus = IPoint.opt(map, "FOCUS");
       if (focus != null)
         setFocus(focus);
-      if (map.optBoolean(NOSAVENECESSARY_TAG))
-        noSaveNecessary = true;
       if (map.optBoolean("POLYVERTS"))
         PolygonObject.showVertices = true;
     }
 
     @Override
     public void writeTo(JSONObject map) throws JSONException {
-      recentProjects.put(map, PROJECTS_TAG);
-      map.put("ORIGIN", showOrigin());
-      map.put("FADED", faded());
-      map.put("ZOOM", zoomFactor);
-      focus.put(map, "FOCUS");
-      if (noSaveNecessary) {
-        map.put(NOSAVENECESSARY_TAG, true);
-      }
+      sRecentProjects.put(map, PROJECTS_TAG);
+      map.put("ORIGIN", sInfoPanel.isOriginShowing());
+      map.put("FADED", sInfoPanel.isFaded());
+      map.put("ZOOM", sZoomFactor);
+      sFocus.put(map, "FOCUS");
       map.put("POLYVERTS", PolygonObject.showVertices);
     }
 
   };
-  private static boolean noSaveNecessary;
 
-  public static boolean allowQuitWithoutSave() {
-    return noSaveNecessary;
-  }
-
-  /**
-   * Determine if this script is an orphan: one that has never been saved, and
-   * thus has no filename
-   */
-  private boolean isOrphan() {
-    return path == null;
-  }
-
-  // private static JMenuItem recentScriptsMenuItem, recentProjectsMenuItem,
-  // recentScriptSetsMenuItem;
-  //
   private static void writeProjectDefaults() throws JSONException {
-    mProject.getDefaults().put("LAYERS", encodeLayers());
-    ASSERT(pPanel != null);
-    mProject.getDefaults().put("PALETTE", pPanel.encodeDefaults());
+    sProject.getDefaults().put("LAYERS", sScriptSet.encode());
+    ASSERT(sPalettePanel != null);
+    sProject.getDefaults().put("PALETTE", sPalettePanel.encodeDefaults());
   }
 
   public static void setFocus(IPoint trans) {
-    focus = new IPoint(trans);
+    sFocus = new IPoint(trans);
   }
 
   private static void readProjectDefaults() {
-    if (pPanel == null) {
+    if (sPalettePanel == null) {
       warning("project panel null");
     } else {
-      pPanel.decodeDefaults(mProject.getDefaults().optJSONObject("PALETTE"));
+      sPalettePanel.decodeDefaults(sProject.getDefaults().optJSONObject(
+          "PALETTE"));
     }
 
-    ScriptSet ss = null;
+    ScriptSet ss = new ScriptSet(sProject.directory());
     try {
-      JSONObject map = mProject.getDefaults().optJSONObject("LAYERS");
-      if (map != null)
-        ss = new ScriptSet(mProject.directory(), map);
+      JSONObject map = sProject.getDefaults().optJSONObject("LAYERS");
+      if (map != null) {
+        ss = new ScriptSet(sProject.directory(), map);
+      }
     } catch (JSONException e) {
       AppTools.showError("Problem reading project defaults", e);
     }
-    if (ss != null)
-      decodeLayers(ss);
-    else
-      layers.select(0);
+    setScriptSet(ss);
   }
 
   /**
@@ -2120,8 +1572,28 @@ public class ScriptEditor {
         if (db)
           pr("ScrMain, openProject " + f + ":" + newProject);
 
-        setProject(newProject);
+        sProject = newProject;
+        MouseOper.setEnabled(true);
+        sRecentScriptsMenuItem.setRecentFiles(sProject.recentScripts());
+        sRecentScriptSetsMenuItem.setRecentFiles(sProject.recentScriptSets());
+        unimp("update recent atlas list");
+        // sRecentAtlases.setAlias(isProjectOpen() ? mProject.recentAtlases() :
+        // null);
+        sRecentProjects.setCurrentFile(sProject.file());
 
+        unimp("have combo box adjust for recent atlases");
+        /*
+         * mProject.recentAtlases().addListener(new RecentFiles.Listener() {
+         * 
+         * @Override public void mostRecentFileChanged(RecentFiles recentFiles)
+         * { JComboBox cb = atlasCB; cb.removeAllItems(); for (int i = 0; i <
+         * recentFiles.size(); i++) { unimp("where do we handle such events?");
+         * cb.addItem(recentFiles.get(i)); // )new //
+         * ComboBoxItem(recentFiles.get(i))); } } });
+         */
+
+        sAtlasCB.setEnabled(true);
+        sAtlasSelectButton.setEnabled(true);
         readProjectDefaults();
 
       } catch (IOException e) {
@@ -2132,95 +1604,135 @@ public class ScriptEditor {
 
   /**
    * Get zoom factor for editor window
-   * 
-   * @return zoom factor
    */
   public static float zoomFactor() {
-    return zoomFactor;
+    return sZoomFactor;
   }
 
   /**
    * Get the structure describing the current editor layers
-   * 
-   * @return Layer object
    */
-  public static LayerList layers() {
-    return layers;
-  }
-
-  public File path() {
-    return path;
-  }
-
-  /**
-   * Activate this script (called when it becomes the active script)
-   */
-  public void activate() {
-    editor = this;
-  }
-
-  private static void setProjectField(ScriptProject p) {
-    mProject = p;
-  }
-
-  private static void updateProject(ScriptProject p) {
-
-    final boolean db = false;
-
-    if (db)
-      pr("updateProject from " + mProject + " to " + p);
-
-    setProjectField(p);
-
-    sRecentScriptsMenuItem.setRecentFiles(isProjectOpen() ? mProject
-        .recentScripts() : null);
-    sRecentScriptSetsMenuItem.setRecentFiles(isProjectOpen() ? mProject
-        .recentScriptSets() : null);
-
-    unimp("update recent atlas list");
-    // sRecentAtlases.setAlias(isProjectOpen() ? mProject.recentAtlases() :
-    // null);
-
-    recentProjects.setCurrentFile(isProjectOpen() ? mProject.file() : null);
-
-    unimp("have combo box adjust for recent atlases");
-    /*
-     * mProject.recentAtlases().addListener(new RecentFiles.Listener() {
-     * 
-     * @Override public void mostRecentFileChanged(RecentFiles recentFiles) {
-     * JComboBox cb = atlasCB; cb.removeAllItems(); for (int i = 0; i <
-     * recentFiles.size(); i++) { unimp("where do we handle such events?");
-     * cb.addItem(recentFiles.get(i)); // )new //
-     * ComboBoxItem(recentFiles.get(i))); } } });
-     */
-
-    if (isProjectOpen()) {
-      atlasCB.setEnabled(true);
-      atlasSelectButton.setEnabled(true);
-    } else {
-      atlasCB.removeAllItems();
-      atlasCB.setEnabled(false);
-      atlasSelectButton.setEnabled(false);
-    }
-    // if (db)
-    // pr(" updateRecentFilesFor " + recentProjectsMenuItem
-    // + "\n recentProjects=\n" + recentProjects);
-    //
-    // MyMenuBar.updateRecentFilesFor(recentProjectsMenuItem, recentProjects);
-
+  public static ScriptSet layers() {
+    assertProjectOpen();
+    return sScriptSet;
   }
 
   public static ScriptProject project() {
-    return mProject;
+    return sProject;
+  }
+
+  public static void perform(Reversible op) {
+    final boolean db = DBUNDO;
+    if (db)
+      pr("perform reversible:\n" + op);
+
+    op.perform();
+    repaint();
+  }
+
+  private static void assertProjectOpen() {
+    if (!isProjectOpen())
+      throw new IllegalStateException();
+  }
+
+  // ------------------- Instance methods -----------------------------
+
+  public ScriptEditor() {
+    MouseOper.addListener(new MouseOper.Listener() {
+      @Override
+      public void operationChanged(MouseOper oper) {
+        if (sSelectNoneMenuItem != null) {
+          if (oper != null)
+            sSelectNoneMenuItem.setText("Stop " + oper);
+          else
+            sSelectNoneMenuItem.setText("Select None");
+        }
+      }
+    });
+    resetUndo();
+  }
+
+  public File file() {
+    return mFile;
+  }
+
+  private boolean isUnnamed() {
+    return mFile == null;
+  }
+
+  public void render(GLPanel panel, boolean toBgnd) {
+    for (int i = 0; i < mItems.size(); i++) {
+
+      panel.lineWidth(1.5f / zoomFactor());
+
+      EdObject obj = mItems.get(i);
+      if (toBgnd) {
+        boolean f = obj.isSelected();
+        obj.setSelected(false);
+        obj.render(panel);
+        obj.setSelected(f);
+      } else
+        obj.render(panel);
+    }
+  }
+
+  private void doSave(File initialPath, boolean alwaysAskForPath,
+      boolean alwaysVerifyReplaceExisting) {
+
+    final boolean db = true;
+
+    if (db)
+      pr("doSave ask=" + alwaysAskForPath + " for " + this);
+
+    do {
+      File f = initialPath;
+      if (f == null)
+        f = file();
+      if (db)
+        pr(" file=" + f);
+      if (f == null || alwaysAskForPath) {
+        f = AppTools.chooseFileToSave("Save Script", Script.FILES, sProject
+            .replaceIfMissing(sProject.recentScripts().getCurrentFile()));
+
+        if (f == null)
+          break;
+
+        if (db)
+          pr(" requested " + f + " (project=" + sProject.directory() + ")");
+
+        if (notInProject(f))
+          break;
+
+        alwaysVerifyReplaceExisting = true;
+      }
+
+      if (f.exists() && (alwaysVerifyReplaceExisting || !f.equals(file()))) {
+        // custom title, warning icon
+        int result = JOptionPane.showConfirmDialog(
+            AppTools.frame(),
+            "Replace existing file: '"
+                + Files.fileWithinDirectory(f, sProject.directory()) + "'?",
+            "Save Script", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.CANCEL_OPTION
+            || result == JOptionPane.CLOSED_OPTION)
+          break;
+      }
+
+      if (saveAs(f)) {
+        sProject.setLastScriptPath(f);
+        sScriptSet.setName(sScriptSet.getCursor(), f);
+        setChanges(0);
+      }
+    } while (false);
   }
 
   private void resetUndo() {
-    undoCursor = 0;
-    undoList.clear();
+    mUndoCursor = 0;
+    mUndoList.clear();
   }
 
-  private boolean modified() {
-    return changesSinceSaved != 0;
+  public boolean modified() {
+    return mChangesSinceSaved != 0;
   }
 
   /**
@@ -2230,15 +1742,15 @@ public class ScriptEditor {
    *          zero, to clear it to zero; else, amount to add to existing value
    */
   private void setChanges(int n) {
-    int newVal = changesSinceSaved;
+    int newVal = mChangesSinceSaved;
     if (n == 0) {
       newVal = 0;
     } else
       newVal += n;
 
-    if (newVal != changesSinceSaved) {
-      changesSinceSaved = newVal;
-      infoPanel.refresh();
+    if (newVal != mChangesSinceSaved) {
+      mChangesSinceSaved = newVal;
+      sInfoPanel.refresh(editor(), project(), sScriptSet);
     }
   }
 
@@ -2253,25 +1765,25 @@ public class ScriptEditor {
     if (db)
       pr("registerPush: " + op);
 
-    int trim = undoList.size() - undoCursor;
+    int trim = mUndoList.size() - mUndoCursor;
     if (trim > 0) {
       if (db2)
         pr(" removing " + trim + " 'redoable' operations from list");
-      remove(undoList, undoCursor, trim);
+      remove(mUndoList, mUndoCursor, trim);
     }
-    undoList.add(op);
-    undoCursor++;
-    editor.setChanges(1);
+    mUndoList.add(op);
+    mUndoCursor++;
+    editor().setChanges(1);
 
     if (db2)
-      pr(" undoCursor " + undoCursor + " of total " + undoList.size());
+      pr(" undoCursor " + mUndoCursor + " of total " + mUndoList.size());
 
     // limit # undo operations to something reasonable
-    trim = undoCursor - 50;
+    trim = mUndoCursor - 50;
 
     if (trim > 0) {
-      remove(undoList, 0, trim);
-      undoCursor -= trim;
+      remove(mUndoList, 0, trim);
+      mUndoCursor -= trim;
     }
     updateUndoLabels();
   }
@@ -2283,8 +1795,8 @@ public class ScriptEditor {
    */
   public Reversible registerPeek() {
     Reversible r = null;
-    if (undoCursor > 0)
-      r = (Reversible) undoList.get(undoCursor - 1);
+    if (mUndoCursor > 0)
+      r = (Reversible) mUndoList.get(mUndoCursor - 1);
     return r;
   }
 
@@ -2298,18 +1810,18 @@ public class ScriptEditor {
 
     Reversible rev = registerPeek();
     if (db)
-      pr("registerPop: " + rev + " undoCursor=" + undoCursor);
+      pr("registerPop: " + rev + " undoCursor=" + mUndoCursor);
 
-    undoCursor--;
-    int trim = undoList.size() - undoCursor;
+    mUndoCursor--;
+    int trim = mUndoList.size() - mUndoCursor;
     if (db)
-      pr(" trim=" + trim + ", undoCursor=" + undoCursor + ", undoList.size="
-          + undoList.size());
+      pr(" trim=" + trim + ", undoCursor=" + mUndoCursor + ", undoList.size="
+          + mUndoList.size());
 
     if (trim > 0) {
       if (db)
         pr(" removing " + trim + " 'redoable' operations from list");
-      remove(undoList, undoCursor, trim);
+      remove(mUndoList, mUndoCursor, trim);
     }
     setChanges(-1);
     updateUndoLabels();
@@ -2322,44 +1834,35 @@ public class ScriptEditor {
       Reversible r = registerPeek();
       if (r != null)
         lbl = "Undo " + r;
-      undoMenuItem.setText(lbl);
+      sUndoMenuItem.setText(lbl);
     }
     {
       String lbl = "Redo";
-      Reversible r = editor.getRedoOper();
+      Reversible r = editor().getRedoOper();
       if (r != null) {
         lbl = "Redo " + r;
       }
-      redoMenuItem.setText(lbl);
+      sRedoMenuItem.setText(lbl);
     }
   }
 
   private Reversible getRedoOper() {
     Reversible oper = null;
-    if (undoCursor < undoList.size()) {
-      oper = (Reversible) undoList.get(undoCursor);
+    if (mUndoCursor < mUndoList.size()) {
+      oper = (Reversible) mUndoList.get(mUndoCursor);
     }
     return oper;
-  }
-
-  public static void perform(Reversible op) {
-    final boolean db = DBUNDO;
-    if (db)
-      pr("perform reversible:\n" + op);
-
-    op.perform();
-    repaint();
   }
 
   private void doRedo() {
     final boolean db = DBUNDO;
 
     MouseOper.clearOperation();
-    Reversible oper = editor.getRedoOper();
+    Reversible oper = editor().getRedoOper();
     if (oper != null) {
       if (db)
         pr("redo: " + oper);
-      undoCursor++;
+      mUndoCursor++;
       setChanges(1);
       oper.perform();
       updateUndoLabels();
@@ -2369,14 +1872,14 @@ public class ScriptEditor {
   private void doUndo() {
     final boolean db = DBUNDO;
     if (db && false)
-      pr("doUndo, undoCursor " + undoCursor + " of total " + undoList.size());
+      pr("doUndo, undoCursor " + mUndoCursor + " of total " + mUndoList.size());
 
     MouseOper.clearOperation();
 
-    if (undoCursor > 0) {
+    if (mUndoCursor > 0) {
       // unselectAll();
-      Reversible oper = (Reversible) undoList.get(undoCursor - 1);
-      undoCursor--;
+      Reversible oper = (Reversible) mUndoList.get(mUndoCursor - 1);
+      mUndoCursor--;
       setChanges(-1);
       if (db)
         pr("undo: " + oper);
@@ -2385,40 +1888,103 @@ public class ScriptEditor {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(nameOf(this));
+    File f = file();
+    if (f == null)
+      sb.append(" <orphan>");
+    else
+      sb.append(" " + Files.fileWithinDirectory(f, sProject.directory()));
+    return sb.toString();
+  }
+
+  private boolean flushAux(boolean askUser) {
+
+    if (!modified())
+      return true;
+
+    if (askUser) {
+      String prompt;
+      if (isUnnamed())
+        prompt = "Save changes to new file?";
+      else {
+        prompt = "Save changes to '"
+            + Files.fileWithinDirectory(file(), sProject.directory()) + "'?";
+      }
+      int code = JOptionPane.showConfirmDialog(AppTools.frame(), prompt,
+          "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION,
+          JOptionPane.WARNING_MESSAGE);
+
+      if (code == JOptionPane.CANCEL_OPTION
+          || code == JOptionPane.CLOSED_OPTION)
+        return false;
+      if (code == JOptionPane.NO_OPTION) {
+        return true;
+      }
+    }
+    doSave(null, false, false);
+    return !modified();
+  }
+
+  /**
+   * Save script
+   * 
+   * @param f
+   * @return true if successfully saved
+   */
+  private boolean saveAs(File f) {
+    boolean success = false;
+    try {
+      Script s = new Script(sProject);
+      unimp("disallow saving as script already in set");
+      sScriptSet.setName(sScriptSet.getCursor(), f);
+      s.setPath(f);
+      writeScript(s);
+      s.flush();
+      success = true;
+    } catch (IOException e) {
+      AppTools.showError("saving script", e);
+    }
+    return success;
+  }
+
+  private void writeScript(Script s) {
+    s.setItems(mItems);
+
+  }
+
+  public void setFile(File file) {
+    Files.verifyAbsolute(file, true);
+    mFile = file;
+  }
+
   // --- Class fields
-  private static EditorPanelGL editorPanel;
-  // private static Component editorPanel;
-
-  // the active editor
-  private static ScriptEditor editor;
-  private static float zoomFactor = 1.0f;
-  private static SpriteObject lastSprite;
-
-  private static IPoint focus = new IPoint();
-  private static ObjArray clipboard = new ObjArray();
-  private static ScriptProject mProject;
-  private static LayerList layers;
-  private static AtlasPanel atlasPanel;
-  private static PalettePanel pPanel;
-  private static JComboBox atlasCB;
-  private static JButton atlasSelectButton;
-
-  private static JToggleButton origin = new JCheckBox("Origin");
-  private static JToggleButton faded = new JCheckBox("Onion skin");
-
-  // private static JIntSpinner gridSize = new JIntSpinner(
-  private static RecentFiles recentProjects = new RecentFiles(null);
+  private static Component sEditorPanelComponent;
+  private static float sZoomFactor = 1.0f;
+  private static SpriteObject sSelectedSprite;
+  private static IPoint sFocus = new IPoint();
+  private static ObjArray sClipboard = new ObjArray();
+  private static ScriptProject sProject;
+  private static ScriptSet sScriptSet;
+  private static AtlasPanel sAtlasPanel;
+  private static PalettePanel sPalettePanel;
+  private static JComboBox sAtlasCB;
+  private static JButton sAtlasSelectButton;
+  private static InfoPanel sInfoPanel = new InfoPanel();
+  private static RecentFiles sRecentProjects = new RecentFiles(null);
   private static RecentFiles.Menu sRecentScriptsMenuItem;
   private static RecentFiles.Menu sRecentScriptSetsMenuItem;
-  private static RecentFiles sRecentAtlases = new RecentFiles(null);
-  private static JMenuItem undoMenuItem, redoMenuItem;
-  private static JMenuItem selectNoneMenuItem;
+  private static JMenuItem sUndoMenuItem, sRedoMenuItem;
+  private static JMenuItem sSelectNoneMenuItem;
+  // If true, doesn't add scripts being opened to 'recent scripts' set
+  private static boolean sUpdateLastScriptDisabled;
 
   // --- Instance fields
 
-  private ObjArray items = new ObjArray();
-  private File path;
-  private int changesSinceSaved;
-  private ArrayList<Reversible> undoList = new ArrayList();
-  private int undoCursor;
+  private ObjArray mItems = new ObjArray();
+  private File mFile;
+  private int mChangesSinceSaved;
+  private ArrayList<Reversible> mUndoList = new ArrayList();
+  private int mUndoCursor;
 }

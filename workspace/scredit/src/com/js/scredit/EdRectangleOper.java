@@ -129,7 +129,7 @@ public class EdRectangleOper extends MouseOper {
     //     replace stack reversible with DeleteObjectsReversible
     // }
 
-    if (!ScriptEditor.item(slot).isWellDefined()) {
+    if (!ScriptEditor.items().get(slot).isWellDefined()) {
       if (db)
         pr(" object not well defined, deleting");
 

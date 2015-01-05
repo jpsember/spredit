@@ -21,7 +21,7 @@ public class DeleteItemReversible implements Reversible, Reverse {
    * @param slots slots of items about to be changed
    */
   public DeleteItemReversible(int slot) {
-    this(slot, ScriptEditor.item(slot), true);
+    this(slot, ScriptEditor.items().get(slot), true);
   }
 
   @Override

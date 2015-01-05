@@ -4,13 +4,8 @@ import java.io.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import static com.js.basic.Tools.*;
 
 public class Files {
-
-  static { // Suppress warning of unused basic.Tools import
-    doNothing();
-  }
 
   public static void writeStringToFileIfChanged(File file, String content)
       throws IOException {
@@ -106,10 +101,23 @@ public class Files {
     return new File(suffix);
   }
 
-  public static void verifyAbsolute(File file) {
+  public static void verifyAbsolute(File file, boolean allowNull) {
+    if (file == null)
+      if (!allowNull)
+        throw new IllegalArgumentException();
     if (!file.isAbsolute())
       throw new IllegalArgumentException("expected absolute file, but was '"
           + file + "'");
+  }
+
+  public static void verifyAbsolute(File file) {
+    verifyAbsolute(file, false);
+  }
+
+  public static boolean equal(File f1, File f2) {
+    if (f1 == null || f2 == null)
+      return f1 == f2;
+    return f1.equals(f2);
   }
 
 }

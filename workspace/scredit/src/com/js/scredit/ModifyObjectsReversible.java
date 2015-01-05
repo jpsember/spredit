@@ -30,7 +30,7 @@ public class ModifyObjectsReversible implements Reversible {
   private EdObject[] currentSlotContents() {
     EdObject[] a = new EdObject[slots.length];
     for (int i = 0; i < slots.length; i++)
-      a[i] = ScriptEditor.item(slots[i]);
+      a[i] = ScriptEditor.items().get(slots[i]);
     return a;
   }
   public void updateModifiedObjects() {

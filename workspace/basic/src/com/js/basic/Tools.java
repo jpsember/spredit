@@ -41,6 +41,8 @@ public final class Tools {
   /**
    * A do-nothing method that can be called to avoid 'unused import' warnings
    * related to this class
+   * 
+   * @deprecated
    */
   public static void doNothing() {
   }
@@ -139,6 +141,15 @@ public final class Tools {
       }
     }
     return sb.toString();
+  }
+
+  /**
+   * Construct string describing current stack frame
+   * 
+   * @see stackTrace(int,int,Throwable)
+   */
+  public static String stackTrace(int skipCount, int displayCount) {
+    return stackTrace(1 + skipCount, displayCount, null);
   }
 
   /**
@@ -1146,6 +1157,15 @@ public final class Tools {
     Object temp = list.get(aIndex);
     list.set(aIndex, list.get(bIndex));
     list.set(bIndex, temp);
+  }
+
+  /**
+   * Determine if two objects are equal; returns true if both are null
+   */
+  public static <T> boolean equal(T obj1, T obj2) {
+    if (obj1 == null || obj2 == null)
+      return obj1 == obj2;
+    return obj1.equals(obj2);
   }
 
   /**

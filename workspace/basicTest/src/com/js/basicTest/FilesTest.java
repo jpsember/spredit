@@ -10,8 +10,6 @@ public class FilesTest extends MyTestCase {
 
   public void testHasExtension() {
 
-    doNothing(); // Get rid of unused import warning
-
     String[] a = { "alpha.txt",//
         "com/alpha.txt",//
         "!com.txt/alpha",//
@@ -73,6 +71,28 @@ public class FilesTest extends MyTestCase {
 
       assertEquals(new File(after), Files.setExtension(new File(before), ext));
     }
+  }
+
+  public void testFileEquals() {
+    String[] f = {//
+    "a.b/c.jpg", "a.b/c.jpg", //
+        "a/b/c", "a/b",//
+        null, "a/b",//
+        null, null,//
+    };
+    for (int i = 0; i < f.length; i += 2) {
+      String s1 = f[i];
+      String s2 = f[i + 1];
+      File f1 = null;
+      File f2 = null;
+      if (s1 != null)
+        f1 = new File(s1);
+      if (s2 != null)
+        f2 = new File(s2);
+
+      assertEquals(equal(f1, f2), equal(s1, s2));
+    }
+
   }
 
 }

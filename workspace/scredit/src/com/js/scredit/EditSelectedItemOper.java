@@ -16,9 +16,9 @@ public class EditSelectedItemOper extends MouseOper {
       if (right() || ev.isControlDown() || ev.isMetaDown() || ev.isShiftDown())
         break;
 
-      // look through selected elements, front to rear, 
+      // look through selected elements, front to rear,
       // looking for element at mouse point that can be edited
-      
+
       ObjArray a = ScriptEditor.items();
       for (int i = a.size() - 1; i >= 0; i--) {
         EdObject obj = a.get(i);
@@ -27,10 +27,11 @@ public class EditSelectedItemOper extends MouseOper {
 
         EdObjectFactory fa = obj.getFactory();
 
-        // call factory to see if mouse pressed at editable element of this object.
+        // call factory to see if mouse pressed at editable element of this
+        // object.
         // If so, it should return the new MouseOper.
 
-        MouseOper newOper = fa.isEditingSelectedObject(i,obj, currentPt);
+        MouseOper newOper = fa.isEditingSelectedObject(i, obj, currentPt);
         if (newOper != null) {
           MouseOper.setOperation(newOper);
           f = true;
@@ -45,7 +46,6 @@ public class EditSelectedItemOper extends MouseOper {
   public void mouseUp() {
     throw new IllegalStateException();
   }
-
 
   @Override
   public void mouseMove(boolean drag) {

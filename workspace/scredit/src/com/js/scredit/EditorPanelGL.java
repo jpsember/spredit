@@ -14,11 +14,13 @@ import com.js.geometry.*;
 
 public class EditorPanelGL extends GLPanel implements IEditorView {
 
-  public EditorPanelGL() {
+  public EditorPanelGL(InfoPanel infoPanel) {
+    mInfoPanel = infoPanel;
     MouseOper.setView(this);
   }
 
   private static Atlas sOurFont;
+  private InfoPanel mInfoPanel;
 
   // private
   static Atlas getOurFont() {
@@ -46,53 +48,44 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
   }
 
   private void paintContents() {
+    if (!ScriptEditor.isProjectOpen())
+      return;
+
     // clear background (or plot layers)
     final int MAX_FADED = 3;
     int[] fadeLayers = new int[MAX_FADED];
 
     // int fadeLayer = -1;
     {
-      LayerList layers = ScriptEditor.layers();
+      ScriptSet layers = ScriptEditor.layers();
 
-      if (ScriptEditor.faded()) {
+      if (mInfoPanel.isFaded()) {
 
-        int fStart = layers.foregroundStart();
-        int fTotal = layers.size() - layers.foregroundStart();
-
-        int slot = layers.currentSlot();
+        int fStart = layers.getForegroundLayer();
+        int fTotal = layers.size() - layers.getForegroundLayer();
 
         for (int i = 0; i < MAX_FADED; i++) {
           if (fTotal <= i + 1)
             continue;
-          int q = MyMath.myMod((slot - 1 - i - fStart), fTotal) + fStart;
+          int q = MyMath.myMod((layers.getCursor() - 1 - i - fStart), fTotal)
+              + fStart;
           fadeLayers[i] = 1 + q;
-
-          // if (fTotal > 1+i && slot+i >= fStart) {
-          // fadeLayer = MyMath.mod(slot - fStart - 1, fTotal) + fStart;
-          // }
-          // if (db)
-          // pr("faded, fStart=" + fStart + " fTotal=" + fTotal + " slot="
-          // + slot + " fadeLayer=" + fadeLayer);
         }
-
       }
-      for (int i = 0; i < Math.min(layers.currentSlot(),
-          layers.foregroundStart()); i++) {
-        ScriptEditor ed2 = layers.layer(i);
-        if (db)
-          pr("  plotting layer " + i);
-        ed2.render(this, true);
+
+      // Render any background layers that appear at or before current slot
+      for (int i = 0; i < Math.min(layers.getCursor(),
+          layers.getForegroundLayer()); i++) {
+        ScriptEditor editor = layers.get(i);
+        editor.render(this, true);
       }
 
       for (int j = fadeLayers.length - 1; j >= 0; j--) {
         int fadeLayer = fadeLayers[j] - 1;
 
         if (fadeLayer >= 0) {
-          ScriptEditor ed2 = layers.layer(fadeLayer);
-          if (db)
-            pr("rendering fade layer " + ed2);
-
-          ed2.render(this, true);
+          ScriptEditor editor = layers.get(fadeLayer);
+          editor.render(this, true);
 
           // fill screen with translucent bgnd color
 
@@ -118,16 +111,13 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
       }
     }
 
-    if (ScriptEditor.editor() == null)
-      return;
-
     ScriptEditor.editor().render(this, false);
 
     MouseOper op = MouseOper.getOperation();
     if (op != null)
       op.paint();
 
-    if (ScriptEditor.showOrigin()) {
+    if (mInfoPanel.isOriginShowing()) {
       final float W = 80;
 
       lineWidth(3.2f / getZoom());

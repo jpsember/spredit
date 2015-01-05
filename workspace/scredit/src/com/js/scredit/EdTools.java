@@ -20,7 +20,7 @@ public class EdTools {
   public static String itemsStr(int[] slots) {
     StringBuilder sb = new StringBuilder();
     if (slots.length == 1) {
-      sb.append(ScriptEditor.item(slots[0]).toString());
+      sb.append(ScriptEditor.items().get(slots[0]).toString());
     } else {
       sb.append(slots.length);
       sb.append(" items");

@@ -27,6 +27,8 @@ public class Script {
     this.project = project;
   }
 
+  // Shouldn't have 'path' field for Script
+  @Deprecated
   public void setPath(File p) {
     this.path = p;
   }
