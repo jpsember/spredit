@@ -4,9 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
 import apputil.*;
 import com.js.basic.*;
@@ -14,23 +12,36 @@ import static com.js.basic.Tools.*;
 import tex.*;
 
 public class Script {
-  public static final String SRC_EXT = "scr";
-  public static MyFileFilter FILES = new MyFileFilter("Script files", SRC_EXT);
-  public static final String SET_EXT = "set";
+
+  // ------------- class elements
+
+  public static MyFileFilter FILES = new MyFileFilter("Script files", "scr");
   public static MyFileFilter SET_FILES = new MyFileFilter(
-      "Script project files", SET_EXT);
+      "Script project files", "set");
+
+  public static EdObjectFactory factoryFor(String tag) {
+    return (EdObjectFactory) sFactories.get(tag);
+  }
+
+  public static void addObjectFactory(EdObjectFactory f) {
+    sFactories.put(f.getTag(), f);
+  }
+
+  private static Map sFactories = new HashMap();
+
+  // --------------- instance elements
 
   /**
    * Create a new script
    */
   public Script(ScriptProject project) {
-    this.project = project;
+    this.mProject = project;
   }
 
   // Shouldn't have 'path' field for Script
   @Deprecated
   public void setPath(File p) {
-    this.path = p;
+    this.mPath = p;
   }
 
   /**
@@ -40,6 +51,7 @@ public class Script {
    *          location of base directory containing project file; if no project
    *          file found here, creates it
    * @throws IOException
+   * @deprecated shouldn't include path information
    */
   public Script(ScriptProject project, File path) throws IOException {
 
@@ -47,9 +59,9 @@ public class Script {
 
     if (db)
       pr("Script constructor: " + path);
-    this.project = project;
+    this.mProject = project;
 
-    this.path = path;
+    this.mPath = path;
 
     File f = path;
     if (f.exists()) {
@@ -63,14 +75,74 @@ public class Script {
 
   private static final String ITEMS_TAG = "ITEMS";
 
+  public void flush() throws IOException {
+    String content = null;
+    try {
+      JSONObject scriptMap = new JSONObject();
+      {
+        JSONObject defaultsMap = new JSONObject();
+        for (String key : JSONTools.iterable(mDefaults.keySet())) {
+          defaultsMap.put(key, mDefaults.get(key));
+        }
+        scriptMap.put("defaults", defaultsMap);
+      }
+
+      {
+        JSONArray scriptItems = new JSONArray();
+        for (int i = 0; i < mObjects.size(); i++) {
+          EdObject obj = mObjects.get(i);
+          EdObjectFactory f = obj.getFactory();
+          JSONObject itemMap = new JSONObject();
+          f.write(this, itemMap, obj);
+          scriptItems.put(f.getTag());
+          scriptItems.put(itemMap);
+        }
+        scriptMap.put(ITEMS_TAG, scriptItems);
+      }
+
+      content = scriptMap.toString(2);
+    } catch (JSONException e) {
+      die(e);
+    }
+    if (mPath == null)
+      throw new IllegalStateException("path undefined");
+
+    Files.writeStringToFileIfChanged(mPath, content);
+  }
+
+  @Deprecated
+  public File path() {
+    return mPath;
+  }
+
+  public Atlas lastAtlas() {
+    return mLastAtlas;
+  }
+
+  public void setAtlas(Atlas a) {
+    mLastAtlas = a;
+  }
+
+  public void setItems(ObjArray items) {
+    this.mObjects = items;
+  }
+
+  public ObjArray items() {
+    return mObjects;
+  }
+
+  public ScriptProject project() {
+    return mProject;
+  }
+
   private void read() throws IOException {
-    String content = FileUtils.readFileToString(path);
+    String content = FileUtils.readFileToString(mPath);
     try {
       JSONObject fileMap = new JSONObject(content);
       {
         JSONObject defaultsMap = fileMap.getJSONObject("defaults");
         for (String key : JSONTools.keys(defaultsMap)) {
-          defaults.put(key, defaultsMap.get(key));
+          mDefaults.put(key, defaultsMap.get(key));
         }
       }
       boolean problem = false;
@@ -94,83 +166,12 @@ public class Script {
     } catch (JSONException e) {
       die(e);
     }
-
   }
 
-  public void flush() throws IOException {
-    String content = null;
-    try {
-      JSONObject scriptMap = new JSONObject();
-      {
-        JSONObject defaultsMap = new JSONObject();
-        for (String key : JSONTools.iterable(defaults.keySet())) {
-          defaultsMap.put(key, defaults.get(key));
-        }
-        scriptMap.put("defaults", defaultsMap);
-      }
-
-      {
-        JSONArray scriptItems = new JSONArray();
-        for (int i = 0; i < mObjects.size(); i++) {
-          EdObject obj = mObjects.get(i);
-          EdObjectFactory f = obj.getFactory();
-          JSONObject itemMap = new JSONObject();
-          f.write(this, itemMap, obj);
-          scriptItems.put(f.getTag());
-          scriptItems.put(itemMap);
-        }
-        scriptMap.put(ITEMS_TAG, scriptItems);
-      }
-
-      content = scriptMap.toString(2);
-    } catch (JSONException e) {
-      die(e);
-    }
-    if (path == null)
-      throw new IllegalStateException("path undefined");
-
-    Files.writeStringToFileIfChanged(path, content);
-  }
-
-  public File path() {
-    return path;
-  }
-
-  public Atlas lastAtlas() {
-    return lastAtlas;
-  }
-
-  public void setAtlas(Atlas a) {
-    lastAtlas = a;
-  }
-
-  public void setItems(ObjArray items) {
-    this.mObjects = items;
-  }
-
-  public ObjArray items() {
-    return mObjects;
-  }
-
-  public ScriptProject project() {
-    return project;
-  }
-
-  public static EdObjectFactory factoryFor(String tag) {
-    return (EdObjectFactory) factories.get(tag);
-  }
-
-  public static void addObjectFactory(EdObjectFactory f) {
-    factories.put(f.getTag(), f);
-  }
-
-  private static Map factories = new HashMap();
-
-  private Atlas lastAtlas;
-  private File path;
-  // Use a TreeMap so keys are kept in sorted order
-  private Map defaults = new TreeMap();
+  private Atlas mLastAtlas;
+  private File mPath;
+  private Map mDefaults = new HashMap();
   private ObjArray mObjects = new ObjArray();
-  private ScriptProject project;
+  private ScriptProject mProject;
 
 }
