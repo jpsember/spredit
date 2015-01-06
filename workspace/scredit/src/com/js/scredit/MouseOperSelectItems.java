@@ -267,8 +267,7 @@ public class MouseOperSelectItems extends MouseOper {
   private void toggleBoxedObjects(IPoint p1, IPoint p2) {
     ObjArray items = ScriptEditor.items();
     Rect r = new IRect(p1, p2).toRect();
-    for (int i = 0; i < items.size(); i++) {
-      EdObject obj = items.get(i);
+    for (EdObject obj : items) {
       if (!obj.isContainedBy(r))
         continue;
       obj.setSelected(!obj.isSelected());

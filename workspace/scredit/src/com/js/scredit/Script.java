@@ -60,8 +60,7 @@ public class Script {
     JSONObject scriptMap = new JSONObject();
     {
       JSONArray itemsArray = new JSONArray();
-      for (int i = 0; i < mObjects.size(); i++) {
-        EdObject obj = mObjects.get(i);
+      for (EdObject obj : mObjects) {
         EdObjectFactory f = obj.getFactory();
         JSONObject itemMap = new JSONObject();
         f.write(this, itemMap, obj);

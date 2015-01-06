@@ -8,6 +8,7 @@ import tex.*;
 
 public class ScriptsFile {
   public static final int VERSION = 2093; // added initial atlas tag
+
   // 2902; // added tints to sprites
 
   private ScriptsFile() {
@@ -16,16 +17,9 @@ public class ScriptsFile {
   /**
    * Format of script file:
    * 
-   *  [2] version number
-   *  [2] # strings
-   *  [2] # scripts
-   *  [2] number of labels 
-   *  labels:
-   *     [x] id of label (mapped string)
-   *     [2] number of scripts for label
-   *     scripts:
-   *         [2] number of EdObjects
-   *         EdObjects: see EdObject
+   * [2] version number [2] # strings [2] # scripts [2] number of labels labels:
+   * [x] id of label (mapped string) [2] number of scripts for label scripts:
+   * [2] number of EdObjects EdObjects: see EdObject
    */
   public static void write(ScriptProject project, ArrayMap labelMap, File file)
       throws IOException {
@@ -38,6 +32,7 @@ public class ScriptsFile {
     sf.project = project;
     sf.write();
   }
+
   private void write() throws IOException {
     final boolean db = false;
 
@@ -56,11 +51,7 @@ public class ScriptsFile {
         Script sc = ls.script(j);
 
         ObjArray itms = sc.items();
-        for (int k = 0; k < itms.size(); k++) {
-          EdObject obj = itms.get(k);
-          if (db)
-            pr("  object #" + k + "=" + obj);
-
+        for (EdObject obj : itms) {
           a = obj.getAtlas();
           if (a != null) {
             if (db)
@@ -107,6 +98,7 @@ public class ScriptsFile {
     dw.close();
     dw = null;
   }
+
   private void writeScript(Script s) throws IOException {
     int nItems = 0;
     long startPtr = dw.getFilePointer();
@@ -129,14 +121,16 @@ public class ScriptsFile {
   }
 
   /**
-   * Write string to output.  If string has not appeared before, writes a c-style
-   * zero-terminated string, where each character is between 1..0x7f;
-   * otherwise, writes   [high | 0x80], [low] where index of string is (high * 0x100) + low.
-   * @param s string to write
+   * Write string to output. If string has not appeared before, writes a c-style
+   * zero-terminated string, where each character is between 1..0x7f; otherwise,
+   * writes [high | 0x80], [low] where index of string is (high * 0x100) + low.
+   * 
+   * @param s
+   *          string to write
    * @throws IOException
    */
   public void writeString(String s) throws IOException {
-    //    MyTools.unimp("add # strings, # scripts fields to header, so we don't need variable-sized arrays when reading");
+    // MyTools.unimp("add # strings, # scripts fields to header, so we don't need variable-sized arrays when reading");
 
     warning("not performing this optimization; script file will probably be JSON anyways");
     int strIndex = -1; // stringsMap.indexOf(s);
@@ -158,15 +152,17 @@ public class ScriptsFile {
       dw.writeByte(strIndex & 0x7f);
     }
   }
+
   public ScriptProject project() {
     return project;
   }
+
   public DataOutput outputStream() {
     return dw;
   }
 
   private ArrayMap stringsMap = new ArrayMap();
-  private RandomAccessFile dw; //DataOutputStream dw;
+  private RandomAccessFile dw; // DataOutputStream dw;
   private ArrayMap labelMap;
   private ScriptProject project;
   private File file;

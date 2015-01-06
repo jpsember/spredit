@@ -570,8 +570,8 @@ public class ScriptEditor {
 
       public void go() {
         ObjArray a = items();
-        for (int i = 0; i < a.size(); i++)
-          a.get(i).setSelected(true);
+        for (EdObject obj : a)
+          obj.setSelected(true);
         repaint();
       }
     });
@@ -1670,10 +1670,8 @@ public class ScriptEditor {
 
   public void render(GLPanel panel, boolean toBgnd) {
     ObjArray items = mScript.items();
-    for (int i = 0; i < items.size(); i++) {
+    for (EdObject obj : items) {
       panel.lineWidth(1.5f / zoomFactor());
-
-      EdObject obj = items.get(i);
       if (toBgnd) {
         boolean f = obj.isSelected();
         obj.setSelected(false);

@@ -1,6 +1,7 @@
 package com.js.scredit;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.js.basic.*;
 
@@ -12,7 +13,7 @@ import com.js.basic.*;
  * </pre>
  * 
  */
-class ObjArray {
+class ObjArray implements Iterable<EdObject> {
 
   /**
    * Construct empty object array.
@@ -40,6 +41,11 @@ class ObjArray {
         throw new IllegalArgumentException("malformed subset");
       mItems.add(source.get(slot));
     }
+  }
+
+  @Override
+  public Iterator<EdObject> iterator() {
+    return mItems.iterator();
   }
 
   public int[] getSelected() {
