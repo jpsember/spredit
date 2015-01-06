@@ -234,7 +234,7 @@ public class MouseOperSelectItems extends MouseOper {
 
     Point mouseLoc = new Point(iMouseLoc);
 
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
 
     // first item in array is first plotted, therefore hidden behind others
     for (int i = items.size() - 1; i >= 0; i--) {
@@ -265,7 +265,7 @@ public class MouseOperSelectItems extends MouseOper {
   }
 
   private void toggleBoxedObjects(IPoint p1, IPoint p2) {
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
     Rect r = new IRect(p1, p2).toRect();
     for (EdObject obj : items) {
       if (!obj.isContainedBy(r))

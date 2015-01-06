@@ -41,7 +41,7 @@ public class GroupObject extends EdObject {
       ASSERT(!undoFlag);
 
       if (origObj == null) {
-        origObj = new ObjArray(ScriptEditor.items());
+        origObj = new EdObjectArray(ScriptEditor.items());
         origObj.clearAllSelected();
       }
 
@@ -64,7 +64,7 @@ public class GroupObject extends EdObject {
       } else {
         getReverse(); // make sure we've constructed origObj
         origObj.setSelected(slots, false);
-        ObjArray a = new ObjArray();
+        EdObjectArray a = new EdObjectArray();
         GroupObject group = new GroupObject();
         group.setSelected(true);
         int slot = 0;
@@ -101,7 +101,7 @@ public class GroupObject extends EdObject {
     }
 
     private int[] slots;
-    private ObjArray origObj;
+    private EdObjectArray origObj;
 
     // true if this object is actually the reversal of the original Group
     // operation
@@ -119,7 +119,7 @@ public class GroupObject extends EdObject {
 
     public UnGroupReversible() {
       this(false);
-      ObjArray a = ScriptEditor.items();
+      EdObjectArray a = ScriptEditor.items();
       int[] slots = a.getSelected();
       if (slots.length == 1) {
         EdObject obj = a.get(slots[0]);
@@ -138,7 +138,7 @@ public class GroupObject extends EdObject {
     private int slot;
     private UnGroupReversible rev;
     private boolean undoFlag;
-    private ObjArray origObj;
+    private EdObjectArray origObj;
 
     @Override
     public Reverse getReverse() {
@@ -153,7 +153,7 @@ public class GroupObject extends EdObject {
           if (db)
             pr(" storing ScriptEditor items in origObj");
 
-          origObj = new ObjArray(ScriptEditor.items());
+          origObj = new EdObjectArray(ScriptEditor.items());
         }
 
         UnGroupReversible gr = new UnGroupReversible(true);
@@ -183,8 +183,8 @@ public class GroupObject extends EdObject {
 
       } else {
         getReverse(); // make sure we've saved original items
-        ObjArray a = ScriptEditor.items();
-        ObjArray b = new ObjArray();
+        EdObjectArray a = ScriptEditor.items();
+        EdObjectArray b = new EdObjectArray();
         for (int i = 0; i < a.size(); i++) {
           EdObject obj = a.get(i);
           if (i == slot) {

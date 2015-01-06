@@ -10,16 +10,16 @@ public class PasteReversible implements Reversible {
   }
 
   public PasteReversible() {
-    ObjArray clip = ScriptEditor.clipboard();
+    EdObjectArray clip = ScriptEditor.clipboard();
     if (!clip.isEmpty())
       this.clip = clip;
   }
 
-  private ObjArray clip;
+  private EdObjectArray clip;
 
   @Override
   public void perform() {
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
     items.clearAllSelected();
 
     /*
@@ -61,7 +61,7 @@ public class PasteReversible implements Reversible {
       @Override
       public void perform() {
         // ObjArray clip = ScriptEditor.clipboard();
-        ObjArray items = ScriptEditor.items();
+        EdObjectArray items = ScriptEditor.items();
         items.remove(items.size() - clip.size(), clip.size());
       }
 

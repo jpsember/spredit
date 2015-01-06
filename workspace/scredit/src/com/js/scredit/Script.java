@@ -80,14 +80,14 @@ public class Script {
     mLastAtlas = a;
   }
 
-  public void setItems(ObjArray items) {
+  public void setItems(EdObjectArray items) {
     this.mObjects = items;
   }
 
   /**
    * Get the objects comprising this script
    */
-  public ObjArray items() {
+  public EdObjectArray items() {
     return mObjects;
   }
 
@@ -121,7 +121,7 @@ public class Script {
   private static Map<String, EdObjectFactory> sFactories = new HashMap();
 
   private Atlas mLastAtlas;
-  private ObjArray mObjects = new ObjArray();
+  private EdObjectArray mObjects = new EdObjectArray();
   private ScriptProject mProject;
   private File mFile;
 }

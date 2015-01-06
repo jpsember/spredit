@@ -17,7 +17,7 @@ public class AdjustSlotsReversible implements Reversible, Reverse {
     this.dir = direction;
     this.toLimit = toLimit;
 
-    ObjArray a = ScriptEditor.items();
+    EdObjectArray a = ScriptEditor.items();
 
     srcSlots = a.getSelected();
     int len = srcSlots.length;
@@ -72,8 +72,8 @@ public class AdjustSlotsReversible implements Reversible, Reverse {
 
   @Override
   public void perform() {
-    ObjArray newItems = new ObjArray();
-    ObjArray oldItems = ScriptEditor.items();
+    EdObjectArray newItems = new EdObjectArray();
+    EdObjectArray oldItems = ScriptEditor.items();
 
     int unselCursor = 0;
     int newSlotCursor = 0;

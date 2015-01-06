@@ -19,7 +19,7 @@ public class EditSelectedItemOper extends MouseOper {
       // look through selected elements, front to rear,
       // looking for element at mouse point that can be edited
 
-      ObjArray a = ScriptEditor.items();
+      EdObjectArray a = ScriptEditor.items();
       for (int i = a.size() - 1; i >= 0; i--) {
         EdObject obj = a.get(i);
         if (!obj.isSelected())

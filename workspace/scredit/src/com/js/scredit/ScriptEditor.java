@@ -145,14 +145,14 @@ public class ScriptEditor {
   /**
    * Get the ObjArray manipulated by the current editor
    */
-  public static ObjArray items() {
+  public static EdObjectArray items() {
     return editor().mScript.items();
   }
 
   /**
    * Replace ObjArray for current editor
    */
-  public static void setItems(ObjArray items) {
+  public static void setItems(EdObjectArray items) {
     editor().mScript.setItems(items);
   }
 
@@ -216,7 +216,7 @@ public class ScriptEditor {
     public EditSelectedOper() {
 
       // determine selected items, and save for undoing
-      ObjArray items = ScriptEditor.items();
+      EdObjectArray items = ScriptEditor.items();
       slots = items.getSelected();
       origItems = new EdObject[slots.length];
       for (int i = 0; i < slots.length; i++)
@@ -235,7 +235,7 @@ public class ScriptEditor {
 
         @Override
         public void perform() {
-          ObjArray items = ScriptEditor.items();
+          EdObjectArray items = ScriptEditor.items();
           for (int i = 0; i < slots.length; i++)
             items.set(slots[i], origItems[i]);
         }
@@ -569,7 +569,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        ObjArray a = items();
+        EdObjectArray a = items();
         for (EdObject obj : a)
           obj.setSelected(true);
         repaint();
@@ -1371,7 +1371,7 @@ public class ScriptEditor {
     }
   }
 
-  public static ObjArray clipboard() {
+  public static EdObjectArray clipboard() {
     return sClipboard;
   }
 
@@ -1381,7 +1381,7 @@ public class ScriptEditor {
    * @param newClip
    *          new clipboard
    */
-  public static void setClipboard(ObjArray newClip) {
+  public static void setClipboard(EdObjectArray newClip) {
     sClipboard = newClip;
   }
 
@@ -1669,7 +1669,7 @@ public class ScriptEditor {
   }
 
   public void render(GLPanel panel, boolean toBgnd) {
-    ObjArray items = mScript.items();
+    EdObjectArray items = mScript.items();
     for (EdObject obj : items) {
       panel.lineWidth(1.5f / zoomFactor());
       if (toBgnd) {
@@ -1948,7 +1948,7 @@ public class ScriptEditor {
   private static float sZoomFactor = 1.0f;
   private static SpriteObject sSelectedSprite;
   private static IPoint sFocus = new IPoint();
-  private static ObjArray sClipboard = new ObjArray();
+  private static EdObjectArray sClipboard = new EdObjectArray();
   private static ScriptProject sProject;
   private static ScriptSet sScriptSet;
   private static AtlasPanel sAtlasPanel;

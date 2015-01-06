@@ -16,7 +16,7 @@ class AddObjectsReversible implements Reversible {
   }
 
   public void perform() {
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
     items.clearAllSelected();
     items.add(addObj);
     addObj.setSelected(true);
@@ -43,7 +43,7 @@ class AddObjectsReversible implements Reversible {
     Point delta = new Point(IPoint.difference(MouseOper.currentPt,
         MouseOper.startPt));
 
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
 
     EdObject obj = items.getCopy(items.size() - 1);
     obj.setLocation(Point.sum(addObj.location(), delta));
@@ -55,7 +55,7 @@ class AddObjectsReversible implements Reversible {
       @Override
       public void perform() {
         // update the addObj, in case it changed since we constructed the operation
-        ObjArray a = ScriptEditor.items();
+        EdObjectArray a = ScriptEditor.items();
         //int slot = a.size() - 1;
         addObj = a.get(slot);
         a.remove(slot);

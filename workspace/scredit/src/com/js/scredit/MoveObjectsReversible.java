@@ -13,7 +13,7 @@ public class MoveObjectsReversible implements Reversible {
   public MoveObjectsReversible(Point startLoc) {
     this.startLoc = new Point(startLoc);
 
-    ObjArray itm = ScriptEditor.items();
+    EdObjectArray itm = ScriptEditor.items();
     slots = itm.getSelected();
     origLocs = new Point[slots.length];
     translate = new Point();
@@ -87,7 +87,7 @@ public class MoveObjectsReversible implements Reversible {
 
       @Override
       public void perform() {
-        ObjArray items = ScriptEditor.items();
+        EdObjectArray items = ScriptEditor.items();
         for (int i = 0; i < slots.length; i++) {
           EdObject obj = items.getCopy(slots[i]);
           obj.setLocation(origLocs[i]);

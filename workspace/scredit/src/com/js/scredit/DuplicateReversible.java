@@ -24,7 +24,7 @@ public class DuplicateReversible implements Reversible {
   public void perform() {
     final boolean db = false;
 
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
     items.clearAllSelected();
 
     /*
@@ -59,7 +59,7 @@ public class DuplicateReversible implements Reversible {
 
       @Override
       public void perform() {
-        ObjArray items = ScriptEditor.items();
+        EdObjectArray items = ScriptEditor.items();
         // remove(items, items.size() - slots.length, slots.length);
         items.remove(items.size() - slots.length, slots.length);
       }

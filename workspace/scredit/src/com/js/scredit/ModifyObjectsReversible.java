@@ -39,11 +39,11 @@ public class ModifyObjectsReversible implements Reversible {
   public void updateModifiedObjects() {
     if (db)
       pr("updateModifiedObjects for " + this);
-    ObjArray a = ScriptEditor.items();
+    EdObjectArray a = ScriptEditor.items();
     modObjects = getArray(a, slots);
   }
 
-  private static EdObject[] getArray(ObjArray objects, int[] slots) {
+  private static EdObject[] getArray(EdObjectArray objects, int[] slots) {
     EdObject[] a = new EdObject[slots.length];
     for (int i = 0; i < slots.length; i++)
       a[i] = objects.get(slots[i]);
@@ -91,7 +91,7 @@ public class ModifyObjectsReversible implements Reversible {
       public void perform() {
         constructModifiedVersions();
 
-        ObjArray a = ScriptEditor.items();
+        EdObjectArray a = ScriptEditor.items();
         set(a, slots, origObjects);
         a.clearAllSelected();
         a.setSelected(slots, true);
@@ -99,7 +99,7 @@ public class ModifyObjectsReversible implements Reversible {
     };
   }
 
-  private static void set(ObjArray objects, int[] slots, EdObject[] items) {
+  private static void set(EdObjectArray objects, int[] slots, EdObject[] items) {
     for (int i = 0; i < slots.length; i++)
       objects.set(slots[i], items[i]);
   }
@@ -138,13 +138,13 @@ public class ModifyObjectsReversible implements Reversible {
     // use them
 
     if (modObjects != null) {
-      ObjArray a = ScriptEditor.items();
+      EdObjectArray a = ScriptEditor.items();
       set(a, slots, modObjects);
       a.clearAllSelected();
       a.setSelected(slots, true);
     } else {
       // otherwise, call user method with fresh copy of item
-      ObjArray items = ScriptEditor.items();
+      EdObjectArray items = ScriptEditor.items();
       for (int i = 0; i < nSlots(); i++) {
         EdObject origObj = origObjects[i];
         EdObject modObj = perform(origObj);

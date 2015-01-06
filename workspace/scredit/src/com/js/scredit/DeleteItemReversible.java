@@ -42,7 +42,7 @@ public class DeleteItemReversible implements Reversible, Reverse {
     if (db)
       pr("Perform " + this);
 
-    ObjArray a = ScriptEditor.items();
+    EdObjectArray a = ScriptEditor.items();
 
     if (delete)
       a.remove(slot);

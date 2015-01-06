@@ -14,18 +14,18 @@ import com.js.basic.*;
  * </pre>
  * 
  */
-class ObjArray implements Iterable<EdObject> {
+class EdObjectArray implements Iterable<EdObject> {
 
   /**
    * Construct empty object array.
    */
-  public ObjArray() {
+  public EdObjectArray() {
   }
 
   /**
    * Copy constructor
    */
-  public ObjArray(ObjArray source) {
+  public EdObjectArray(EdObjectArray source) {
     mList.addAll(source.mList);
   }
 
@@ -35,7 +35,7 @@ class ObjArray implements Iterable<EdObject> {
    * @param slots
    *          strictly increasing sequence of source slot numbers
    */
-  public ObjArray(ObjArray source, int[] slots) {
+  public EdObjectArray(EdObjectArray source, int[] slots) {
     int prevSlot = -1;
     for (int slot : slots) {
       if (slot <= prevSlot)
@@ -153,7 +153,7 @@ class ObjArray implements Iterable<EdObject> {
   /**
    * Make this array immutable, if it's not already
    */
-  public ObjArray freeze() {
+  public EdObjectArray freeze() {
     if (!mFrozen) {
       mFrozen = true;
       mFrozenVersion = this;
@@ -169,8 +169,8 @@ class ObjArray implements Iterable<EdObject> {
   /**
    * Construct array containing only the selected objects from this array
    */
-  public ObjArray getSelectedObjects() {
-    ObjArray subset = new ObjArray();
+  public EdObjectArray getSelectedObjects() {
+    EdObjectArray subset = new EdObjectArray();
     for (int slot : getSelectedSlots()) {
       subset.add(get(slot));
     }
@@ -180,8 +180,8 @@ class ObjArray implements Iterable<EdObject> {
   /**
    * Get a mutable copy of this array
    */
-  public ObjArray getMutableCopy() {
-    ObjArray copy = new ObjArray();
+  public EdObjectArray getMutableCopy() {
+    EdObjectArray copy = new EdObjectArray();
     for (EdObject obj : mList)
       copy.add(obj);
     // Have the copy share this array's frozen version, if it has one
@@ -194,14 +194,14 @@ class ObjArray implements Iterable<EdObject> {
    * 
    * @return frozen version, which may be this
    */
-  public ObjArray getFrozen() {
+  public EdObjectArray getFrozen() {
     return getCopy().freeze();
   }
 
   /**
    * Get a copy of this array; if we're frozen, returns this
    */
-  private ObjArray getCopy() {
+  private EdObjectArray getCopy() {
     if (isFrozen())
       return this;
     return getMutableCopy();
@@ -325,6 +325,6 @@ class ObjArray implements Iterable<EdObject> {
   private List<EdObject> mList = new ArrayList();
   private List<Integer> mSelectedSlots;
   private boolean mFrozen;
-  private ObjArray mFrozenVersion;
+  private EdObjectArray mFrozenVersion;
 
 }

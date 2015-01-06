@@ -49,7 +49,7 @@ public class CopyReversible implements Reversible {
 
   @Override
   public void perform() {
-    ScriptEditor.setClipboard(new ObjArray(ScriptEditor.items(), slots));
+    ScriptEditor.setClipboard(new EdObjectArray(ScriptEditor.items(), slots));
     //    ScriptEditor.items().get(slots));
     Dup.reset();
   }
@@ -59,5 +59,5 @@ public class CopyReversible implements Reversible {
   }
 
   private int[] slots;
-  private ObjArray oldClipboard;
+  private EdObjectArray oldClipboard;
 }

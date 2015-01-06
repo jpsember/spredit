@@ -32,9 +32,9 @@ public class CutReversible implements Reversible {
 
       @Override
       public void perform() {
-        ObjArray clip = ScriptEditor.clipboard();
+        EdObjectArray clip = ScriptEditor.clipboard();
         ASSERT(clip.size() == slots.length);
-        ObjArray items = ScriptEditor.items();
+        EdObjectArray items = ScriptEditor.items();
 
         for (int i = 0; i < slots.length; i++) {
           items.add(slots[i], clip.get(i));
@@ -52,21 +52,21 @@ public class CutReversible implements Reversible {
   public void perform() {
     Dup.reset();
 
-    ObjArray items = ScriptEditor.items();
+    EdObjectArray items = ScriptEditor.items();
 
-    ObjArray newClip = new ObjArray(items, slots);
+    EdObjectArray newClip = new EdObjectArray(items, slots);
     ScriptEditor.setClipboard(newClip);
     removeObjects(items, slots);
   }
 
-  private static void removeObjects(ObjArray objects, int[] slots) {
+  private static void removeObjects(EdObjectArray objects, int[] slots) {
     for (int i = slots.length - 1; i >= 0; i--) {
       objects.remove(slots[i]);
     }
   }
 
   private int[] slots;
-  private ObjArray origClipboard;
+  private EdObjectArray origClipboard;
 
   @Override
   public boolean valid() {
