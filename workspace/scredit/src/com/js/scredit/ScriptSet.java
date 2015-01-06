@@ -150,15 +150,14 @@ public class ScriptSet {
   }
 
   /**
-   * Replace editor
+   * Replace editor for current slot
    * 
-   * @param slot
    * @param file
    *          file for new editor, or null
    */
-  public void set(int slot, File file) {
+  public void setCursorFile(File file) {
     ScriptEditor editor = editorForFile(file);
-    mEditors.set(slot, editor);
+    mEditors.set(getCursor(), editor);
   }
 
   /**

@@ -59,14 +59,13 @@ public class ScriptEditor {
    */
   private static void disposeOfCurrentEditor() {
     assertProjectOpen();
-    sScriptSet.set(sScriptSet.getCursor(), null);
+    sScriptSet.setCursorFile(null);
   }
 
   private static void readScriptForCurrentEditor() throws IOException {
     ScriptEditor editor = editor();
-    Script s = new Script(sProject);
-    s.read(editor.file());
-    editor.mItems = s.items();
+    editor.mScript = new Script(sProject);
+    editor.mScript.read(editor.file());
   }
 
   /**
@@ -97,12 +96,12 @@ public class ScriptEditor {
 
         int slot = sScriptSet.findEditorForNamedFile(f);
         if (slot >= 0) {
-          sScriptSet.set(sScriptSet.getCursor(), f);
+          sScriptSet.setCursorFile(f);
           success = true;
           break;
         }
 
-        sScriptSet.set(sScriptSet.getCursor(), f);
+        sScriptSet.setCursorFile(f);
         readScriptForCurrentEditor();
 
         success = true;
@@ -154,14 +153,14 @@ public class ScriptEditor {
    * Get the ObjArray manipulated by the current editor
    */
   public static ObjArray items() {
-    return editor().mItems;
+    return editor().mScript.items();
   }
 
   /**
    * Replace ObjArray for current editor
    */
   public static void setItems(ObjArray items) {
-    editor().mItems = items;
+    editor().mScript.setItems(items);
   }
 
   /**
@@ -284,7 +283,7 @@ public class ScriptEditor {
     private int dir;
 
     public boolean shouldBeEnabled() {
-      return editor().mItems.hasSelected();
+      return items().hasSelected();
     }
 
     public void go() {
@@ -563,11 +562,11 @@ public class ScriptEditor {
     m.addSeparator();
     m.addItem("Select All", KeyEvent.VK_A, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return !editor().mItems.isEmpty();
+        return !items().isEmpty();
       }
 
       public void go() {
-        ObjArray a = editor().mItems;
+        ObjArray a = items();
         for (int i = 0; i < a.size(); i++)
           a.get(i).setSelected(true);
         repaint();
@@ -1636,6 +1635,8 @@ public class ScriptEditor {
   // ------------------- Instance methods -----------------------------
 
   public ScriptEditor() {
+    assertProjectOpen();
+    mScript = new Script(project());
     MouseOper.addListener(new MouseOper.Listener() {
       @Override
       public void operationChanged(MouseOper oper) {
@@ -1659,11 +1660,11 @@ public class ScriptEditor {
   }
 
   public void render(GLPanel panel, boolean toBgnd) {
-    for (int i = 0; i < mItems.size(); i++) {
-
+    ObjArray items = mScript.items();
+    for (int i = 0; i < items.size(); i++) {
       panel.lineWidth(1.5f / zoomFactor());
 
-      EdObject obj = mItems.get(i);
+      EdObject obj = items.get(i);
       if (toBgnd) {
         boolean f = obj.isSelected();
         obj.setSelected(false);
@@ -1676,52 +1677,35 @@ public class ScriptEditor {
 
   private void doSave(File initialPath, boolean alwaysAskForPath,
       boolean alwaysVerifyReplaceExisting) {
-
-    final boolean db = true;
-
-    if (db)
-      pr("doSave ask=" + alwaysAskForPath + " for " + this);
-
-    do {
-      File f = initialPath;
+    File f = initialPath;
+    if (f == null)
+      f = file();
+    if (f == null || alwaysAskForPath) {
+      f = AppTools.chooseFileToSave("Save Script", Script.FILES,
+          sProject.replaceIfMissing(sProject.recentScripts().getCurrentFile()));
       if (f == null)
-        f = file();
-      if (db)
-        pr(" file=" + f);
-      if (f == null || alwaysAskForPath) {
-        f = AppTools.chooseFileToSave("Save Script", Script.FILES, sProject
-            .replaceIfMissing(sProject.recentScripts().getCurrentFile()));
+        return;
+      if (notInProject(f))
+        return;
+      alwaysVerifyReplaceExisting = true;
+    }
 
-        if (f == null)
-          break;
+    if (f.exists() && (alwaysVerifyReplaceExisting || !f.equals(file()))) {
+      int result = JOptionPane.showConfirmDialog(
+          AppTools.frame(),
+          "Replace existing file: '"
+              + Files.fileWithinDirectory(f, sProject.directory()) + "'?",
+          "Save Script", JOptionPane.OK_CANCEL_OPTION);
+      if (result == JOptionPane.CANCEL_OPTION
+          || result == JOptionPane.CLOSED_OPTION)
+        return;
+    }
 
-        if (db)
-          pr(" requested " + f + " (project=" + sProject.directory() + ")");
-
-        if (notInProject(f))
-          break;
-
-        alwaysVerifyReplaceExisting = true;
-      }
-
-      if (f.exists() && (alwaysVerifyReplaceExisting || !f.equals(file()))) {
-        // custom title, warning icon
-        int result = JOptionPane.showConfirmDialog(
-            AppTools.frame(),
-            "Replace existing file: '"
-                + Files.fileWithinDirectory(f, sProject.directory()) + "'?",
-            "Save Script", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.CANCEL_OPTION
-            || result == JOptionPane.CLOSED_OPTION)
-          break;
-      }
-
-      if (saveAs(f)) {
-        sProject.setLastScriptPath(f);
-        sScriptSet.setName(sScriptSet.getCursor(), f);
-        setChanges(0);
-      }
-    } while (false);
+    if (saveAs(f)) {
+      sProject.setLastScriptPath(f);
+      sScriptSet.setName(sScriptSet.getCursor(), f);
+      setChanges(0);
+    }
   }
 
   private void resetUndo() {
@@ -1934,11 +1918,12 @@ public class ScriptEditor {
   private boolean saveAs(File f) {
     boolean success = false;
     try {
-      Script s = new Script(sProject);
+      // Script s = new Script(sProject);
       unimp("disallow saving as script already in set");
       sScriptSet.setName(sScriptSet.getCursor(), f);
-      writeScript(s);
-      s.flush(f);
+      // writeScript(s);
+      mScript.flush(f);
+      // s.flush(f);
       success = true;
     } catch (IOException e) {
       AppTools.showError("saving script", e);
@@ -1946,10 +1931,9 @@ public class ScriptEditor {
     return success;
   }
 
-  private void writeScript(Script s) {
-    s.setItems(mItems);
-
-  }
+  // private void writeScript(Script s) {
+  // s.setItems(mItems);
+  // }
 
   public void setFile(File file) {
     Files.verifyAbsolute(file, true);
@@ -1979,9 +1963,9 @@ public class ScriptEditor {
 
   // --- Instance fields
 
-  private ObjArray mItems = new ObjArray();
   private File mFile;
   private int mChangesSinceSaved;
   private ArrayList<Reversible> mUndoList = new ArrayList();
   private int mUndoCursor;
+  private Script mScript;
 }
