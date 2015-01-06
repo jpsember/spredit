@@ -178,12 +178,14 @@ public class ScriptSet {
   }
 
   public void remove(int slot) {
-    if (mEditors.size() == 1)
+    if (size() == 1)
       throw new IllegalStateException();
     mEditors.remove(slot);
     if (slot < mForegroundStart)
       mForegroundStart--;
     if (slot < mCursor)
+      mCursor--;
+    if (mCursor == size())
       mCursor--;
   }
 
@@ -219,8 +221,7 @@ public class ScriptSet {
    * @return slot, if found, or -1
    */
   public int findEditorForNamedFile(File file) {
-    ASSERT(file != null);
-    for (int slot = 0; slot < mEditors.size(); slot++) {
+    for (int slot = 0; slot < size(); slot++) {
       ScriptEditor editor = mEditors.get(slot);
       if (file.equals(editor.getScript().getFile()))
         return slot;
@@ -246,7 +247,7 @@ public class ScriptSet {
 
   private void setFile(int slot, File f) {
     ScriptEditor editor = editorForFile(f);
-    if (mEditors.size() == slot) {
+    if (size() == slot) {
       mEditors.add(editor);
     } else {
       mEditors.set(slot, editor);
@@ -259,7 +260,7 @@ public class ScriptSet {
     sb.append("\n projectBase " + mProjectBase);
     sb.append("\n cursor " + mCursor + "\n");
     sb.append("----- Editors -----\n");
-    for (int i = 0; i < mEditors.size(); i++) {
+    for (int i = 0; i < size(); i++) {
       sb.append("  #" + i + ": " + mEditors.get(i) + "\n");
     }
     sb.append("-------------------\n");
