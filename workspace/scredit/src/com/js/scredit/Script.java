@@ -6,16 +6,11 @@ import java.util.*;
 import org.apache.commons.io.FileUtils;
 import org.json.*;
 
-import apputil.*;
 import com.js.basic.*;
 
 import tex.*;
 
 public class Script {
-
-  public static MyFileFilter FILES = new MyFileFilter("Script files", "scr");
-  public static MyFileFilter SET_FILES = new MyFileFilter(
-      "Script project files", "set");
 
   public static EdObjectFactory factoryFor(String tag) {
     return sFactories.get(tag);

@@ -80,8 +80,9 @@ public class ScriptEditor {
       }
 
       if (f == null) {
-        f = AppTools.chooseFileToOpen("Open Script", Script.FILES, sProject
-            .replaceIfMissing(sProject.recentScripts().getCurrentFile()));
+        f = AppTools.chooseFileToOpen("Open Script", SCRIPT_FILEFILTER,
+            sProject
+                .replaceIfMissing(sProject.recentScripts().getCurrentFile()));
       }
       if (f == null) {
         break;
@@ -1164,7 +1165,7 @@ public class ScriptEditor {
     File currentFile = editor().getFile();
     TreeSet<File> candidates = new TreeSet();
     File[] array = currentFile.getParentFile().listFiles(
-        (FilenameFilter) Script.FILES);
+        (FilenameFilter) SCRIPT_FILEFILTER);
     candidates.addAll(Arrays.asList(array));
     if (candidates.isEmpty())
       return;
@@ -1250,8 +1251,9 @@ public class ScriptEditor {
         break;
 
       if (f == null)
-        f = AppTools.chooseFileToOpen("Open Set", Script.SET_FILES, sProject
-            .replaceIfMissing(sProject.recentScriptSets().getCurrentFile()));
+        f = AppTools.chooseFileToOpen("Open Set", SCRIPT_SET_FILEFILTER,
+            sProject.replaceIfMissing(sProject.recentScriptSets()
+                .getCurrentFile()));
       if (f == null)
         break;
 
@@ -1292,8 +1294,9 @@ public class ScriptEditor {
       if (!flushAll())
         break;
 
-      File f = AppTools.chooseFileToSave("Save Set", Script.SET_FILES, sProject
-          .replaceIfMissing(sProject.recentScriptSets().getCurrentFile()));
+      File f = AppTools.chooseFileToSave("Save Set", SCRIPT_SET_FILEFILTER,
+          sProject.replaceIfMissing(sProject.recentScriptSets()
+              .getCurrentFile()));
 
       if (f == null)
         break;
@@ -1687,7 +1690,7 @@ public class ScriptEditor {
     if (f == null)
       f = getFile();
     if (f == null || alwaysAskForPath) {
-      f = AppTools.chooseFileToSave("Save Script", Script.FILES,
+      f = AppTools.chooseFileToSave("Save Script", SCRIPT_FILEFILTER,
           sProject.replaceIfMissing(sProject.recentScripts().getCurrentFile()));
       if (f == null)
         return;
@@ -1960,6 +1963,10 @@ public class ScriptEditor {
   private static RecentFiles.Menu sRecentScriptSetsMenuItem;
   private static JMenuItem sUndoMenuItem, sRedoMenuItem;
   private static JMenuItem sSelectNoneMenuItem;
+  private static MyFileFilter SCRIPT_SET_FILEFILTER = new MyFileFilter(
+      "Script project files", "set");
+  private static MyFileFilter SCRIPT_FILEFILTER = new MyFileFilter(
+      "Script files", "scr");
 
   // --- Instance fields
 
