@@ -102,9 +102,11 @@ public class Files {
   }
 
   public static void verifyAbsolute(File file, boolean allowNull) {
-    if (file == null)
+    if (file == null) {
       if (!allowNull)
         throw new IllegalArgumentException();
+      return;
+    }
     if (!file.isAbsolute())
       throw new IllegalArgumentException("expected absolute file, but was '"
           + file + "'");

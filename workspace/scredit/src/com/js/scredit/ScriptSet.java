@@ -79,7 +79,8 @@ public class ScriptSet {
     map.put("fg", mForegroundStart);
     JSONArray array = new JSONArray();
     for (int i = 0; i < size(); i++) {
-      File f = get(i).file();
+      ScriptEditor editor = get(i);
+      File f = editor.getScript().getFile();
       if (f == null)
         array.put("");
       else
@@ -197,17 +198,17 @@ public class ScriptSet {
   public void setName(int slot, File name) {
     if (name == null)
       throw new IllegalArgumentException();
-    ScriptEditor editor = get(slot);
+    Script script = get(slot).getScript();
 
     // If name matches current, do nothing
-    if (equal(name, editor.file()))
+    if (equal(name, script.getFile()))
       return;
 
     // Make sure this name doesn't already appear in another slot
     if (findEditorForNamedFile(name) >= 0)
       throw new IllegalStateException("Cannot assign name " + name
           + " to slot " + slot + ", already used");
-    editor.setFile(name);
+    script.setFile(name);
   }
 
   /**
@@ -221,7 +222,7 @@ public class ScriptSet {
     ASSERT(file != null);
     for (int slot = 0; slot < mEditors.size(); slot++) {
       ScriptEditor editor = mEditors.get(slot);
-      if (file.equals(editor.file()))
+      if (file.equals(editor.getScript().getFile()))
         return slot;
     }
     return -1;
@@ -239,7 +240,7 @@ public class ScriptSet {
     if (slot >= 0)
       return mEditors.get(slot);
     ScriptEditor editor = new ScriptEditor();
-    editor.setFile(file);
+    editor.getScript().setFile(file);
     return editor;
   }
 

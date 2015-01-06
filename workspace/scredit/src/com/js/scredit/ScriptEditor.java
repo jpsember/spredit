@@ -63,9 +63,7 @@ public class ScriptEditor {
   }
 
   private static void readScriptForCurrentEditor() throws IOException {
-    ScriptEditor editor = editor();
-    editor.mScript = new Script(sProject);
-    editor.mScript.read(editor.file());
+    editor().getScript().read();
   }
 
   /**
@@ -132,12 +130,12 @@ public class ScriptEditor {
     for (int i = 0; i < set.size(); i++) {
       set.setCursor(i);
       ScriptEditor editor = sScriptSet.get();
-      if (editor.isUnnamed())
+      if (!editor.hasName())
         continue;
       try {
         readScriptForCurrentEditor();
       } catch (IOException e) {
-        AppTools.showMsg("Problem reading " + editor.file() + ": " + e);
+        AppTools.showMsg("Problem reading " + editor.getFile() + ": " + e);
         // Since an error occurred, throw out any following editors
         originalSlot = i;
         i++;
@@ -354,9 +352,8 @@ public class ScriptEditor {
       public void go() {
         // If current editor is anonymous, and unmodified, don't insert a new
         // one
-        if (!(editor().isUnnamed() && !editor().modified())) {
+        if (editor().hasName() || editor().modified()) {
           sScriptSet.insert(sScriptSet.getCursor(), null);
-          unimp("update editor to reflect mScriptSet");
         }
         openScript(null);
         repaint();
@@ -365,7 +362,7 @@ public class ScriptEditor {
     m.addItem("Open Next File...", KeyEvent.VK_O, CTRL | SHIFT,
         new ActionHandler() {
           public boolean shouldBeEnabled() {
-            return !editor().isUnnamed();
+            return editor().hasName();
           }
 
           public void go() {
@@ -408,7 +405,7 @@ public class ScriptEditor {
 
     m.addItem("Save", KeyEvent.VK_S, CTRL, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return editor().isUnnamed() || editor().modified();
+        return !editor().hasName() || editor().modified();
       }
 
       public void go() {
@@ -429,7 +426,7 @@ public class ScriptEditor {
         boolean ret = false;
         for (int i = 0; i < sScriptSet.size(); i++) {
           ScriptEditor ed = sScriptSet.get(i);
-          if (ed.file() == null || ed.modified())
+          if (!ed.getScript().hasName() || ed.modified())
             ret = true;
         }
         return ret;
@@ -439,7 +436,7 @@ public class ScriptEditor {
         int previousSlot = sScriptSet.getCursor();
         for (int i = 0; i < sScriptSet.size(); i++) {
           ScriptEditor ed = sScriptSet.get(i);
-          if (ed.file() == null || ed.modified()) {
+          if (!ed.getScript().hasName() || ed.modified()) {
             sScriptSet.setCursor(i);
             editor().doSave(null, false, false);
           }
@@ -450,11 +447,11 @@ public class ScriptEditor {
     });
     m.addItem("Save As Next", KeyEvent.VK_S, META | SHIFT, new ActionHandler() {
       public boolean shouldBeEnabled() {
-        return !editor().isUnnamed();
+        return editor().hasName();
       }
 
       public void go() {
-        File f = AppTools.incrementFile(editor().file());
+        File f = AppTools.incrementFile(editor().getFile());
         editor().doSave(f, false, true);
         repaint();
       }
@@ -1159,7 +1156,7 @@ public class ScriptEditor {
   // }
 
   private static void openNextFile() {
-    File currentFile = editor().file();
+    File currentFile = editor().getFile();
     TreeSet<File> candidates = new TreeSet();
     File[] array = currentFile.getParentFile().listFiles(
         (FilenameFilter) Script.FILES);
@@ -1233,15 +1230,12 @@ public class ScriptEditor {
     // If current editor is an anonymous script, replace it with a fresh one
     // (after verifying with user);
     // otherwise, insert a fresh one
-    do {
-      if (!editor().isUnnamed()) {
-        sScriptSet.insert(sScriptSet.getCursor(), null);
-      } else {
-        if (!flush(true))
-          break;
+    if (editor().hasName()) {
+      sScriptSet.insert(sScriptSet.getCursor(), null);
+    } else {
+      if (flush(true))
         disposeOfCurrentEditor();
-      }
-    } while (false);
+    }
   }
 
   private static void doOpenSet(File f) {
@@ -1636,7 +1630,7 @@ public class ScriptEditor {
 
   public ScriptEditor() {
     assertProjectOpen();
-    mScript = new Script(project());
+    mScript = new Script(project(), null);
     MouseOper.addListener(new MouseOper.Listener() {
       @Override
       public void operationChanged(MouseOper oper) {
@@ -1651,12 +1645,12 @@ public class ScriptEditor {
     resetUndo();
   }
 
-  public File file() {
-    return mFile;
+  public File getFile() {
+    return getScript().getFile();
   }
 
-  private boolean isUnnamed() {
-    return mFile == null;
+  private boolean hasName() {
+    return getScript().hasName();
   }
 
   public void render(GLPanel panel, boolean toBgnd) {
@@ -1679,7 +1673,7 @@ public class ScriptEditor {
       boolean alwaysVerifyReplaceExisting) {
     File f = initialPath;
     if (f == null)
-      f = file();
+      f = getFile();
     if (f == null || alwaysAskForPath) {
       f = AppTools.chooseFileToSave("Save Script", Script.FILES,
           sProject.replaceIfMissing(sProject.recentScripts().getCurrentFile()));
@@ -1690,7 +1684,7 @@ public class ScriptEditor {
       alwaysVerifyReplaceExisting = true;
     }
 
-    if (f.exists() && (alwaysVerifyReplaceExisting || !f.equals(file()))) {
+    if (f.exists() && (alwaysVerifyReplaceExisting || !f.equals(getFile()))) {
       int result = JOptionPane.showConfirmDialog(
           AppTools.frame(),
           "Replace existing file: '"
@@ -1873,7 +1867,7 @@ public class ScriptEditor {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(nameOf(this));
-    File f = file();
+    File f = getFile();
     if (f == null)
       sb.append(" <orphan>");
     else
@@ -1888,11 +1882,11 @@ public class ScriptEditor {
 
     if (askUser) {
       String prompt;
-      if (isUnnamed())
+      if (!hasName())
         prompt = "Save changes to new file?";
       else {
         prompt = "Save changes to '"
-            + Files.fileWithinDirectory(file(), sProject.directory()) + "'?";
+            + Files.fileWithinDirectory(getFile(), sProject.directory()) + "'?";
       }
       int code = JOptionPane.showConfirmDialog(AppTools.frame(), prompt,
           "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION,
@@ -1920,10 +1914,9 @@ public class ScriptEditor {
     try {
       // Script s = new Script(sProject);
       unimp("disallow saving as script already in set");
-      sScriptSet.setName(sScriptSet.getCursor(), f);
-      // writeScript(s);
-      mScript.flush(f);
-      // s.flush(f);
+      mScript.setFile(f);
+      sScriptSet.setName(sScriptSet.getCursor(), mScript.getFile());
+      mScript.flush();
       success = true;
     } catch (IOException e) {
       AppTools.showError("saving script", e);
@@ -1931,13 +1924,8 @@ public class ScriptEditor {
     return success;
   }
 
-  // private void writeScript(Script s) {
-  // s.setItems(mItems);
-  // }
-
-  public void setFile(File file) {
-    Files.verifyAbsolute(file, true);
-    mFile = file;
+  public Script getScript() {
+    return mScript;
   }
 
   // --- Class fields
@@ -1963,9 +1951,11 @@ public class ScriptEditor {
 
   // --- Instance fields
 
-  private File mFile;
   private int mChangesSinceSaved;
   private ArrayList<Reversible> mUndoList = new ArrayList();
   private int mUndoCursor;
-  private Script mScript;
+  // The script being edited by this editor. We could make the editor a subclass
+  // of Script, but we'll favor composition over inheritance, at the expense of
+  // some extra methods to call Script method counterparts (e.g. hasName())
+  private final Script mScript;
 }

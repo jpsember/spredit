@@ -8,6 +8,7 @@ import org.json.*;
 
 import apputil.*;
 import com.js.basic.*;
+
 import static com.js.basic.Tools.*;
 import tex.*;
 
@@ -34,13 +35,29 @@ public class Script {
   /**
    * Create a new script
    */
-  public Script(ScriptProject project) {
+  public Script(ScriptProject project, File file) {
     this.mProject = project;
+    setFile(file);
+  }
+
+  public File getFile() {
+    return mFile;
+  }
+
+  public boolean hasName() {
+    return mFile != null;
+  }
+
+  public void setFile(File file) {
+    Files.verifyAbsolute(file, true);
+    mFile = file;
   }
 
   private static final String ITEMS_TAG = "ITEMS";
 
-  public void flush(File path) throws IOException {
+  public void flush() throws IOException {
+    if (!hasName())
+      throw new IllegalStateException();
     String content = null;
     try {
       JSONObject scriptMap = new JSONObject();
@@ -69,7 +86,7 @@ public class Script {
     } catch (JSONException e) {
       die(e);
     }
-    Files.writeStringToFileIfChanged(path, content);
+    Files.writeStringToFileIfChanged(getFile(), content);
   }
 
   public Atlas lastAtlas() {
@@ -92,8 +109,10 @@ public class Script {
     return mProject;
   }
 
-  public void read(File mPath) throws IOException {
-    String content = FileUtils.readFileToString(mPath);
+  public void read() throws IOException {
+    if (!hasName())
+      throw new IllegalStateException();
+    String content = FileUtils.readFileToString(getFile());
     try {
       JSONObject fileMap = new JSONObject(content);
       {
@@ -129,5 +148,5 @@ public class Script {
   private Map mDefaults = new HashMap();
   private ObjArray mObjects = new ObjArray();
   private ScriptProject mProject;
-
+  private File mFile;
 }

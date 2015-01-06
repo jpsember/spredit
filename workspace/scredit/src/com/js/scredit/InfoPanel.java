@@ -122,8 +122,10 @@ class InfoPanel extends MyPanel implements ActionListener {
       StringBuilder sb = new StringBuilder();
       sb.append(editor.modified() ? "*" : " ");
 
-      if (editor.file() != null)
-        sb.append(Files.fileWithinDirectory(editor.file(), project.directory()));
+      Script script = editor.getScript();
+      if (script.getFile() != null)
+        sb.append(Files.fileWithinDirectory(script.getFile(),
+            project.directory()));
       upd(mFilePath, sb);
       displayProjectPath(project.file().getName());
       upd(bgnd, true, layers.isBackground());

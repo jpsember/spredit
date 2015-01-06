@@ -146,7 +146,8 @@ public class ScriptCompiler {
     ScriptSet ss = new ScriptSet(project.directory(), new JSONObject(
         FileUtils.readFileToString(f)));
     for (int i = 0; i < ss.size(); i++) {
-      File f2 = ss.get(i).file();
+      Script script = ss.get(i).getScript();
+      File f2 = script.getFile();
       if (f2 != null)
         processScript(f2);
     }
@@ -158,9 +159,9 @@ public class ScriptCompiler {
     if (db)
       pr("processScript: " + f);
 
-    Script scr = new Script(project);
+    Script scr = new Script(project, f);
     if (f.exists())
-      scr.read(f);
+      scr.read();
     labelSet.add(scr);
   }
 
