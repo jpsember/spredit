@@ -1436,8 +1436,6 @@ public class ScriptEditor {
       ac.add(pnl, BorderLayout.NORTH);
     }
 
-    setScriptSet(null);
-
     addMenus();
 
     {
@@ -1529,16 +1527,16 @@ public class ScriptEditor {
           "PALETTE"));
     }
 
-    ScriptSet ss = new ScriptSet(sProject.directory());
+    ScriptSet defaultScriptSet = new ScriptSet(sProject.directory());
     try {
       JSONObject map = sProject.getDefaults().optJSONObject("LAYERS");
       if (map != null) {
-        ss = new ScriptSet(sProject.directory(), map);
+        defaultScriptSet = new ScriptSet(sProject.directory(), map);
       }
     } catch (JSONException e) {
       AppTools.showError("Problem reading project defaults", e);
     }
-    setScriptSet(ss);
+    setScriptSet(defaultScriptSet);
   }
 
   /**
