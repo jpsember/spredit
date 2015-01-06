@@ -58,10 +58,15 @@ public class ScriptEditor {
    * project is open
    */
   private static void disposeOfCurrentEditor() {
-    ASSERT(isProjectOpen());
-    // if (!isProjectOpen())
-    // return;
+    assertProjectOpen();
     sScriptSet.set(sScriptSet.getCursor(), null);
+  }
+
+  private static void readScriptForCurrentEditor() throws IOException {
+    ScriptEditor editor = editor();
+    Script s = new Script(sProject);
+    s.read(editor.file());
+    editor.mItems = s.items();
   }
 
   /**
@@ -98,15 +103,7 @@ public class ScriptEditor {
         }
 
         sScriptSet.set(sScriptSet.getCursor(), f);
-
-        Script s = new Script(sProject);
-        if (f.exists())
-          s.read(f);
-        // , f);
-        // Create a new editor to hold this
-        // mScriptSet.setFile(mScriptSet.currentSlot(), f);
-        ScriptEditor theEditor = sScriptSet.get();
-        theEditor.mItems = s.items();
+        readScriptForCurrentEditor();
 
         success = true;
         if (!sUpdateLastScriptDisabled)
@@ -138,10 +135,10 @@ public class ScriptEditor {
       ScriptEditor editor = sScriptSet.get();
       if (editor.isUnnamed())
         continue;
-      sUpdateLastScriptDisabled = true;
-      if (!openScript(editor.file())) {
-        AppTools.showMsg("Unable to open " + editor.file());
-        sScriptSet.set(i, null);
+      try {
+        readScriptForCurrentEditor();
+      } catch (IOException e) {
+        AppTools.showMsg("Problem reading " + editor.file() + ": " + e);
         // Since an error occurred, throw out any following editors
         originalSlot = i;
         i++;
@@ -1030,8 +1027,7 @@ public class ScriptEditor {
         sRecentScriptsMenuItem.setRecentFiles(null);
         sRecentScriptSetsMenuItem.setRecentFiles(null);
         unimp("update recent atlas list");
-        // sRecentAtlases.setAlias(isProjectOpen() ? mProject.recentAtlases() :
-        // null);
+        // sRecentAtlases.setAlias(null);
         sRecentProjects.setCurrentFile(null);
         sAtlasCB.removeAllItems();
         sAtlasCB.setEnabled(false);
@@ -1580,8 +1576,7 @@ public class ScriptEditor {
         sRecentScriptsMenuItem.setRecentFiles(sProject.recentScripts());
         sRecentScriptSetsMenuItem.setRecentFiles(sProject.recentScriptSets());
         unimp("update recent atlas list");
-        // sRecentAtlases.setAlias(isProjectOpen() ? mProject.recentAtlases() :
-        // null);
+        // sRecentAtlases.setAlias(mProject.recentAtlases());
         sRecentProjects.setCurrentFile(sProject.file());
 
         unimp("have combo box adjust for recent atlases");
