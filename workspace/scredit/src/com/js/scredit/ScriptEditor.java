@@ -103,13 +103,11 @@ public class ScriptEditor {
         readScriptForCurrentEditor();
 
         success = true;
-        if (!sUpdateLastScriptDisabled)
-          sProject.setLastScriptPath(f);
+        sProject.setLastScriptPath(f);
       } catch (Throwable e) {
         AppTools.showError("opening script", e);
       }
     } while (false);
-    sUpdateLastScriptDisabled = false;
     return success;
   }
 
@@ -1946,8 +1944,6 @@ public class ScriptEditor {
   private static RecentFiles.Menu sRecentScriptSetsMenuItem;
   private static JMenuItem sUndoMenuItem, sRedoMenuItem;
   private static JMenuItem sSelectNoneMenuItem;
-  // If true, doesn't add scripts being opened to 'recent scripts' set
-  private static boolean sUpdateLastScriptDisabled;
 
   // --- Instance fields
 
