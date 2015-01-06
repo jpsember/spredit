@@ -112,28 +112,23 @@ public class ScriptEditor {
   }
 
   /**
-   * Change current script set; if defined, read editor contents from their
-   * respective files
-   * 
-   * @param set
-   *          new script set, or null
+   * Set current script set, and read each script from its respective file (if
+   * it has one)
    */
   private static void setScriptSet(ScriptSet set) {
+    if (set == null)
+      throw new IllegalArgumentException();
     sScriptSet = set;
-    if (sScriptSet == null)
-      return;
 
     int originalSlot = set.getCursor();
-
     for (int i = 0; i < set.size(); i++) {
       set.setCursor(i);
-      ScriptEditor editor = sScriptSet.get();
-      if (!editor.hasName())
+      if (!editor().hasName())
         continue;
       try {
         readScriptForCurrentEditor();
       } catch (IOException e) {
-        AppTools.showMsg("Problem reading " + editor.getFile() + ": " + e);
+        AppTools.showMsg("Problem reading " + editor().getFile() + ": " + e);
         // Since an error occurred, throw out any following editors
         originalSlot = i;
         i++;
