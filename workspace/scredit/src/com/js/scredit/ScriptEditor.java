@@ -62,7 +62,8 @@ public class ScriptEditor {
     sScriptSet.setCursorFile(null);
   }
 
-  private static void readScriptForCurrentEditor() throws IOException {
+  private static void readScriptForCurrentEditor() throws IOException,
+      JSONException {
     editor().getScript().read();
   }
 
@@ -127,7 +128,7 @@ public class ScriptEditor {
         continue;
       try {
         readScriptForCurrentEditor();
-      } catch (IOException e) {
+      } catch (Exception e) {
         AppTools.showMsg("Problem reading " + editor().getFile() + ": " + e);
         // Since an error occurred, throw out any following editors
         originalSlot = i;
@@ -1930,6 +1931,8 @@ public class ScriptEditor {
       mScript.write();
       success = true;
     } catch (IOException e) {
+      AppTools.showError("saving script", e);
+    } catch (JSONException e) {
       AppTools.showError("saving script", e);
     }
     return success;

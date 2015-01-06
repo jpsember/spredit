@@ -9,7 +9,6 @@ import org.json.*;
 import apputil.*;
 import com.js.basic.*;
 
-import static com.js.basic.Tools.*;
 import tex.*;
 
 public class Script {
@@ -56,44 +55,27 @@ public class Script {
     mFile = file;
   }
 
-  private static final String ITEMS_TAG = "ITEMS";
+  private static final String ITEMS_TAG = "items";
 
   /**
    * Write script's contents to its file
-   * 
-   * @throws IOException
    */
-  public void write() throws IOException {
-    if (!hasName())
-      throw new IllegalStateException("script has no name");
-    String content = null;
-    try {
-      JSONObject scriptMap = new JSONObject();
-      {
-        JSONObject defaultsMap = new JSONObject();
-        for (String key : JSONTools.iterable(mDefaults.keySet())) {
-          defaultsMap.put(key, mDefaults.get(key));
-        }
-        scriptMap.put("defaults", defaultsMap);
+  public void write() throws IOException, JSONException {
+    assertHasName();
+    JSONObject scriptMap = new JSONObject();
+    {
+      JSONArray itemsArray = new JSONArray();
+      for (int i = 0; i < mObjects.size(); i++) {
+        EdObject obj = mObjects.get(i);
+        EdObjectFactory f = obj.getFactory();
+        JSONObject itemMap = new JSONObject();
+        f.write(this, itemMap, obj);
+        itemsArray.put(f.getTag());
+        itemsArray.put(itemMap);
       }
-
-      {
-        JSONArray scriptItems = new JSONArray();
-        for (int i = 0; i < mObjects.size(); i++) {
-          EdObject obj = mObjects.get(i);
-          EdObjectFactory f = obj.getFactory();
-          JSONObject itemMap = new JSONObject();
-          f.write(this, itemMap, obj);
-          scriptItems.put(f.getTag());
-          scriptItems.put(itemMap);
-        }
-        scriptMap.put(ITEMS_TAG, scriptItems);
-      }
-      content = scriptMap.toString(2);
-    } catch (JSONException e) {
-      die(e);
+      scriptMap.put(ITEMS_TAG, itemsArray);
     }
-    Files.writeStringToFileIfChanged(getFile(), content);
+    FileUtils.write(getFile(), scriptMap.toString(2));
   }
 
   public Atlas lastAtlas() {
@@ -119,45 +101,32 @@ public class Script {
     return mProject;
   }
 
-  public void read() throws IOException {
-    if (!hasName())
-      throw new IllegalStateException();
+  public void read() throws IOException, JSONException {
+    assertHasName();
     String content = FileUtils.readFileToString(getFile());
-    try {
-      JSONObject fileMap = new JSONObject(content);
-      {
-        JSONObject defaultsMap = fileMap.getJSONObject("defaults");
-        for (String key : JSONTools.keys(defaultsMap)) {
-          mDefaults.put(key, defaultsMap.get(key));
-        }
+    JSONObject scriptMap = new JSONObject(content);
+    JSONArray itemsArray = scriptMap.getJSONArray(ITEMS_TAG);
+    int cursor = 0;
+    while (cursor < itemsArray.length()) {
+      String itemTag = itemsArray.getString(cursor++);
+      JSONObject itemMap = itemsArray.getJSONObject(cursor++);
+      EdObjectFactory factory = factoryFor(itemTag);
+      if (factory == null) {
+        throw new JSONException("unrecognized object type: " + itemTag);
       }
-      boolean problem = false;
-      JSONArray itemsList = fileMap.getJSONArray(ITEMS_TAG);
-      int cursor = 0;
-      while (cursor < itemsList.length()) {
-        String itemTag = itemsList.getString(cursor++);
-        JSONObject itemMap = itemsList.getJSONObject(cursor++);
-        EdObjectFactory f = factoryFor(itemTag);
-        if (f == null) {
-          if (!problem) {
-            problem = true;
-            AppTools.showMsg("unknown object type: " + itemTag + " (" + itemMap
-                + ")");
-          }
-          continue;
-        }
-        EdObject obj = f.parse(this, itemMap);
-        mObjects.add(obj);
-      }
-    } catch (JSONException e) {
-      die(e);
+      EdObject obj = factory.parse(this, itemMap);
+      mObjects.add(obj);
     }
+  }
+
+  private void assertHasName() {
+    if (!hasName())
+      throw new IllegalStateException("script has no name");
   }
 
   private static Map<String, EdObjectFactory> sFactories = new HashMap();
 
   private Atlas mLastAtlas;
-  private Map mDefaults = new HashMap();
   private ObjArray mObjects = new ObjArray();
   private ScriptProject mProject;
   private File mFile;

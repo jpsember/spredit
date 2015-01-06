@@ -154,7 +154,7 @@ public class ScriptCompiler {
 
   }
 
-  private void processScript(File f) throws IOException {
+  private void processScript(File f) throws IOException, JSONException {
     final boolean db = false;
     if (db)
       pr("processScript: " + f);
