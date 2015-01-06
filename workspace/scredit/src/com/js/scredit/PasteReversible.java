@@ -37,7 +37,7 @@ public class PasteReversible implements Reversible {
     Point ds = Point.sum(Dup.getAccum(true), Dup.getClipboardAdjust());
 
     for (EdObject obj : clip) {
-      EdObject newInstance = (EdObject) obj.clone();
+      EdObject newInstance = obj.getCopy();
       newInstance.setLocation(Point.sum(newInstance.location(), ds));
       newInstance.setSelected(true);
       items.add(newInstance);

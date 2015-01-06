@@ -53,7 +53,7 @@ public class PolygonObject extends EdObject {
   public EdObject applyColor(Color color) {
     PolygonObject ret = this;
     if (!color.equals(this.color)) {
-      ret = (PolygonObject) this.clone();
+      ret = this.getCopy();
       ret.setColorValue(color);
     }
     return ret;

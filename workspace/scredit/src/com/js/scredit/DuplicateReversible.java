@@ -38,7 +38,7 @@ public class DuplicateReversible implements Reversible {
     Point ds = Dup.getAccum(true); //)getFilteredDupAccum();
 
     for (int i = 0; i < slots.length; i++) {
-      EdObject newInstance = (EdObject) (items.get(slots[i]).clone());
+      EdObject newInstance = items.getCopy(slots[i]);
       if (db)
         pr("adding dupAmount " + ds + "  to duplicated object #" + i + ": "
             + newInstance);

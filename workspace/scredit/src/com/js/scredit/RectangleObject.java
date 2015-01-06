@@ -79,7 +79,7 @@ public class RectangleObject extends EdObject {
   public EdObject applyColor(Color color) {
     RectangleObject ret = this;
     if (!color.equals(this.mColor)) {
-      ret = (RectangleObject) this.clone();
+      ret = this.getCopy();
       ret.setColor(color);
     }
     return ret;

@@ -189,8 +189,7 @@ public class GroupObject extends EdObject {
           EdObject obj = a.get(i);
           if (i == slot) {
             for (int k = 0; k < group.size(); k++) {
-              EdObject o2 = group.obj(k);
-              o2 = (EdObject) o2.clone();
+              EdObject o2 = group.obj(k).getCopy();
               o2.setSelected(true);
               b.add(o2);
             }
@@ -236,8 +235,9 @@ public class GroupObject extends EdObject {
   public Object clone() {
     GroupObject g = (GroupObject) super.clone();
     g.objects = new ArrayList();
+    // If we make objects immutable, we don't need to get copies of them...?
     for (int i = 0; i < size(); i++)
-      g.objects.add((EdObject) obj(i).clone());
+      g.objects.add(obj(i).getCopy());
     return g;
   }
 
@@ -334,7 +334,7 @@ public class GroupObject extends EdObject {
   public EdObject applyColor(Color color) {
     EdObject ret = this;
 
-    GroupObject g = (GroupObject) this.clone();
+    GroupObject g = this.getCopy();
     for (int i = 0; i < g.size(); i++) {
       EdObject obj = obj(i);
       EdObject obj2 = obj.applyColor(color);
@@ -427,7 +427,7 @@ public class GroupObject extends EdObject {
   }
 
   public void addParsedObject(EdObject obj) {
-    objects.add(obj); // obj.clone());
+    objects.add(obj);
   }
 
   public boolean parseComplete() {

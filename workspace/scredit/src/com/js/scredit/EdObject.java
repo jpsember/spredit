@@ -26,6 +26,10 @@ public abstract class EdObject implements Cloneable {
     }
   }
 
+  public <T extends EdObject> T getCopy() {
+    return (T) this.clone();
+  }
+
   public Color getColor() {
     return null;
   }

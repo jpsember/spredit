@@ -54,7 +54,7 @@ public class SpriteObject extends EdObject {
     Point loc2 = Grid.snapToGrid(loc, false);
     if (loc == loc2)
       return this;
-    SpriteObject s = (SpriteObject) this.clone();
+    SpriteObject s = getCopy();
     s.setLocation(loc2);
     return s;
   }
@@ -62,7 +62,7 @@ public class SpriteObject extends EdObject {
   public EdObject applyColor(Color color) {
     EdObject ret = this;
     if (tintColor != color) {
-      SpriteObject so = (SpriteObject) this.clone();
+      SpriteObject so = getCopy();
       so.tintColor = color;
       ret = so;
     }
