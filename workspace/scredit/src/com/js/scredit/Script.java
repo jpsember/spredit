@@ -14,32 +14,35 @@ import tex.*;
 
 public class Script {
 
-  // ------------- class elements
-
   public static MyFileFilter FILES = new MyFileFilter("Script files", "scr");
   public static MyFileFilter SET_FILES = new MyFileFilter(
       "Script project files", "set");
 
   public static EdObjectFactory factoryFor(String tag) {
-    return (EdObjectFactory) sFactories.get(tag);
+    return sFactories.get(tag);
   }
 
   public static void addObjectFactory(EdObjectFactory f) {
     sFactories.put(f.getTag(), f);
   }
 
-  private static Map sFactories = new HashMap();
-
-  // --------------- instance elements
-
   /**
-   * Create a new script
+   * Constructor
+   * 
+   * @param project
+   *          the ScriptProject this script will belong to
+   * @param file
+   *          an optional file where this script is to be written; if null, it's
+   *          considered an 'anonymous' script that has never been saved
    */
   public Script(ScriptProject project, File file) {
     this.mProject = project;
     setFile(file);
   }
 
+  /**
+   * Get the script's file, which may be null
+   */
   public File getFile() {
     return mFile;
   }
@@ -55,9 +58,14 @@ public class Script {
 
   private static final String ITEMS_TAG = "ITEMS";
 
-  public void flush() throws IOException {
+  /**
+   * Write script's contents to its file
+   * 
+   * @throws IOException
+   */
+  public void write() throws IOException {
     if (!hasName())
-      throw new IllegalStateException();
+      throw new IllegalStateException("script has no name");
     String content = null;
     try {
       JSONObject scriptMap = new JSONObject();
@@ -81,7 +89,6 @@ public class Script {
         }
         scriptMap.put(ITEMS_TAG, scriptItems);
       }
-
       content = scriptMap.toString(2);
     } catch (JSONException e) {
       die(e);
@@ -101,6 +108,9 @@ public class Script {
     this.mObjects = items;
   }
 
+  /**
+   * Get the objects comprising this script
+   */
   public ObjArray items() {
     return mObjects;
   }
@@ -143,6 +153,8 @@ public class Script {
       die(e);
     }
   }
+
+  private static Map<String, EdObjectFactory> sFactories = new HashMap();
 
   private Atlas mLastAtlas;
   private Map mDefaults = new HashMap();

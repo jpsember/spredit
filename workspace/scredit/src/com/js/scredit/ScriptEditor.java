@@ -1927,7 +1927,7 @@ public class ScriptEditor {
       unimp("disallow saving as script already in set");
       mScript.setFile(f);
       sScriptSet.setName(sScriptSet.getCursor(), mScript.getFile());
-      mScript.flush();
+      mScript.write();
       success = true;
     } catch (IOException e) {
       AppTools.showError("saving script", e);
