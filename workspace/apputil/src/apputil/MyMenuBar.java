@@ -136,7 +136,8 @@ public class MyMenuBar {
         // If the menu isn't showing, ALWAYS enable the items.
         // If user selects them via shortcut key, we'll perform an additional
         // call to shouldBeEnabled() before acting on them.
-        item.setEnabled(!showingMenu || enableable.shouldBeEnabled());
+        item.setEnabled(!showingMenu
+            || (enableable.shouldBeEnabled() && !menusAreDisabled()));
       }
     }
   }
@@ -226,7 +227,7 @@ public class MyMenuBar {
       addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent event) {
-          if (shouldBeEnabled())
+          if (shouldBeEnabled() && !menusAreDisabled())
             handler().actionPerformed(event);
         }
       });
@@ -248,5 +249,19 @@ public class MyMenuBar {
     private ActionHandler mItemHandler;
     private Menu mContainingMenu;
   }
+
+  private static boolean menusAreDisabled() {
+    return sAllMenusDisabled;
+  }
+
+  /**
+   * Set enable state for our menubars. We can temporarily disable them, e.g.,
+   * when displaying modal dialogs such as file choosers
+   */
+  static void enableMenuBar(boolean f) {
+    sAllMenusDisabled = !f;
+  }
+
+  private static boolean sAllMenusDisabled;
 
 }

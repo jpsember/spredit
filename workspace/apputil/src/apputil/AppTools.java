@@ -127,7 +127,7 @@ public class AppTools {
 
   public static File chooseFileToSave(String prompt, MyFileFilter fileFilter,
       File defaultFile) {
-    enableMenuBar(false);
+    MyMenuBar.enableMenuBar(false);
     File f = null;
     do {
 
@@ -164,14 +164,8 @@ public class AppTools {
       f = fileFilter.fixExtension(f);
 
     } while (false);
-    enableMenuBar(true);
+    MyMenuBar.enableMenuBar(true);
     return f;
-  }
-
-  private static void enableMenuBar(boolean f) {
-    JMenuBar mb = sFrame.getJMenuBar();
-    if (mb != null)
-      mb.setEnabled(f);
   }
 
   public static File chooseFileToOpen(String prompt, MyFileFilter fileFilter,
@@ -184,12 +178,13 @@ public class AppTools {
     //
     // System.setProperty("apple.awt.fileDialogForDirectories", "true");
 
-    enableMenuBar(false);
+    MyMenuBar.enableMenuBar(false);
 
     File chosenFile = null;
     do {
       if (AppTools.isMac()) {
-        FileDialog fileChooser = new FileDialog(sFrame, prompt, FileDialog.LOAD);
+        FileDialog fileChooser = new FileDialog(frame(), prompt,
+            FileDialog.LOAD);
         if (defaultFile != null) {
           fileChooser.setDirectory(defaultFile.getParent());
           fileChooser.setFile(defaultFile.getName());
@@ -215,7 +210,7 @@ public class AppTools {
         break;
       }
     } while (false);
-    enableMenuBar(true);
+    MyMenuBar.enableMenuBar(true);
     return chosenFile;
   }
 

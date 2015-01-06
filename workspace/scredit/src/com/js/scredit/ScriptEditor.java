@@ -309,7 +309,7 @@ public class ScriptEditor {
     Enableable projectMustBeOpenHandler = new Enableable() {
       @Override
       public boolean shouldBeEnabled() {
-        return ScriptEditor.isProjectOpen();
+        return isProjectOpen();
       }
     };
 
@@ -367,6 +367,12 @@ public class ScriptEditor {
     m.addSeparator();
 
     m.addItem("Close", KeyEvent.VK_W, CTRL, new ActionHandler() {
+      @Override
+      public boolean shouldBeEnabled() {
+        return currentScriptCloseable();
+      }
+
+      @Override
       public void go() {
         do {
           if (!flush(true))
@@ -380,6 +386,12 @@ public class ScriptEditor {
       }
     });
     m.addItem("Close All", KeyEvent.VK_W, CTRL | SHIFT, new ActionHandler() {
+      @Override
+      public boolean shouldBeEnabled() {
+        return currentScriptCloseable();
+      }
+
+      @Override
       public void go() {
         sScriptSet.setCursor(sScriptSet.size() - 1);
         do {
@@ -414,7 +426,6 @@ public class ScriptEditor {
       }
     });
     m.addItem("Save All", KeyEvent.VK_S, CTRL | SHIFT, new ActionHandler() {
-
       public boolean shouldBeEnabled() {
         boolean ret = false;
         for (int i = 0; i < sScriptSet.size(); i++) {
@@ -1615,6 +1626,15 @@ public class ScriptEditor {
   private static void assertProjectOpen() {
     if (!isProjectOpen())
       throw new IllegalStateException();
+  }
+
+  /**
+   * Determine if the current script can be closed. It can unless it's the only
+   * script open, it has no name, and is empty
+   */
+  private static boolean currentScriptCloseable() {
+    return sScriptSet.size() > 1 || editor().hasName()
+        || !editor().getScript().items().isEmpty();
   }
 
   // ------------------- Instance methods -----------------------------
