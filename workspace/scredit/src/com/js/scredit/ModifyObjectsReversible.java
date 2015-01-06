@@ -4,8 +4,8 @@ import apputil.*;
 import static com.js.basic.Tools.*;
 
 /**
- * General purpose reversible function that saves the original
- * items in an internal buffer for restoring by the reverse method
+ * General purpose reversible function that saves the original items in an
+ * internal buffer for restoring by the reverse method
  */
 public class ModifyObjectsReversible implements Reversible {
   private static final boolean db = false;
@@ -19,7 +19,9 @@ public class ModifyObjectsReversible implements Reversible {
 
   /**
    * Constructor
-   * @param slot slot of the single item about to be changed
+   * 
+   * @param slot
+   *          slot of the single item about to be changed
    */
   public ModifyObjectsReversible(int slot) {
     int[] s = new int[1];
@@ -33,11 +35,19 @@ public class ModifyObjectsReversible implements Reversible {
       a[i] = ScriptEditor.items().get(slots[i]);
     return a;
   }
+
   public void updateModifiedObjects() {
     if (db)
       pr("updateModifiedObjects for " + this);
     ObjArray a = ScriptEditor.items();
-    modObjects = a.getArray(slots);
+    modObjects = getArray(a, slots);
+  }
+
+  private static EdObject[] getArray(ObjArray objects, int[] slots) {
+    EdObject[] a = new EdObject[slots.length];
+    for (int i = 0; i < slots.length; i++)
+      a[i] = objects.get(slots[i]);
+    return a;
   }
 
   private void construct(int[] slots) {
@@ -82,11 +92,16 @@ public class ModifyObjectsReversible implements Reversible {
         constructModifiedVersions();
 
         ObjArray a = ScriptEditor.items();
-        a.set(slots, origObjects);
+        set(a, slots, origObjects);
         a.clearAllSelected();
         a.setSelected(slots, true);
       }
     };
+  }
+
+  private static void set(ObjArray objects, int[] slots, EdObject[] items) {
+    for (int i = 0; i < slots.length; i++)
+      objects.set(slots[i], items[i]);
   }
 
   private void constructModifiedVersions() {
@@ -113,17 +128,18 @@ public class ModifyObjectsReversible implements Reversible {
     }
 
   }
+
   private boolean changesMade;
 
   @Override
   public void perform() {
 
-    // if we already have modified versions of the items, 
+    // if we already have modified versions of the items,
     // use them
 
     if (modObjects != null) {
       ObjArray a = ScriptEditor.items();
-      a.set(slots, modObjects);
+      set(a, slots, modObjects);
       a.clearAllSelected();
       a.setSelected(slots, true);
     } else {
@@ -140,9 +156,11 @@ public class ModifyObjectsReversible implements Reversible {
   }
 
   /**
-   * Apply changes to a single object; return original object if
-   * changes will have no effecct
-   * @param origObj original object
+   * Apply changes to a single object; return original object if changes will
+   * have no effecct
+   * 
+   * @param origObj
+   *          original object
    * @return original object, or modified copy
    */
   public EdObject perform(EdObject origObj) {

@@ -41,8 +41,7 @@ public class GroupObject extends EdObject {
       ASSERT(!undoFlag);
 
       if (origObj == null) {
-        origObj = new ObjArray();
-        origObj.addAll(ScriptEditor.items());
+        origObj = new ObjArray(ScriptEditor.items());
         origObj.clearAllSelected();
       }
 
@@ -154,8 +153,7 @@ public class GroupObject extends EdObject {
           if (db)
             pr(" storing ScriptEditor items in origObj");
 
-          origObj = new ObjArray();
-          origObj.addAll(ScriptEditor.items());
+          origObj = new ObjArray(ScriptEditor.items());
         }
 
         UnGroupReversible gr = new UnGroupReversible(true);

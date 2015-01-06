@@ -276,7 +276,7 @@ public class ScriptEditor {
     private int dir;
 
     public boolean shouldBeEnabled() {
-      return items().hasSelected();
+      return items().getSelected().length != 0;
     }
 
     public void go() {

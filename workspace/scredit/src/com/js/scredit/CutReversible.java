@@ -6,15 +6,12 @@ import apputil.*;
 public class CutReversible implements Reversible {
 
   /*
-   
-   Fwd:
-     create undoOper from current items, clipboard
-     construct clipboard from slots
-     delete slot items
-     
-     
-   Bwd:
-     undoOper
+   * 
+   * Fwd: create undoOper from current items, clipboard construct clipboard from
+   * slots delete slot items
+   * 
+   * 
+   * Bwd: undoOper
    */
   public CutReversible() {
     int[] si = ScriptEditor.items().getSelected();
@@ -23,6 +20,7 @@ public class CutReversible implements Reversible {
       origClipboard = ScriptEditor.clipboard();
     }
   }
+
   @Override
   public String toString() {
     return "Cut " + EdTools.itemsStr(slots.length);
@@ -56,16 +54,20 @@ public class CutReversible implements Reversible {
 
     ObjArray items = ScriptEditor.items();
 
-    ObjArray newClip = new ObjArray(items, slots); 
+    ObjArray newClip = new ObjArray(items, slots);
     ScriptEditor.setClipboard(newClip);
+    removeObjects(items, slots);
+  }
 
-    items.remove(slots);
-
+  private static void removeObjects(ObjArray objects, int[] slots) {
+    for (int i = slots.length - 1; i >= 0; i--) {
+      objects.remove(slots[i]);
+    }
   }
 
   private int[] slots;
   private ObjArray origClipboard;
-  
+
   @Override
   public boolean valid() {
     return slots != null;
