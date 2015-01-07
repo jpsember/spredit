@@ -14,7 +14,7 @@ import com.js.basic.*;
  * </pre>
  * 
  */
-class EdObjectArray implements Iterable<EdObject> {
+class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
 
   /**
    * Construct empty object array.
@@ -91,14 +91,14 @@ class EdObjectArray implements Iterable<EdObject> {
    * @return the index of the object
    */
   public int add(EdObject object) {
-    prepareForChanges();
+    mutate();
     int index = mList.size();
     mList.add(object);
     return index;
   }
 
   public void set(int index, EdObject object) {
-    prepareForChanges();
+    mutate();
     mList.set(index, object);
   }
 
@@ -139,30 +139,8 @@ class EdObjectArray implements Iterable<EdObject> {
    * </pre>
    */
 
-  /**
-   * Invalidate any cached information in preparation for changes being made to
-   * this object
-   */
-  private void prepareForChanges() {
-    if (mFrozen)
-      throw new IllegalStateException();
-    mFrozenVersion = null;
-    mSelectedSlots = null;
-  }
-
-  /**
-   * Make this array immutable, if it's not already
-   */
-  public EdObjectArray freeze() {
-    if (!mFrozen) {
-      mFrozen = true;
-      mFrozenVersion = this;
-    }
-    return this;
-  }
-
   public void clear() {
-    prepareForChanges();
+    mutate();
     mList.clear();
   }
 
@@ -175,40 +153,6 @@ class EdObjectArray implements Iterable<EdObject> {
       subset.add(get(slot));
     }
     return subset;
-  }
-
-  /**
-   * Get a mutable copy of this array
-   */
-  public EdObjectArray getMutableCopy() {
-    EdObjectArray copy = new EdObjectArray();
-    for (EdObject obj : mList)
-      copy.add(obj);
-    // Have the copy share this array's frozen version, if it has one
-    copy.mFrozenVersion = this.mFrozenVersion;
-    return copy;
-  }
-
-  /**
-   * Construct an immutable (i.e. frozen) version of this array
-   * 
-   * @return frozen version, which may be this
-   */
-  public EdObjectArray getFrozen() {
-    return getCopy().freeze();
-  }
-
-  /**
-   * Get a copy of this array; if we're frozen, returns this
-   */
-  private EdObjectArray getCopy() {
-    if (isFrozen())
-      return this;
-    return getMutableCopy();
-  }
-
-  private boolean isFrozen() {
-    return mFrozen;
   }
 
   /**
@@ -231,7 +175,7 @@ class EdObjectArray implements Iterable<EdObject> {
    * Make specific slots selected, and others unselected
    */
   public void setSelected(List<Integer> slots) {
-    prepareForChanges();
+    mutate();
     int j = 0;
     for (int i = 0; i < mList.size(); i++) {
       boolean sel = j < slots.size() && slots.get(j) == i;
@@ -242,16 +186,9 @@ class EdObjectArray implements Iterable<EdObject> {
     mSelectedSlots = slots;
   }
 
-  // public void setEditableSlot(int slot) {
-  // ASSERT(slot >= 0);
-  // setSelected(SlotList.build(slot));
-  // get(slot).setEditable(true);
-  // prepareForChanges();
-  // }
-
   public void removeSelected() {
     List<Integer> slots = getSelectedSlots();
-    prepareForChanges();
+    mutate();
     List<EdObject> newList = new ArrayList();
     int j = 0;
     for (int i = 0; i < mList.size(); i++) {
@@ -269,7 +206,7 @@ class EdObjectArray implements Iterable<EdObject> {
    */
   public void replaceSelectedObjectsWithCopies() {
     List<Integer> selectedSlots = getSelectedSlots();
-    prepareForChanges();
+    mutate();
     for (int slot : selectedSlots) {
       EdObject obj = get(slot);
       set(slot, obj.getCopy());
@@ -277,14 +214,30 @@ class EdObjectArray implements Iterable<EdObject> {
   }
 
   public void unselectAll() {
-    prepareForChanges();
+    mutate();
     setSelected(SlotList.build());
   }
 
   public void selectAll() {
-    prepareForChanges();
+    mutate();
     for (EdObject obj : mList)
       obj.setSelected(true);
+  }
+
+  // Freezable interface
+
+  @Override
+  public void mutate() {
+    super.mutate();
+    mSelectedSlots = null;
+  }
+
+  @Override
+  public EdObjectArray getMutableCopy() {
+    EdObjectArray copy = new EdObjectArray();
+    for (EdObject obj : mList)
+      copy.add(obj);
+    return copy;
   }
 
   @Override
@@ -298,33 +251,15 @@ class EdObjectArray implements Iterable<EdObject> {
     return sb.toString();
   }
 
-  // public EdObject updateEditableObjectStatus(boolean allowEditableObject) {
-  // int currentEditable = -1;
-  // int newEditable = -1;
-  // EdObject editableObject = null;
-  // List<Integer> list = getSelectedSlots();
-  // for (int slot : list) {
-  // EdObject obj = get(slot);
-  // if (obj.isEditable())
-  // currentEditable = slot;
-  // }
-  // if (list.size() == 1 && allowEditableObject) {
-  // newEditable = list.get(0);
-  // editableObject = get(newEditable);
-  // }
-  // if (currentEditable != newEditable) {
-  // prepareForChanges();
-  // if (currentEditable >= 0)
-  // get(currentEditable).setEditable(false);
-  // if (newEditable >= 0)
-  // editableObject.setEditable(true);
-  // }
-  // return editableObject;
-  // }
+  @Override
+  public void freeze() {
+    if (isFrozen())
+      return;
+    // Perform any lazy initialization, so object is truly immutable once frozen
+    getSelectedSlots();
+    super.freeze();
+  }
 
   private List<EdObject> mList = new ArrayList();
   private List<Integer> mSelectedSlots;
-  private boolean mFrozen;
-  private EdObjectArray mFrozenVersion;
-
 }

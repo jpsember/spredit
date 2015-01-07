@@ -41,7 +41,9 @@ public class GroupObject extends EdObject {
       ASSERT(!undoFlag);
 
       if (origObj == null) {
-        origObj = new EdObjectArray(ScriptEditor.items());
+        origObj = ScriptEditor.items().getFrozenCopy();
+        // observe we are actually mutating the frozen object here; later
+        // perhaps we'll move selected flags out of the EdObjectArray
         origObj.clearAllSelected();
       }
 
