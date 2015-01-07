@@ -19,11 +19,9 @@ public class MouseOperSelectItems extends MouseOper {
   private static final int STATE_ADJUSTINGBOX = 4;
 
   public MouseOperSelectItems() {
-    ASSERT(singleton == null);
-    singleton = this;
+    ASSERT(sSingleton == null);
+    sSingleton = this;
   }
-
-  private static MouseOperSelectItems singleton;
 
   /**
    * Modify the singleton instance to start a move operation. Used to append a
@@ -32,13 +30,13 @@ public class MouseOperSelectItems extends MouseOper {
    * @return
    */
   public static MouseOperSelectItems startMovingSelectedItems() {
-    ASSERT(singleton != null);
-    singleton.oper = new MoveObjectsCommand(currentPtF);
+    ASSERT(sSingleton != null);
+    sSingleton.mMoveCommand = new MoveObjectsCommand(currentPtF);
 
-    singleton.setState(STATE_MOVINGITEMS);
-    ScriptEditor.editor().registerPush(singleton.oper);
+    sSingleton.setState(STATE_MOVINGITEMS);
+    ScriptEditor.editor().registerPush(sSingleton.mMoveCommand);
 
-    return singleton;
+    return sSingleton;
   }
 
   @Override
@@ -64,26 +62,26 @@ public class MouseOperSelectItems extends MouseOper {
           if (db)
             pr("testing if press in same location");
 
-          if (lastFoundLoc == null) {
+          if (sLastFoundLoc == null) {
             if (db)
               pr(" no last defined");
             break;
           }
-          if (MyMath.distanceBetween(currentPt, lastFoundLoc) > 2) {
+          if (MyMath.distanceBetween(currentPt, sLastFoundLoc) > 2) {
             if (db)
               pr(" not pressed at same location");
             break;
           }
-          if (itemsUnderMouse.length < 2) {
+          if (sItemsUnderMouse.length < 2) {
             if (db)
               pr(" less than two items in list");
 
             break;
           }
 
-          lastFoundCursor = (1 + lastFoundCursor) % itemsUnderMouse.length;
+          sLastFoundCursor = (1 + sLastFoundCursor) % sItemsUnderMouse.length;
 
-          mouseItem = itemsUnderMouse[lastFoundCursor];
+          mouseItem = sItemsUnderMouse[sLastFoundCursor];
 
         } while (false);
 
@@ -92,12 +90,12 @@ public class MouseOperSelectItems extends MouseOper {
 
         if (mouseItem < 0) {
 
-          lastFoundLoc = new IPoint(currentPt);
-          itemsUnderMouse = toArray(findItemsAtMouse(lastFoundLoc));
-          lastFoundCursor = 0;
+          sLastFoundLoc = new IPoint(currentPt);
+          sItemsUnderMouse = toArray(findItemsAtMouse(sLastFoundLoc));
+          sLastFoundCursor = 0;
 
-          if (itemsUnderMouse.length > 0)
-            mouseItem = itemsUnderMouse[0];
+          if (sItemsUnderMouse.length > 0)
+            mouseItem = sItemsUnderMouse[0];
           if (db)
             pr(" mouseItem (B) = " + mouseItem);
 
@@ -121,7 +119,7 @@ public class MouseOperSelectItems extends MouseOper {
           }
 
           {
-            oper = new MoveObjectsCommand(currentPtF);
+            mMoveCommand = new MoveObjectsCommand(currentPtF);
             // if there is an existing operation, and it has the same
             // highlighted items,
             // continue it
@@ -132,16 +130,16 @@ public class MouseOperSelectItems extends MouseOper {
               Command tos = ScriptEditor.editor().registerPeek();
               if (tos != null && tos instanceof MoveObjectsCommand) {
                 MoveObjectsCommand r = (MoveObjectsCommand) tos;
-                if (r.sameItemsAs(oper)) {
-                  oper = r;
-                  oper.continueWithNewMouseDown(currentPtF);
+                if (r.sameItemsAs(mMoveCommand)) {
+                  mMoveCommand = r;
+                  mMoveCommand.continueWithNewMouseDown(currentPtF);
                   continuing = true;
                 }
               }
             }
 
             if (!continuing) {
-              ScriptEditor.editor().registerPush(oper);
+              ScriptEditor.editor().registerPush(mMoveCommand);
             }
           }
           setState(STATE_MOVINGITEMS);
@@ -151,18 +149,18 @@ public class MouseOperSelectItems extends MouseOper {
         // ctrl is pressed
 
         int mouseItem = -1;
-        lastFoundLoc = new IPoint(currentPt);
-        itemsUnderMouse = toArray(findItemsAtMouse(lastFoundLoc));
-        lastFoundCursor = 0;
-        if (itemsUnderMouse.length > 0)
-          mouseItem = itemsUnderMouse[lastFoundCursor];
+        sLastFoundLoc = new IPoint(currentPt);
+        sItemsUnderMouse = toArray(findItemsAtMouse(sLastFoundLoc));
+        sLastFoundCursor = 0;
+        if (sItemsUnderMouse.length > 0)
+          mouseItem = sItemsUnderMouse[sLastFoundCursor];
 
         if (mouseItem < 0) {
           resetDup = true;
           setState(STATE_WAITFORDRAG1);
           f = true;
         } else {
-          pressedAtItem = mouseItem;
+          mPressedAtItem = mouseItem;
           setState(STATE_WAITFORDRAG2);
           f = true;
         }
@@ -176,20 +174,20 @@ public class MouseOperSelectItems extends MouseOper {
 
   @Override
   public void mouseMove(boolean drag) {
-    switch (state) {
+    switch (mState) {
     case STATE_WAITFORDRAG1:
     case STATE_WAITFORDRAG2:
-      boxStart = startPt;
-      state = STATE_ADJUSTINGBOX;
-      boxEnd = currentPt;
+      mBoxStart = startPt;
+      mState = STATE_ADJUSTINGBOX;
+      mBoxEnd = currentPt;
       ScriptEditor.repaint();
       break;
     case STATE_ADJUSTINGBOX:
-      boxEnd = currentPt;
+      mBoxEnd = currentPt;
       ScriptEditor.repaint();
       break;
     case STATE_MOVINGITEMS:
-      oper.update(currentPtF);
+      mMoveCommand.update(currentPtF);
       break;
     }
   }
@@ -198,19 +196,19 @@ public class MouseOperSelectItems extends MouseOper {
   public void mouseUp() {
     boolean clr = true;
 
-    switch (state) {
+    switch (mState) {
     case STATE_WAITFORDRAG1:
       setState(STATE_NONE);
       break;
     case STATE_WAITFORDRAG2: {
-      EdObject obj = ScriptEditor.items().getCopy(pressedAtItem);
+      EdObject obj = ScriptEditor.items().getCopy(mPressedAtItem);
       obj.setSelected(!obj.isSelected());
       setState(STATE_NONE);
     }
       break;
     case STATE_ADJUSTINGBOX: {
-      boxEnd = currentPt;
-      toggleBoxedObjects(boxStart, boxEnd);
+      mBoxEnd = currentPt;
+      toggleBoxedObjects(mBoxStart, mBoxEnd);
       setState(STATE_NONE);
     }
       break;
@@ -279,30 +277,30 @@ public class MouseOperSelectItems extends MouseOper {
 
   private void setState(int s) {
     final boolean db = false;
-    if (state != s) {
+    if (mState != s) {
       if (db)
-        pr("chg state from " + stateNames[state] + " to " + stateNames[s]);
-      state = s;
+        pr("chg state from " + sStateNames[mState] + " to " + sStateNames[s]);
+      mState = s;
     }
   }
 
   @Override
   public void stop() {
-    if (state == STATE_MOVINGITEMS) {
+    if (mState == STATE_MOVINGITEMS) {
       // if we didn't move anywhere, pop the operation
-      if (oper.getTranslate().magnitude() == 0) {
+      if (mMoveCommand.getTranslate().magnitude() == 0) {
         ScriptEditor.editor().registerPop();
       }
 
-      oper = null;
+      mMoveCommand = null;
     }
     setState(STATE_NONE);
   }
 
   private IRect getBox() {
     IRect box = null;
-    if (state == STATE_ADJUSTINGBOX) {
-      box = new IRect(boxStart, boxEnd);
+    if (mState == STATE_ADJUSTINGBOX) {
+      box = new IRect(mBoxStart, mBoxEnd);
     }
     return box;
   }
@@ -324,20 +322,22 @@ public class MouseOperSelectItems extends MouseOper {
     }
   }
 
-  // STATE_x
-  private int state;
+  private static MouseOperSelectItems sSingleton;
 
-  private static int lastFoundCursor;
-  private static int[] itemsUnderMouse;
-  private static IPoint lastFoundLoc;
-  private static String[] stateNames = { "NONE", "WAITFORDRAG1", "MOVINGITEMS",
-      "WAITFORDRAG2", "ADUSTINGBOX", };
+  private static int sLastFoundCursor;
+  private static int[] sItemsUnderMouse;
+  private static IPoint sLastFoundLoc;
+  private static String[] sStateNames = {//
+  "NONE", "WAITFORDRAG1", "MOVINGITEMS", "WAITFORDRAG2", "ADUSTINGBOX", };
 
   // item user pressed on with ctrl pressed as well, prior to STATE_WAITFORDRAG2
-  private int pressedAtItem;
+  private int mPressedAtItem;
+
+  // STATE_x
+  private int mState;
 
   // If MOVINGITEMS, the operation performing the move
-  private MoveObjectsCommand oper;
-  private static IPoint boxStart, boxEnd;
+  private MoveObjectsCommand mMoveCommand;
+  private static IPoint mBoxStart, mBoxEnd;
 
 }
