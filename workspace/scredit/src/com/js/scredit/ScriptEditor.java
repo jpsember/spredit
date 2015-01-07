@@ -1367,12 +1367,9 @@ public class ScriptEditor {
 
   /**
    * Set clipboard
-   * 
-   * @param newClip
-   *          new clipboard
    */
   public static void setClipboard(EdObjectArray newClip) {
-    sClipboard = newClip;
+    sClipboard = newClip.getFrozenCopy();
   }
 
   private static boolean flushAll() {
@@ -1733,6 +1730,12 @@ public class ScriptEditor {
     }
   }
 
+  public void setState(ScriptEditorState state) {
+    getScript().setItems(state.getObjects().getMutableCopy());
+    getScript().items().setSelected(state.getSelectedSlots());
+    setClipboard(state.getClipboard());
+  }
+
   // ------------------------- Undo Stuff ---------------------------
 
   private static final boolean DBUNDO = false;
@@ -1938,7 +1941,7 @@ public class ScriptEditor {
   private static float sZoomFactor = 1.0f;
   private static SpriteObject sSelectedSprite;
   private static IPoint sFocus = new IPoint();
-  private static EdObjectArray sClipboard = new EdObjectArray();
+  private static EdObjectArray sClipboard = new EdObjectArray().getFrozenCopy();
   private static ScriptProject sProject;
   private static ScriptSet sScriptSet;
   private static AtlasPanel sAtlasPanel;
