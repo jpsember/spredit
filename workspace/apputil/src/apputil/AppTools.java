@@ -49,6 +49,10 @@ public class AppTools {
             if (sApplication.exitProgram()) {
               frame.setVisible(false);
               frame.dispose();
+              sFrame = null;
+              // The Java VM isn't quitting the program, even though the frame
+              // has been disposed of... so quit it explicitly
+              System.exit(0);
             }
           }
         });
