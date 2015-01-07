@@ -188,10 +188,8 @@ public class PalettePanel extends JPanel {
 
       {
         Command r = new ColorRev(c);
-        if (db)
-          pr(" constructed ColorRev, valid=" + r.shouldBeEnabled());
 
-        if (r.shouldBeEnabled()) {
+        if (r.valid()) {
           if (db)
             pr("  performing it");
 

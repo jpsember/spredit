@@ -73,7 +73,7 @@ public class PasteReversible extends Command.Adapter {
   }
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     return clip != null;
   }
 }

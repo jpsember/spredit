@@ -34,8 +34,11 @@ public interface Command {
    * Determine if the command is valid; e.g., whether it can be performed at the
    * present time
    */
-  public boolean shouldBeEnabled();
+  public boolean valid();
 
+  /**
+   * Abstract class that implements the Command interface
+   */
   public abstract class Adapter implements Command {
 
     @Override
@@ -46,13 +49,19 @@ public interface Command {
     @Override
     public abstract void perform();
 
+    /**
+     * Default implementation: no merging possible
+     */
     @Override
     public Command attemptMergeWith(Command follower) {
       return null;
     }
 
+    /**
+     * Default implementation: always enabled
+     */
     @Override
-    public boolean shouldBeEnabled() {
+    public boolean valid() {
       return true;
     }
   }

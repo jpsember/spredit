@@ -70,7 +70,7 @@ public class CutReversible extends Command.Adapter {
   private EdObjectArray origClipboard;
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     return slots != null;
   }
 

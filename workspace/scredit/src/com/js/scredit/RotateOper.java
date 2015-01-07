@@ -16,7 +16,7 @@ public class RotateOper extends MouseOper {
   }
 
   public boolean shouldBeEnabled() {
-    return oper.shouldBeEnabled();
+    return oper.valid();
   }
 
   private boolean reg;
@@ -67,8 +67,8 @@ public class RotateOper extends MouseOper {
       return;
 
     oper.rotation = MyMath.normalizeAngle(MyMath.polarAngleOfSegment(
-        oper.circ.getOrigin(),
-        currentPtF) - mouseDownAngle + mouseDownRotation);
+        oper.circ.getOrigin(), currentPtF)
+        - mouseDownAngle + mouseDownRotation);
     oper.perform();
   }
 
@@ -89,7 +89,7 @@ public class RotateOper extends MouseOper {
     }
 
     @Override
-    public boolean shouldBeEnabled() {
+    public boolean valid() {
       return nSlots() > 0;
     }
 

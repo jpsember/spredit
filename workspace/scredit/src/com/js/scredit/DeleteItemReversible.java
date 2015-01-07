@@ -55,11 +55,6 @@ public class DeleteItemReversible extends Command.Adapter {
       a.add(slot, origObject);
   }
 
-  @Override
-  public boolean shouldBeEnabled() {
-    return true;
-  }
-
   private int slot;
   private boolean delete;
   private EdObject origObject;

@@ -84,7 +84,7 @@ public class GroupObject extends EdObject {
     }
 
     @Override
-    public boolean shouldBeEnabled() {
+    public boolean valid() {
       return undoFlag || slots.length >= 2;
     }
 
@@ -203,7 +203,7 @@ public class GroupObject extends EdObject {
     }
 
     @Override
-    public boolean shouldBeEnabled() {
+    public boolean valid() {
       return group != null;
     }
   };

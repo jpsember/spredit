@@ -22,7 +22,7 @@ public class ScaleOper extends MouseOper {
   }
 
   public boolean shouldBeEnabled() {
-    return oper.shouldBeEnabled();
+    return oper.valid();
   }
 
   @Override
@@ -131,7 +131,7 @@ public class ScaleOper extends MouseOper {
     }
 
     @Override
-    public boolean shouldBeEnabled() {
+    public boolean valid() {
       return nSlots() > 0;
     }
 

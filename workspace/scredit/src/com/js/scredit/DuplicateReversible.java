@@ -16,7 +16,7 @@ public class DuplicateReversible extends Command.Adapter {
   }
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     return slots.length > 0;
   }
 

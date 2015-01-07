@@ -27,12 +27,6 @@ public class CopyReversible extends Command.Adapter {
 
     return new Command.Adapter() {
 
-      // @Override
-      // public Reversible getReverse() {
-      // throw new IllegalStateException();
-      // // return CopyReversible.this;
-      // }
-
       @Override
       public void perform() {
         ScriptEditor.setClipboard(oldClipboard);
@@ -43,10 +37,6 @@ public class CopyReversible extends Command.Adapter {
         return CopyReversible.this;
       }
 
-      @Override
-      public boolean shouldBeEnabled() {
-        return CopyReversible.this.shouldBeEnabled();
-      }
     };
   }
 
@@ -58,7 +48,7 @@ public class CopyReversible extends Command.Adapter {
   }
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     return slots != null;
   }
 

@@ -161,7 +161,7 @@ public class AdjustSlotsReversible extends Command.Adapter {
   }
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     boolean val = false;
     do {
       if (srcSlots.length == 0)

@@ -87,7 +87,7 @@ public class MoveObjectsReversible extends Command.Adapter {
   }
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     return slots != null && slots.length > 0;
   }
 

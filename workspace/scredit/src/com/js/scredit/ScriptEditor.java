@@ -289,7 +289,7 @@ public class ScriptEditor {
         }
 
         @Override
-        public boolean shouldBeEnabled() {
+        public boolean valid() {
           return nSelected() > 0;
         }
       };
@@ -488,7 +488,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = new CutReversible();
-        return r.shouldBeEnabled();
+        return r.valid();
       }
 
       public void go() {
@@ -516,14 +516,12 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = new CopyReversible();
-        return r.shouldBeEnabled();
-        // return editor.items.hasSelected();
+        return r.valid();
       }
 
       public void go() {
         editor().registerPush(r);
         perform(r);
-        // editor.doCopy();
       }
     });
 
@@ -532,8 +530,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = new PasteReversible();
-        return r.shouldBeEnabled();
-        // return clipboard().size() > 0;
+        return r.valid();
       }
 
       public void go() {
@@ -548,7 +545,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = new DuplicateReversible();
-        return r.shouldBeEnabled();
+        return r.valid();
       }
 
       public void go() {
@@ -593,7 +590,7 @@ public class ScriptEditor {
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(1, false);
-            return r.shouldBeEnabled();
+            return r.valid();
           }
 
           public void go() {
@@ -607,7 +604,7 @@ public class ScriptEditor {
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(-1, false);
-            return r.shouldBeEnabled();
+            return r.valid();
           }
 
           public void go() {
@@ -621,7 +618,7 @@ public class ScriptEditor {
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(1, true);
-            return r.shouldBeEnabled();
+            return r.valid();
           }
 
           public void go() {
@@ -635,7 +632,7 @@ public class ScriptEditor {
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(-1, true);
-            return r.shouldBeEnabled();
+            return r.valid();
           }
 
           public void go() {
@@ -651,7 +648,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = GroupObject.getGroupReversible();
-        return r.shouldBeEnabled();
+        return r.valid();
       }
 
       public void go() {
@@ -664,7 +661,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = GroupObject.getUnGroupReversible();
-        return r.shouldBeEnabled();
+        return r.valid();
       }
 
       public void go() {
@@ -685,7 +682,7 @@ public class ScriptEditor {
 
           public boolean shouldBeEnabled() {
             r = new FlipReversible(true);
-            return r.shouldBeEnabled();
+            return r.valid();
           }
 
           public void go() {
@@ -699,7 +696,7 @@ public class ScriptEditor {
 
           public boolean shouldBeEnabled() {
             r = new FlipReversible(false);
-            return r.shouldBeEnabled();
+            return r.valid();
           }
 
           public void go() {
@@ -725,7 +722,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = RotateOper.getResetOper();
-        return r.shouldBeEnabled();
+        return r.valid();
       }
 
       public void go() {
@@ -751,7 +748,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = ScaleOper.getResetOper();
-        return r.shouldBeEnabled();
+        return r.valid();
       }
 
       public void go() {
@@ -797,7 +794,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = Grid.getOper();
-        return r.shouldBeEnabled();
+        return r.valid();
 
       }
 
@@ -1350,7 +1347,7 @@ public class ScriptEditor {
       }
 
       @Override
-      public boolean shouldBeEnabled() {
+      public boolean valid() {
         return nSelected() > 0;
       }
     };

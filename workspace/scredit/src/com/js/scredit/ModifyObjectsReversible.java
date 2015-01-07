@@ -175,7 +175,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
   }
 
   @Override
-  public boolean shouldBeEnabled() {
+  public boolean valid() {
     constructModifiedVersions();
     return changesMade;
   }
