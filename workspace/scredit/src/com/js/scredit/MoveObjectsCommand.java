@@ -5,7 +5,7 @@ import java.util.*;
 import com.js.editor.Command;
 import com.js.geometry.*;
 
-public class MoveObjectsReversible extends Command.Adapter {
+public class MoveObjectsCommand extends Command.Adapter {
 
   /**
    * Constructor
@@ -13,7 +13,7 @@ public class MoveObjectsReversible extends Command.Adapter {
    * @param startLoc
    *          initial mouse position
    */
-  public MoveObjectsReversible(Point startLoc) {
+  public MoveObjectsCommand(Point startLoc) {
     this.startLoc = new Point(startLoc);
 
     EdObjectArray itm = ScriptEditor.items();
@@ -106,7 +106,7 @@ public class MoveObjectsReversible extends Command.Adapter {
     };
   }
 
-  public boolean sameItemsAs(MoveObjectsReversible oper) {
+  public boolean sameItemsAs(MoveObjectsCommand oper) {
     boolean same = false;
     do {
       if (!Arrays.equals(slots, oper.slots))

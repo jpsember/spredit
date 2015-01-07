@@ -33,7 +33,7 @@ public class MouseOperSelectItems extends MouseOper {
    */
   public static MouseOperSelectItems startMovingSelectedItems() {
     ASSERT(singleton != null);
-    singleton.oper = new MoveObjectsReversible(currentPtF);
+    singleton.oper = new MoveObjectsCommand(currentPtF);
 
     singleton.setState(STATE_MOVINGITEMS);
     ScriptEditor.editor().registerPush(singleton.oper);
@@ -121,7 +121,7 @@ public class MouseOperSelectItems extends MouseOper {
           }
 
           {
-            oper = new MoveObjectsReversible(currentPtF);
+            oper = new MoveObjectsCommand(currentPtF);
             // if there is an existing operation, and it has the same
             // highlighted items,
             // continue it
@@ -130,8 +130,8 @@ public class MouseOperSelectItems extends MouseOper {
 
             {
               Command tos = ScriptEditor.editor().registerPeek();
-              if (tos != null && tos instanceof MoveObjectsReversible) {
-                MoveObjectsReversible r = (MoveObjectsReversible) tos;
+              if (tos != null && tos instanceof MoveObjectsCommand) {
+                MoveObjectsCommand r = (MoveObjectsCommand) tos;
                 if (r.sameItemsAs(oper)) {
                   oper = r;
                   oper.continueWithNewMouseDown(currentPtF);
@@ -337,7 +337,7 @@ public class MouseOperSelectItems extends MouseOper {
   private int pressedAtItem;
 
   // If MOVINGITEMS, the operation performing the move
-  private MoveObjectsReversible oper;
+  private MoveObjectsCommand oper;
   private static IPoint boxStart, boxEnd;
 
 }
