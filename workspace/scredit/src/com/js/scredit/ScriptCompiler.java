@@ -2,7 +2,6 @@ package com.js.scredit;
 
 import java.io.*;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -144,7 +143,7 @@ public class ScriptCompiler {
       pr("processScriptSet: " + f);
 
     ScriptSet ss = new ScriptSet(project.directory(), new JSONObject(
-        FileUtils.readFileToString(f)));
+        Files.readString(f)));
     for (int i = 0; i < ss.size(); i++) {
       Script script = ss.get(i).getScript();
       File f2 = script.getFile();

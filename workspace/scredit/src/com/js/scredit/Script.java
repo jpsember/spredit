@@ -97,7 +97,7 @@ public class Script {
 
   public void read() throws IOException, JSONException {
     assertHasName();
-    String content = FileUtils.readFileToString(getFile());
+    String content = Files.readString(getFile());
     JSONObject scriptMap = new JSONObject(content);
     JSONArray itemsArray = scriptMap.getJSONArray(ITEMS_TAG);
     int cursor = 0;

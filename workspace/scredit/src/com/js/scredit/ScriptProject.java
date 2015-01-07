@@ -4,7 +4,6 @@ import java.awt.image.*;
 import java.io.*;
 import java.util.*;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,7 +59,7 @@ public class ScriptProject {
   }
 
   private void read() throws IOException, JSONException {
-    String content = FileUtils.readFileToString(mProjectFile);
+    String content = Files.readString(mProjectFile);
     mProjectDefaults = new JSONObject(content);
     mRecentScripts.restore(getDefaults(), KEY_RECENTSCRIPTS);
     mRecentAtlases.restore(getDefaults(), KEY_RECENTATLASES);

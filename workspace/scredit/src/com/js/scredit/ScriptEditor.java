@@ -11,7 +11,6 @@ import java.util.TreeSet;
 
 import javax.swing.*;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -1262,7 +1261,7 @@ public class ScriptEditor {
       try {
 
         ScriptSet ss = new ScriptSet(sProject.directory(), new JSONObject(
-            FileUtils.readFileToString(f)));
+            Files.readString(f)));
 
         setScriptSet(ss);
         setRecentSetPath(f);

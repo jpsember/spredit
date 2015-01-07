@@ -9,7 +9,6 @@ import org.json.*;
 
 import static com.js.basic.Tools.*;
 
-import com.js.basic.Tools;
 import com.js.geometry.IRect;
 
 public class MyFrame extends JFrame {
@@ -75,7 +74,7 @@ public class MyFrame extends JFrame {
         }
       });
 
-    Tools.quitProgramAfterDelay(this, 5 * 60);
+    AppTools.quitProgramAfterDelay(this, 5 * 60);
   }
 
   public MyFrame(String persistId, String title, Component contents) {

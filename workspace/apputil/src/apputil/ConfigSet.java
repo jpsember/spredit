@@ -3,7 +3,6 @@ package apputil;
 import java.io.*;
 import java.util.ArrayList;
 
-import org.apache.commons.io.FileUtils;
 import org.json.*;
 
 import com.js.basic.Files;
@@ -89,7 +88,7 @@ public class ConfigSet {
     JSONObject map = new JSONObject();
 
     if (mFile.exists()) {
-      String s = FileUtils.readFileToString(mFile);
+      String s = Files.readString(mFile);
       map = new JSONObject(s);
     }
     for (Interface ic : configs)

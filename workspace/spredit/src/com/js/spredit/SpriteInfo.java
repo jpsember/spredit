@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.image.*;
 import java.io.*;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,7 +29,7 @@ public class SpriteInfo {
 
   private void readMeta() {
     try {
-      mLastFileContents = FileUtils.readFileToString(mMetaPath);
+      mLastFileContents = Files.readString(mMetaPath);
       JSONObject map = new JSONObject(mLastFileContents);
       setCenterpoint(Point.opt(map, "CP"));
       setCropRect(IRect.opt(map, "CLIP"));
@@ -143,7 +142,7 @@ public class SpriteInfo {
     String str = map.toString();
     if (!str.equals(mLastFileContents)) {
       try {
-        FileUtils.writeStringToFile(mMetaPath, str);
+        Files.writeString(mMetaPath, str);
         mLastFileContents = str;
       } catch (IOException e) {
         AppTools.showError("writing SpriteInfo", e);

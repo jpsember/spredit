@@ -3,6 +3,9 @@ package apputil;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.swing.*;
 
 import com.js.basic.Files;
@@ -251,6 +254,20 @@ public class AppTools {
 
   public static IApplication app() {
     return sApplication;
+  }
+
+  /**
+   * Set up timer to close an application frame after a minute or so
+   */
+  public static void quitProgramAfterDelay(final Window frame,
+      int delayInSeconds) {
+    warning("will close window in " + delayInSeconds + "s");
+    new Timer().schedule(new TimerTask() {
+      @Override
+      public void run() {
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+      }
+    }, delayInSeconds * 1000);
   }
 
   private static boolean sIsMac;
