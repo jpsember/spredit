@@ -201,7 +201,8 @@ public class MouseOperSelectItems extends MouseOper {
       setState(STATE_NONE);
       break;
     case STATE_WAITFORDRAG2: {
-      ScriptEditor.items().get(pressedAtItem).toggleSelected();
+      EdObject obj = ScriptEditor.items().getCopy(pressedAtItem);
+      obj.setSelected(!obj.isSelected());
       setState(STATE_NONE);
     }
       break;

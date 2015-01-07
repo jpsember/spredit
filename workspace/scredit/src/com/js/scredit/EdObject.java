@@ -12,7 +12,8 @@ import com.js.myopengl.GLPanel;
 import tex.*;
 
 public abstract class EdObject implements Cloneable {
-  public static final int COLOR_UNDEFINED = -2;
+  private static final int FLAG_SELECTED = (1 << 31);
+  private static final int FLAG_EDITABLE = (1 << 30);
 
   /**
    * Clone the object
@@ -48,15 +49,6 @@ public abstract class EdObject implements Cloneable {
   }
 
   /**
-   * Determine if object is selected
-   * 
-   * @return true if so
-   */
-  public boolean isSelected() {
-    return selected;
-  }
-
-  /**
    * Determine if object is well defined. If not, and editing complete, it gets
    * deleted.
    */
@@ -65,17 +57,86 @@ public abstract class EdObject implements Cloneable {
   }
 
   /**
-   * Set object's selected state
+   * Add or clear flags
    * 
-   * @param f
-   *          new state
+   * @param flags
+   *          flags to modify
+   * @param value
+   *          true to set, false to clear
    */
-  public void setSelected(boolean f) {
-    selected = f;
+  private void setFlags(int flags, boolean value) {
+    if (!value)
+      clearFlags(flags);
+    else
+      addFlags(flags);
   }
 
-  public void toggleSelected() {
-    selected ^= true;
+  /**
+   * Turn specific flags on
+   * 
+   * @param f
+   *          flags to turn on
+   */
+  public void addFlags(int f) {
+    setFlags(mFlags | f);
+  }
+
+  /**
+   * Determine if a set of flags are set
+   * 
+   * @param f
+   *          flags to test
+   * @return true if every one of these flags is set
+   */
+  public boolean hasFlags(int f) {
+    return (mFlags & f) == f;
+  }
+
+  /**
+   * Turn specific flags off
+   * 
+   * @param f
+   *          flags to turn off
+   */
+  public void clearFlags(int f) {
+    setFlags(mFlags & ~f);
+  }
+
+  /**
+   * Get current flags
+   * 
+   * @return flags
+   */
+  public int flags() {
+    return mFlags;
+  }
+
+  /**
+   * Determine if object is selected
+   */
+  public boolean isSelected() {
+    return hasFlags(FLAG_SELECTED);
+  }
+
+  /**
+   * Set object's selected state
+   */
+  void setSelected(boolean f) {
+    int flags = FLAG_SELECTED;
+    if (!f)
+      flags |= FLAG_EDITABLE;
+    setFlags(flags, f);
+  }
+
+  public boolean isEditable() {
+    return hasFlags(FLAG_EDITABLE);
+  }
+
+  void setEditable(boolean f) {
+    int flags = FLAG_EDITABLE;
+    if (f)
+      flags |= FLAG_SELECTED;
+    setFlags(flags, f);
   }
 
   /**
@@ -180,10 +241,17 @@ public abstract class EdObject implements Cloneable {
 
   public abstract Point location();
 
-  private boolean selected;
+  /**
+   * Replace existing flags with new ones
+   */
+  public void setFlags(int f) {
+    this.mFlags = f;
+  }
 
   /**
    * @return
    */
   public abstract Rect boundingRect();
+
+  private int mFlags;
 }
