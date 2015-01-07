@@ -1,6 +1,6 @@
 package com.js.scredit;
 
-import apputil.*;
+import com.js.editor.MouseOper;
 
 /**
  * Operation to determine if editing a particular element of a selected item is

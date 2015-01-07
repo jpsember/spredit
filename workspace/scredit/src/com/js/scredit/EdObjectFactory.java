@@ -5,9 +5,8 @@ import java.io.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.editor.MouseOper;
 import com.js.geometry.IPoint;
-
-import apputil.*;
 
 public abstract class EdObjectFactory {
 

@@ -1,6 +1,8 @@
 package com.js.scredit;
 
-import apputil.*;
+import com.js.editor.MouseOper;
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 

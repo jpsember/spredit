@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
 import static com.js.basic.Tools.*;
-
-import apputil.*;
 
 public class GroupObject extends EdObject {
 

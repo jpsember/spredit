@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import apputil.*;
 
+import com.js.editor.Reversible;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 

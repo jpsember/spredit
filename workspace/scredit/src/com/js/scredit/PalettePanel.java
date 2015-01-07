@@ -11,9 +11,10 @@ import javax.swing.*;
 import org.json.JSONObject;
 //import javax.swing.event.*;
 
+import com.js.editor.MouseOper;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 
-import apputil.*;
 import tex.*;
 import static com.js.basic.Tools.*;
 

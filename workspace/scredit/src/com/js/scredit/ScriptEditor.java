@@ -18,6 +18,9 @@ import tex.*;
 import apputil.*;
 
 import com.js.basic.*;
+import com.js.editor.MouseOper;
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 

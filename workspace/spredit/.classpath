@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="/myopengl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/basic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jogl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/editor"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

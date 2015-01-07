@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import apputil.*;
 import com.js.basic.*;
+import com.js.editor.MouseOper;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 

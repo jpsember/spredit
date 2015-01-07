@@ -1,7 +1,9 @@
 package com.js.scredit;
 
 import java.util.*;
-import apputil.*;
+
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 
 public class MoveObjectsReversible implements Reversible {

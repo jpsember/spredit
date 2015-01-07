@@ -1,4 +1,4 @@
-package apputil;
+package com.js.editor;
 
 import static com.js.basic.Tools.*;
 

@@ -1,7 +1,8 @@
 package com.js.scredit;
 
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
-import apputil.*;
 
 public class PasteReversible implements Reversible {
   @Override

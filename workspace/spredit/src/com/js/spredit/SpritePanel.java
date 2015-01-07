@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 import javax.swing.JCheckBox;
 
 import com.js.myopengl.GLPanel;
-import apputil.IEditorView;
-import apputil.MouseOper;
 
+import com.js.editor.IEditorView;
+import com.js.editor.MouseOper;
 import com.js.geometry.*;
 
 public class SpritePanel extends GLPanel implements IEditorView {

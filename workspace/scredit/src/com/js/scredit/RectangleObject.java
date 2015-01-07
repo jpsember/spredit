@@ -9,10 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.js.basic.JSONTools;
+import com.js.editor.MouseOper;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
-import apputil.*;
 import static com.js.scredit.ScriptEditor.*;
 import static com.js.basic.Tools.*;
 

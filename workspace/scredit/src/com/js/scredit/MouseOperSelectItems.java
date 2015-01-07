@@ -2,11 +2,13 @@ package com.js.scredit;
 
 import java.awt.Color;
 import java.util.*;
+
+import com.js.editor.MouseOper;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
 import static com.js.basic.Tools.*;
-import apputil.*;
 
 public class MouseOperSelectItems extends MouseOper {
 

@@ -4,12 +4,13 @@ import static com.js.basic.Tools.*;
 
 import java.awt.Color;
 import java.io.*;
-import apputil.*;
 
 import com.js.myopengl.*;
 import tex.*;
 
 import com.js.basic.Files;
+import com.js.editor.IEditorView;
+import com.js.editor.MouseOper;
 import com.js.geometry.*;
 
 public class EditorPanelGL extends GLPanel implements IEditorView {

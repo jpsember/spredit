@@ -1,8 +1,7 @@
 package com.js.scredit;
 
+import com.js.editor.MouseOper;
 import com.js.geometry.*;
-
-import apputil.*;
 
 public class MoveFocusOper extends MouseOper {
 

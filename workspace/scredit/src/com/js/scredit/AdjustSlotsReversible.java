@@ -1,7 +1,9 @@
 package com.js.scredit;
 
-import apputil.*;
 import static com.js.basic.Tools.*;
+
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 
 public class AdjustSlotsReversible implements Reversible, Reverse {

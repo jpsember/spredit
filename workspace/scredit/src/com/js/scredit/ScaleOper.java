@@ -3,7 +3,9 @@ package com.js.scredit;
 import java.awt.Color;
 
 import com.js.myopengl.GLPanel;
-import apputil.*;
+
+import com.js.editor.MouseOper;
+import com.js.editor.Reversible;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;

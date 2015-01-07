@@ -1,7 +1,9 @@
 package com.js.scredit;
 
 import static com.js.basic.Tools.*;
-import apputil.*;
+
+import com.js.editor.Reverse;
+import com.js.editor.Reversible;
 
 public class CutReversible implements Reversible {
 
