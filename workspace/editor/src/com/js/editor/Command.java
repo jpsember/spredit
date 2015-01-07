@@ -3,17 +3,20 @@ package com.js.editor;
 /**
  * Encapsulates an edit operation, to allow for undo/redo functionality
  */
-public abstract class Command {
+public interface Command {
 
   /**
    * Get a command that will undo this one
+   * 
+   * Note: a command that is already an 'undo' of another one doesn't itself
+   * need an undo, since the original command serves that purpose
    */
-  public abstract Command getReverse();
+  public Command getReverse();
 
   /**
    * Perform this command
    */
-  public abstract void perform();
+  public void perform();
 
   /**
    * Merge this command with another that follows it, if possible. For example,
@@ -25,8 +28,32 @@ public abstract class Command {
    *          command that follows this one
    * @return merged command, or null if no merge was possible
    */
-  public Command attemptMergeWith(Command follower) {
-    return null;
-  }
+  public Command attemptMergeWith(Command follower);
 
+  /**
+   * Determine if the command is valid; e.g., whether it can be performed at the
+   * present time
+   */
+  public boolean shouldBeEnabled();
+
+  public abstract class Adapter implements Command {
+
+    @Override
+    public Command getReverse() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public abstract void perform();
+
+    @Override
+    public Command attemptMergeWith(Command follower) {
+      return null;
+    }
+
+    @Override
+    public boolean shouldBeEnabled() {
+      return true;
+    }
+  }
 }

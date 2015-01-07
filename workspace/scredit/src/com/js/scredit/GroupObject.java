@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -18,7 +17,7 @@ public class GroupObject extends EdObject {
 
   private static final boolean db = false;
 
-  private static class GroupReversible implements Reversible, Reverse {
+  private static class GroupReversible extends Command.Adapter {
     public GroupReversible() {
       this(false);
     }
@@ -34,7 +33,7 @@ public class GroupObject extends EdObject {
     }
 
     @Override
-    public Reverse getReverse() {
+    public Command getReverse() {
       if (rev != null)
         return rev;
 
@@ -85,7 +84,7 @@ public class GroupObject extends EdObject {
     }
 
     @Override
-    public boolean valid() {
+    public boolean shouldBeEnabled() {
       return undoFlag || slots.length >= 2;
     }
 
@@ -112,9 +111,10 @@ public class GroupObject extends EdObject {
     private GroupReversible rev;
     // private static int uniqueId = 500;
     // private int id;
+
   };
 
-  private static class UnGroupReversible implements Reversible, Reverse {
+  private static class UnGroupReversible extends Command.Adapter {
     private UnGroupReversible(boolean undoFlag) {
       this.undoFlag = undoFlag;
     }
@@ -143,7 +143,7 @@ public class GroupObject extends EdObject {
     private EdObjectArray origObj;
 
     @Override
-    public Reverse getReverse() {
+    public Command getReverse() {
       if (db)
         pr("UnGroupReversible.getReverse()");
 
@@ -203,16 +203,16 @@ public class GroupObject extends EdObject {
     }
 
     @Override
-    public boolean valid() {
+    public boolean shouldBeEnabled() {
       return group != null;
     }
   };
 
-  public static Reversible getGroupReversible() {
+  public static Command getGroupReversible() {
     return new GroupReversible();
   }
 
-  public static Reversible getUnGroupReversible() {
+  public static Command getUnGroupReversible() {
     return new UnGroupReversible();
   }
 

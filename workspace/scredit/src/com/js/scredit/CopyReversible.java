@@ -1,15 +1,12 @@
 package com.js.scredit;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 
-public class CopyReversible implements Reversible {
+public class CopyReversible extends Command.Adapter {
   /*
-   Fwd:
-       replace clipboard with selected items
-       
-   Rev:
-       replace clipboard with previous clipboard
+   * Fwd: replace clipboard with selected items
+   * 
+   * Rev: replace clipboard with previous clipboard
    */
 
   public CopyReversible() {
@@ -26,39 +23,46 @@ public class CopyReversible implements Reversible {
   }
 
   @Override
-  public Reverse getReverse() {
+  public Command getReverse() {
 
-    return new Reverse() {
+    return new Command.Adapter() {
 
-      //      @Override
-      //      public Reversible getReverse() {
-      //        throw new IllegalStateException();
-      //     //   return CopyReversible.this;
-      //      }
+      // @Override
+      // public Reversible getReverse() {
+      // throw new IllegalStateException();
+      // // return CopyReversible.this;
+      // }
 
       @Override
       public void perform() {
         ScriptEditor.setClipboard(oldClipboard);
       }
 
-      //      @Override
-      //      public boolean valid() {
-      //        return CopyReversible.this.valid();
-      //      }
+      @Override
+      public Command getReverse() {
+        return CopyReversible.this;
+      }
+
+      @Override
+      public boolean shouldBeEnabled() {
+        return CopyReversible.this.shouldBeEnabled();
+      }
     };
   }
 
   @Override
   public void perform() {
     ScriptEditor.setClipboard(new EdObjectArray(ScriptEditor.items(), slots));
-    //    ScriptEditor.items().get(slots));
+    // ScriptEditor.items().get(slots));
     Dup.reset();
   }
+
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     return slots != null;
   }
 
   private int[] slots;
   private EdObjectArray oldClipboard;
+
 }

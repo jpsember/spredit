@@ -2,11 +2,10 @@ package com.js.scredit;
 
 import static com.js.basic.Tools.*;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 import com.js.geometry.*;
 
-public class DuplicateReversible implements Reversible {
+public class DuplicateReversible extends Command.Adapter {
   @Override
   public String toString() {
     return "Duplicate " + EdTools.itemsStr(slots.length);
@@ -15,8 +14,9 @@ public class DuplicateReversible implements Reversible {
   public DuplicateReversible() {
     slots = ScriptEditor.items().getSelected();
   }
+
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     return slots.length > 0;
   }
 
@@ -28,14 +28,14 @@ public class DuplicateReversible implements Reversible {
     items.clearAllSelected();
 
     /*
-     *  Determine where to place the duplicated items.
-     *  The dup accumulator represents the distance from the 2nd to last instance of 
-     *  the selected item from their last instance.
-     *  
-     *  ...not using clipboard, so we don't use clip adjust...
+     * Determine where to place the duplicated items. The dup accumulator
+     * represents the distance from the 2nd to last instance of the selected
+     * item from their last instance.
+     * 
+     * ...not using clipboard, so we don't use clip adjust...
      */
 
-    Point ds = Dup.getAccum(true); //)getFilteredDupAccum();
+    Point ds = Dup.getAccum(true); // )getFilteredDupAccum();
 
     for (int i = 0; i < slots.length; i++) {
       EdObject newInstance = items.getCopy(slots[i]);
@@ -49,13 +49,8 @@ public class DuplicateReversible implements Reversible {
   }
 
   @Override
-  public Reverse getReverse() {
-    return new Reverse() {
-
-      //      @Override
-      //      public Reversible getReverse() {
-      //        throw new UnsupportedOperationException();
-      //      }
+  public Command getReverse() {
+    return new Command.Adapter() {
 
       @Override
       public void perform() {
@@ -64,12 +59,13 @@ public class DuplicateReversible implements Reversible {
         items.remove(items.size() - slots.length, slots.length);
       }
 
-      //      @Override
-      //      public boolean valid() {
-      //        throw new UnsupportedOperationException();
-      //      }
+      @Override
+      public Command getReverse() {
+        return DuplicateReversible.this;
+      }
     };
   }
+
   private int[] slots;
 
 }

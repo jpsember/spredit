@@ -2,15 +2,16 @@ package com.js.scredit;
 
 import java.util.*;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 import com.js.geometry.*;
 
-public class MoveObjectsReversible implements Reversible {
+public class MoveObjectsReversible extends Command.Adapter {
 
   /**
    * Constructor
-   * @param startLoc initial mouse position
+   * 
+   * @param startLoc
+   *          initial mouse position
    */
   public MoveObjectsReversible(Point startLoc) {
     this.startLoc = new Point(startLoc);
@@ -25,11 +26,14 @@ public class MoveObjectsReversible implements Reversible {
     origDupAccum = Dup.getAccum(false);
     origDupClipAdjust = Dup.getClipboardAdjust();
   }
+
   private Point origDupAccum, origDupClipAdjust;
 
   /**
    * Update the move operation based on new mouse position
-   * @param mouseLoc position of mouse in world space
+   * 
+   * @param mouseLoc
+   *          position of mouse in world space
    */
   public void update(Point mouseLoc) {
 
@@ -41,11 +45,15 @@ public class MoveObjectsReversible implements Reversible {
   public Point getTranslate() {
     return translate;
   }
-  //  private int id = baseId++;
-  //  private static int baseId = 500;
+
+  // private int id = baseId++;
+  // private static int baseId = 500;
   @Override
   public String toString() {
-    return "Move " + slots.length + " item" + (slots.length > 1 ? "s" : "");//    + " " + id;
+    return "Move " + slots.length + " item" + (slots.length > 1 ? "s" : "");// +
+                                                                            // " "
+                                                                            // +
+                                                                            // id;
   }
 
   // Reversible interface
@@ -79,13 +87,13 @@ public class MoveObjectsReversible implements Reversible {
   }
 
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     return slots != null && slots.length > 0;
   }
 
   @Override
-  public Reverse getReverse() {
-    return new Reverse() {
+  public Command getReverse() {
+    return new Command.Adapter() {
 
       @Override
       public void perform() {
@@ -97,6 +105,7 @@ public class MoveObjectsReversible implements Reversible {
       }
     };
   }
+
   public boolean sameItemsAs(MoveObjectsReversible oper) {
     boolean same = false;
     do {

@@ -3,8 +3,8 @@ package com.js.scredit;
 import java.awt.Color;
 import java.util.*;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -129,7 +129,7 @@ public class MouseOperSelectItems extends MouseOper {
             boolean continuing = false;
 
             {
-              Reversible tos = ScriptEditor.editor().registerPeek();
+              Command tos = ScriptEditor.editor().registerPeek();
               if (tos != null && tos instanceof MoveObjectsReversible) {
                 MoveObjectsReversible r = (MoveObjectsReversible) tos;
                 if (r.sameItemsAs(oper)) {

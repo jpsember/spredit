@@ -2,8 +2,8 @@ package com.js.scredit;
 
 import static com.js.basic.Tools.*;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 
 public class AddSpriteOper extends MouseOper {
   private static final boolean db = false;
@@ -23,7 +23,7 @@ public class AddSpriteOper extends MouseOper {
       SpriteObject sr = ScriptEditor.lastSprite();
       sp.setSprite(sr);
 
-      Reversible oper = new AddObjectsReversible(sp);
+      Command oper = new AddObjectsReversible(sp);
       ScriptEditor.editor().registerPush(oper);
       ScriptEditor.perform(oper);
 

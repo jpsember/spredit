@@ -1,15 +1,15 @@
 package com.js.scredit;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
-class AddObjectsReversible implements Reversible {
+class AddObjectsReversible extends Command.Adapter {
 
   /**
    * Constructor for adding a single object to end of existing items
+   * 
    * @param obj
    */
   public AddObjectsReversible(EdObject obj) {
@@ -24,20 +24,20 @@ class AddObjectsReversible implements Reversible {
     addObj.setSelected(true);
   }
 
-//  /**
-//   * Get slot item is to be added to
-//   * @deprecated
-//   * @return slot 
-//   */
-//  private int slot() {
-//    return slot;
-//  }
+  // /**
+  // * Get slot item is to be added to
+  // * @deprecated
+  // * @return slot
+  // */
+  // private int slot() {
+  // return slot;
+  // }
 
   private int slot;
 
   /**
-   * Move just-added objects to new location, in response
-   * to drag event
+   * Move just-added objects to new location, in response to drag event
+   * 
    * @deprecated
    */
   public void updateMove() {
@@ -52,16 +52,17 @@ class AddObjectsReversible implements Reversible {
 
   }
 
-  public Reverse getReverse() {
-    return new Reverse() {
+  public Command getReverse() {
+    return new Command.Adapter() {
       @Override
       public void perform() {
-        // update the addObj, in case it changed since we constructed the operation
+        // update the addObj, in case it changed since we constructed the
+        // operation
         EdObjectArray a = ScriptEditor.items();
-        //int slot = a.size() - 1;
+        // int slot = a.size() - 1;
         addObj = a.get(slot);
         a.remove(slot);
-        //        ScriptEditor.items().remove(ScriptEditor.items().size() - 1);
+        // ScriptEditor.items().remove(ScriptEditor.items().size() - 1);
       }
     };
   }
@@ -69,10 +70,6 @@ class AddObjectsReversible implements Reversible {
   @Override
   public String toString() {
     return "Add " + addObj;
-  }
-  @Override
-  public boolean valid() {
-    return true;
   }
 
   private EdObject addObj;

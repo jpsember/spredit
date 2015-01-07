@@ -18,9 +18,8 @@ import tex.*;
 import apputil.*;
 
 import com.js.basic.*;
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -213,7 +212,7 @@ public class ScriptEditor {
    * Template for operation that modifies selected items only. Performs undo by
    * restoring original items.
    */
-  private abstract static class EditSelectedOper implements Reversible {
+  private abstract static class EditSelectedOper extends Command.Adapter {
 
     public EditSelectedOper() {
 
@@ -226,14 +225,13 @@ public class ScriptEditor {
     }
 
     @Override
-    public Reverse getReverse() {
-      return new Reverse() {
+    public Command getReverse() {
+      return new Command.Adapter() {
 
-        // @Override
-        // public Reversible getReverse() {
-        // // TODO Auto-generated method stub
-        // return EditSelectedOper.this;
-        // }
+        @Override
+        public Command getReverse() {
+          return EditSelectedOper.this;
+        }
 
         @Override
         public void perform() {
@@ -241,10 +239,6 @@ public class ScriptEditor {
           for (int i = 0; i < slots.length; i++)
             items.set(slots[i], origItems[i]);
         }
-        // @Override
-        // public boolean valid() {
-        // return getReverse().valid();
-        // }
       };
     }
 
@@ -295,7 +289,7 @@ public class ScriptEditor {
         }
 
         @Override
-        public boolean valid() {
+        public boolean shouldBeEnabled() {
           return nSelected() > 0;
         }
       };
@@ -490,12 +484,11 @@ public class ScriptEditor {
     });
     m.addSeparator();
     m.addItem("Cut", KeyEvent.VK_X, CTRL, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = new CutReversible();
-        return r.valid();
-        // return editor.items.hasSelected();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -519,11 +512,11 @@ public class ScriptEditor {
       }
     });
     m.addItem("Copy", KeyEvent.VK_C, CTRL, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = new CopyReversible();
-        return r.valid();
+        return r.shouldBeEnabled();
         // return editor.items.hasSelected();
       }
 
@@ -535,11 +528,11 @@ public class ScriptEditor {
     });
 
     m.addItem("Paste", KeyEvent.VK_V, CTRL, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = new PasteReversible();
-        return r.valid();
+        return r.shouldBeEnabled();
         // return clipboard().size() > 0;
       }
 
@@ -551,11 +544,11 @@ public class ScriptEditor {
     });
 
     m.addItem("Duplicate", KeyEvent.VK_D, CTRL, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = new DuplicateReversible();
-        return r.valid();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -596,11 +589,11 @@ public class ScriptEditor {
 
     m.addItem("Move Backward", KeyEvent.VK_OPEN_BRACKET, 0,
         new ActionHandler() {
-          private Reversible r;
+          private Command r;
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(1, false);
-            return r.valid();
+            return r.shouldBeEnabled();
           }
 
           public void go() {
@@ -610,11 +603,11 @@ public class ScriptEditor {
         });
     m.addItem("Move Forward", KeyEvent.VK_CLOSE_BRACKET, 0,
         new ActionHandler() {
-          private Reversible r;
+          private Command r;
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(-1, false);
-            return r.valid();
+            return r.shouldBeEnabled();
           }
 
           public void go() {
@@ -624,11 +617,11 @@ public class ScriptEditor {
         });
     m.addItem("Move to Rear", KeyEvent.VK_OPEN_BRACKET, CTRL,
         new ActionHandler() {
-          private Reversible r;
+          private Command r;
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(1, true);
-            return r.valid();
+            return r.shouldBeEnabled();
           }
 
           public void go() {
@@ -638,11 +631,11 @@ public class ScriptEditor {
         });
     m.addItem("Move to Front", KeyEvent.VK_CLOSE_BRACKET, CTRL,
         new ActionHandler() {
-          private Reversible r;
+          private Command r;
 
           public boolean shouldBeEnabled() {
             r = new AdjustSlotsReversible(-1, true);
-            return r.valid();
+            return r.shouldBeEnabled();
           }
 
           public void go() {
@@ -654,11 +647,11 @@ public class ScriptEditor {
     m.addSeparator();
 
     m.addItem("Group", KeyEvent.VK_G, CTRL, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = GroupObject.getGroupReversible();
-        return r.valid();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -667,11 +660,11 @@ public class ScriptEditor {
       }
     });
     m.addItem("Ungroup", KeyEvent.VK_U, CTRL, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = GroupObject.getUnGroupReversible();
-        return r.valid();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -688,12 +681,11 @@ public class ScriptEditor {
     m.addSeparator();
     m.addItem("Flip Horizontally", KeyEvent.VK_H, SHIFT | CTRL,
         new ActionHandler() {
-          private Reversible r;
+          private Command r;
 
           public boolean shouldBeEnabled() {
             r = new FlipReversible(true);
-            return r.valid();
-
+            return r.shouldBeEnabled();
           }
 
           public void go() {
@@ -703,12 +695,11 @@ public class ScriptEditor {
         });
     m.addItem("Flip Vertically", KeyEvent.VK_V, SHIFT | CTRL,
         new ActionHandler() {
-          private Reversible r;
+          private Command r;
 
           public boolean shouldBeEnabled() {
             r = new FlipReversible(false);
-            return r.valid();
-
+            return r.shouldBeEnabled();
           }
 
           public void go() {
@@ -722,7 +713,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         r = new RotateOper();
-        return r.valid();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -730,11 +721,11 @@ public class ScriptEditor {
       }
     });
     m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = RotateOper.getResetOper();
-        return r.valid();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -748,7 +739,7 @@ public class ScriptEditor {
 
       public boolean shouldBeEnabled() {
         oper = new ScaleOper();
-        return oper.valid();
+        return oper.shouldBeEnabled();
       }
 
       public void go() {
@@ -756,11 +747,11 @@ public class ScriptEditor {
       }
     });
     m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = ScaleOper.getResetOper();
-        return r.valid();
+        return r.shouldBeEnabled();
       }
 
       public void go() {
@@ -802,11 +793,11 @@ public class ScriptEditor {
     });
     m.addSeparator();
     m.addItem("Snap to Grid", KeyEvent.VK_G, CTRL | SHIFT, new ActionHandler() {
-      private Reversible r;
+      private Command r;
 
       public boolean shouldBeEnabled() {
         r = Grid.getOper();
-        return r.valid();
+        return r.shouldBeEnabled();
 
       }
 
@@ -1359,7 +1350,7 @@ public class ScriptEditor {
       }
 
       @Override
-      public boolean valid() {
+      public boolean shouldBeEnabled() {
         return nSelected() > 0;
       }
     };
@@ -1620,7 +1611,7 @@ public class ScriptEditor {
     return sProject;
   }
 
-  public static void perform(Reversible op) {
+  public static void perform(Command op) {
     final boolean db = DBUNDO;
     if (db)
       pr("perform reversible:\n" + op);
@@ -1749,7 +1740,7 @@ public class ScriptEditor {
 
   private static final boolean DBUNDO = false;
 
-  public void registerPush(Reversible op) {
+  public void registerPush(Command op) {
     final boolean db = DBUNDO;
     final boolean db2 = db && false;
 
@@ -1784,10 +1775,10 @@ public class ScriptEditor {
    * 
    * @return topmost reversible, or null if stack is empty
    */
-  public Reversible registerPeek() {
-    Reversible r = null;
+  public Command registerPeek() {
+    Command r = null;
     if (mUndoCursor > 0)
-      r = (Reversible) mUndoList.get(mUndoCursor - 1);
+      r = mUndoList.get(mUndoCursor - 1);
     return r;
   }
 
@@ -1796,10 +1787,10 @@ public class ScriptEditor {
    * 
    * @return topmost reversible
    */
-  public Reversible registerPop() {
+  public Command registerPop() {
     final boolean db = DBUNDO;
 
-    Reversible rev = registerPeek();
+    Command rev = registerPeek();
     if (db)
       pr("registerPop: " + rev + " undoCursor=" + mUndoCursor);
 
@@ -1822,14 +1813,14 @@ public class ScriptEditor {
   private void updateUndoLabels() {
     {
       String lbl = "Undo";
-      Reversible r = registerPeek();
+      Command r = registerPeek();
       if (r != null)
         lbl = "Undo " + r;
       sUndoMenuItem.setText(lbl);
     }
     {
       String lbl = "Redo";
-      Reversible r = editor().getRedoOper();
+      Command r = editor().getRedoOper();
       if (r != null) {
         lbl = "Redo " + r;
       }
@@ -1837,10 +1828,10 @@ public class ScriptEditor {
     }
   }
 
-  private Reversible getRedoOper() {
-    Reversible oper = null;
+  private Command getRedoOper() {
+    Command oper = null;
     if (mUndoCursor < mUndoList.size()) {
-      oper = (Reversible) mUndoList.get(mUndoCursor);
+      oper = mUndoList.get(mUndoCursor);
     }
     return oper;
   }
@@ -1849,7 +1840,7 @@ public class ScriptEditor {
     final boolean db = DBUNDO;
 
     MouseOper.clearOperation();
-    Reversible oper = editor().getRedoOper();
+    Command oper = editor().getRedoOper();
     if (oper != null) {
       if (db)
         pr("redo: " + oper);
@@ -1869,7 +1860,7 @@ public class ScriptEditor {
 
     if (mUndoCursor > 0) {
       // unselectAll();
-      Reversible oper = (Reversible) mUndoList.get(mUndoCursor - 1);
+      Command oper = mUndoList.get(mUndoCursor - 1);
       mUndoCursor--;
       setChanges(-1);
       if (db)
@@ -1971,7 +1962,7 @@ public class ScriptEditor {
   // --- Instance fields
 
   private int mChangesSinceSaved;
-  private ArrayList<Reversible> mUndoList = new ArrayList();
+  private ArrayList<Command> mUndoList = new ArrayList();
   private int mUndoCursor;
   // The script being edited by this editor. We could make the editor a subclass
   // of Script, but we'll favor composition over inheritance, at the expense of

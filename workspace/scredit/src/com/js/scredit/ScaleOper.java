@@ -4,8 +4,8 @@ import java.awt.Color;
 
 import com.js.myopengl.GLPanel;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
@@ -21,8 +21,8 @@ public class ScaleOper extends MouseOper {
     initScale = 1;
   }
 
-  public boolean valid() {
-    return oper.valid();
+  public boolean shouldBeEnabled() {
+    return oper.shouldBeEnabled();
   }
 
   @Override
@@ -79,7 +79,7 @@ public class ScaleOper extends MouseOper {
     oper.perform();
   }
 
-  public static Reversible getResetOper() {
+  public static Command getResetOper() {
     return new ResetScaleOper();
   }
 
@@ -131,7 +131,7 @@ public class ScaleOper extends MouseOper {
     }
 
     @Override
-    public boolean valid() {
+    public boolean shouldBeEnabled() {
       return nSlots() > 0;
     }
 

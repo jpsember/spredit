@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import static com.js.basic.Tools.*;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -204,7 +204,7 @@ public class EdPolygonOper extends MouseOper {
     // create a new Reversible, one that either adds new polygon, or edits existing one,
     // based upon whether an item in the slot exists
 
-    Reversible rev = null;
+    Command rev = null;
 
     if (poly != null) {
       rev = new ModifyObjectsReversible(slot);
@@ -275,7 +275,7 @@ public class EdPolygonOper extends MouseOper {
 
       // if we were adding this polygon, pop the add operation
       // from the undo stack
-      Reversible tos = ScriptEditor.editor().registerPeek();
+      Command tos = ScriptEditor.editor().registerPeek();
 
       if (tos instanceof AddObjectsReversible) {
         ScriptEditor.editor().registerPop();
@@ -290,7 +290,7 @@ public class EdPolygonOper extends MouseOper {
         // undo the modify action to restore the original polygon
         mr.getReverse().perform();
 
-        Reversible del = new DeleteItemReversible(slot);
+        Command del = new DeleteItemReversible(slot);
         ScriptEditor.editor().registerPop();
         ScriptEditor.editor().registerPush(del);
         ScriptEditor.perform(del);
@@ -299,7 +299,7 @@ public class EdPolygonOper extends MouseOper {
       if (db)
         pr(" modified poly is well defined");
 
-      Reversible tos = ScriptEditor.editor().registerPeek();
+      Command tos = ScriptEditor.editor().registerPeek();
 
       if (tos instanceof AddObjectsReversible) {
         if (false) {

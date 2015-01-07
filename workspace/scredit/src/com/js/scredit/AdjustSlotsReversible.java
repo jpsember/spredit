@@ -2,18 +2,19 @@ package com.js.scredit;
 
 import static com.js.basic.Tools.*;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 import com.js.geometry.*;
 
-public class AdjustSlotsReversible implements Reversible, Reverse {
+public class AdjustSlotsReversible extends Command.Adapter {
   private static final boolean db = false;
 
-  
   /**
    * Constructor
-   * @param direction   negative to move to back, positive to move to front
-   * @param toLimit true to move maximum amount
+   * 
+   * @param direction
+   *          negative to move to back, positive to move to front
+   * @param toLimit
+   *          true to move maximum amount
    */
   public AdjustSlotsReversible(int direction, boolean toLimit) {
     this.dir = direction;
@@ -34,7 +35,7 @@ public class AdjustSlotsReversible implements Reversible, Reverse {
 
       d = MyMath.clamp(d, 0, a.size() - len);
       for (int i = 0; i < len; i++)
-        destSlots[i] = d + i; //- (len - i);
+        destSlots[i] = d + i; // - (len - i);
     }
 
     if (db)
@@ -160,7 +161,7 @@ public class AdjustSlotsReversible implements Reversible, Reverse {
   }
 
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     boolean val = false;
     do {
       if (srcSlots.length == 0)
@@ -173,16 +174,18 @@ public class AdjustSlotsReversible implements Reversible, Reverse {
     } while (false);
     return val;
   }
+
   private boolean isRev;
 
   @Override
-  public Reverse getReverse() {
+  public Command getReverse() {
     AdjustSlotsReversible a = new AdjustSlotsReversible();
     a.srcSlots = destSlots;
     a.destSlots = srcSlots;
     a.isRev = true;
     return a;
   }
+
   private boolean toLimit;
   private int dir;
   private int[] srcSlots;

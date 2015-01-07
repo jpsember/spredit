@@ -11,8 +11,8 @@ import javax.swing.*;
 import org.json.JSONObject;
 //import javax.swing.event.*;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 
 import tex.*;
@@ -187,11 +187,11 @@ public class PalettePanel extends JPanel {
         pr(" current MouseOper=" + MouseOper.getOperation());
 
       {
-        Reversible r = new ColorRev(c);
+        Command r = new ColorRev(c);
         if (db)
-          pr(" constructed ColorRev, valid=" + r.valid());
+          pr(" constructed ColorRev, valid=" + r.shouldBeEnabled());
 
-        if (r.valid()) {
+        if (r.shouldBeEnabled()) {
           if (db)
             pr("  performing it");
 
@@ -203,9 +203,8 @@ public class PalettePanel extends JPanel {
     repaint();
   }
 
-  public Reversible getColorReversible(Color newColor) {
-    Reversible r = new ColorRev(newColor);
-    return r;
+  public Command getColorReversible(Color newColor) {
+    return new ColorRev(newColor);
   }
 
   private class ColorRev extends ModifyObjectsReversible {

@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import apputil.*;
 
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 
@@ -28,7 +28,7 @@ public class Grid {
     }
   }
 
-  public static Reversible getOper() {
+  public static Command getOper() {
     return new Rev();
   }
 

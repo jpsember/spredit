@@ -2,10 +2,9 @@ package com.js.scredit;
 
 import static com.js.basic.Tools.*;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 
-public class CutReversible implements Reversible {
+public class CutReversible extends Command.Adapter {
 
   /*
    * 
@@ -29,8 +28,8 @@ public class CutReversible implements Reversible {
   }
 
   @Override
-  public Reverse getReverse() {
-    return new Reverse() {
+  public Command getReverse() {
+    return new Command.Adapter() {
 
       @Override
       public void perform() {
@@ -71,7 +70,7 @@ public class CutReversible implements Reversible {
   private EdObjectArray origClipboard;
 
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     return slots != null;
   }
 

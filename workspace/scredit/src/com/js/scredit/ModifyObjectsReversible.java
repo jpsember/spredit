@@ -1,15 +1,16 @@
 package com.js.scredit;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
-
 import static com.js.basic.Tools.*;
+
+import com.js.editor.Command;
 
 /**
  * General purpose reversible function that saves the original items in an
  * internal buffer for restoring by the reverse method
+ * 
+ * deprecated try to put this in the editor project
  */
-public class ModifyObjectsReversible implements Reversible {
+public class ModifyObjectsReversible extends Command.Adapter {
   private static final boolean db = false;
 
   /**
@@ -85,10 +86,9 @@ public class ModifyObjectsReversible implements Reversible {
   }
 
   @Override
-  public Reverse getReverse() {
+  public Command getReverse() {
     ASSERT(origObjects != null);
-
-    return new Reverse() {
+    return new Command.Adapter() {
       @Override
       public void perform() {
         constructModifiedVersions();
@@ -97,6 +97,11 @@ public class ModifyObjectsReversible implements Reversible {
         set(a, slots, origObjects);
         a.clearAllSelected();
         a.setSelected(slots, true);
+      }
+
+      @Override
+      public Command getReverse() {
+        return ModifyObjectsReversible.this;
       }
     };
   }
@@ -170,7 +175,7 @@ public class ModifyObjectsReversible implements Reversible {
   }
 
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     constructModifiedVersions();
     return changesMade;
   }

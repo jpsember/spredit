@@ -2,8 +2,8 @@ package com.js.scredit;
 
 import java.awt.Color;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -15,8 +15,8 @@ public class RotateOper extends MouseOper {
     oper = new RotateReversible();
   }
 
-  public boolean valid() {
-    return oper.valid();
+  public boolean shouldBeEnabled() {
+    return oper.shouldBeEnabled();
   }
 
   private boolean reg;
@@ -89,7 +89,7 @@ public class RotateOper extends MouseOper {
     }
 
     @Override
-    public boolean valid() {
+    public boolean shouldBeEnabled() {
       return nSlots() > 0;
     }
 
@@ -131,7 +131,7 @@ public class RotateOper extends MouseOper {
 
   // ------------- Reset Rotation operation ------------------
 
-  public static Reversible getResetOper() {
+  public static Command getResetOper() {
     return new ResetRotOper();
   }
 

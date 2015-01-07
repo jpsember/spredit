@@ -1,7 +1,9 @@
 package com.js.editor;
 
 /**
- * Reversable procedure 
+ * Reversable procedure
+ * 
+ * @deprecated
  */
 public interface Reversible {
 

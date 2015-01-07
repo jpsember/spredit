@@ -1,10 +1,9 @@
 package com.js.scredit;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 import com.js.geometry.*;
 
-public class PasteReversible implements Reversible {
+public class PasteReversible extends Command.Adapter {
   @Override
   public String toString() {
     return "Paste " + EdTools.itemsStr(ScriptEditor.clipboard().size()); // .length);ScriptEditor.clipboard().size()+" items";
@@ -51,8 +50,8 @@ public class PasteReversible implements Reversible {
   }
 
   @Override
-  public Reverse getReverse() {
-    return new Reverse() {
+  public Command getReverse() {
+    return new Command.Adapter() {
 
       // @Override
       // public Reversible getReverse() {
@@ -66,16 +65,15 @@ public class PasteReversible implements Reversible {
         items.remove(items.size() - clip.size(), clip.size());
       }
 
-      // @Override
-      // public boolean valid() {
-      // throw new UnsupportedOperationException();
-      // }
+      @Override
+      public Command getReverse() {
+        return PasteReversible.this;
+      }
     };
   }
 
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     return clip != null;
   }
-
 }

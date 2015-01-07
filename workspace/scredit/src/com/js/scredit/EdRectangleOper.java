@@ -1,7 +1,7 @@
 package com.js.scredit;
 
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.editor.Reversible;
 import com.js.geometry.*;
 import static com.js.basic.Tools.*;
 
@@ -68,7 +68,7 @@ public class EdRectangleOper extends MouseOper {
         editElement = 0;
         slot = ScriptEditor.items().size();
 
-        Reversible rev = new AddObjectsReversible(origRect);
+        Command rev = new AddObjectsReversible(origRect);
         ScriptEditor.editor().registerPush(rev);
         ScriptEditor.perform(rev);
       }
@@ -93,7 +93,7 @@ public class EdRectangleOper extends MouseOper {
     // create a new Reversible, one that either adds new polygon, or edits existing one,
     // based upon whether an item in the slot exists
 
-    Reversible rev = null;
+    Command rev = null;
 
     if (slot >= 0) {
       rev = new ModifyObjectsReversible(slot);
@@ -136,7 +136,7 @@ public class EdRectangleOper extends MouseOper {
 
       // if we were adding this polygon, pop the add operation
       // from the undo stack
-      Reversible tos = ScriptEditor.editor().registerPeek();
+      Command tos = ScriptEditor.editor().registerPeek();
 
       if (tos instanceof AddObjectsReversible) {
         ScriptEditor.editor().registerPop();
@@ -149,7 +149,7 @@ public class EdRectangleOper extends MouseOper {
         // undo the modify action to restore the original object
         mr.getReverse().perform();
 
-        Reversible del = new DeleteItemReversible(slot);
+        Command del = new DeleteItemReversible(slot);
         ScriptEditor.editor().registerPop();
         ScriptEditor.editor().registerPush(del);
         ScriptEditor.perform(del);
@@ -159,7 +159,7 @@ public class EdRectangleOper extends MouseOper {
       if (db)
         pr(" modified object is well defined");
 
-      Reversible tos = ScriptEditor.editor().registerPeek();
+      Command tos = ScriptEditor.editor().registerPeek();
 
       if (tos instanceof ModifyObjectsReversible) {
         ModifyObjectsReversible mr = (ModifyObjectsReversible) tos;

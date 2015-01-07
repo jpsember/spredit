@@ -1,16 +1,17 @@
 package com.js.scredit;
 
-import com.js.editor.Reverse;
-import com.js.editor.Reversible;
+import com.js.editor.Command;
 
 import static com.js.basic.Tools.*;
 
-public class DeleteItemReversible implements Reversible, Reverse {
+public class DeleteItemReversible extends Command.Adapter {
   private static final boolean db = false;
 
   /**
    * Constructor
-   * @param slots slots of items about to be changed
+   * 
+   * @param slots
+   *          slots of items about to be changed
    */
   public DeleteItemReversible(int slot, EdObject obj, boolean deleteMode) {
     this.slot = slot;
@@ -20,7 +21,9 @@ public class DeleteItemReversible implements Reversible, Reverse {
 
   /**
    * Constructor
-   * @param slots slots of items about to be changed
+   * 
+   * @param slots
+   *          slots of items about to be changed
    */
   public DeleteItemReversible(int slot) {
     this(slot, ScriptEditor.items().get(slot), true);
@@ -34,8 +37,8 @@ public class DeleteItemReversible implements Reversible, Reverse {
   }
 
   @Override
-  public Reverse getReverse() {
-    Reverse r = new DeleteItemReversible(slot, origObject, !delete);
+  public Command getReverse() {
+    Command r = new DeleteItemReversible(slot, origObject, !delete);
     return r;
   }
 
@@ -53,7 +56,7 @@ public class DeleteItemReversible implements Reversible, Reverse {
   }
 
   @Override
-  public boolean valid() {
+  public boolean shouldBeEnabled() {
     return true;
   }
 
