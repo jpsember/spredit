@@ -3,8 +3,6 @@ package joglexample;
 import javax.media.opengl.GL;
 import javax.swing.JFrame;
 
-import apputil.AppTools;
-
 import com.js.geometry.IPoint;
 
 import com.js.myopengl.GLPanel;
@@ -40,7 +38,6 @@ public class Main {
     OurGLPanel panel = new OurGLPanel();
 
     final JFrame jframe = new JFrame("One Triangle Swing GLCanvas");
-    AppTools.quitProgramAfterDelay(jframe, 30);
     jframe.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent windowevent) {
         jframe.dispose();
