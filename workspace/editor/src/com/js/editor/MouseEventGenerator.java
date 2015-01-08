@@ -33,7 +33,20 @@ public class MouseEventGenerator {
 
   private void generateMouseEvent(MouseEvent evt, int type) {
     IPoint viewPoint = new IPoint(evt.getX(), evt.getY());
-    UserEvent event = new UserEvent(type, mView, viewPoint);
+
+    int modifierFlags = 0;
+    if (MouseOper.right(evt))
+      modifierFlags |= UserEvent.FLAG_RIGHT;
+    if (evt.isAltDown())
+      modifierFlags |= UserEvent.FLAG_ALT;
+    if (evt.isControlDown())
+      modifierFlags |= UserEvent.FLAG_CTRL;
+    if (evt.isMetaDown())
+      modifierFlags |= UserEvent.FLAG_META;
+    if (evt.isShiftDown())
+      modifierFlags |= UserEvent.FLAG_SHIFT;
+
+    UserEvent event = new UserEvent(type, mView, viewPoint, modifierFlags);
     if (mListener != null)
       mListener.handleUserEvent(event);
   }

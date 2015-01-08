@@ -32,16 +32,19 @@ public class UserEvent {
 
   public static final UserEvent NONE = new UserEvent(CODE_NONE);
   public static final UserEvent STOP = new UserEvent(CODE_STOP);
+  public static final int FLAG_RIGHT = (1 << 0);
+  public static final int FLAG_CTRL = (1 << 1);
+  public static final int FLAG_SHIFT = (1 << 2);
+  public static final int FLAG_ALT = (1 << 3);
+  public static final int FLAG_META = (1 << 4);
 
-  public UserEvent(int code, IEditorView view, IPoint viewLocation) {
+  public UserEvent(int code, IEditorView view, IPoint viewLocation,
+      int modifierFlags) {
     mCode = code;
     mView = view;
     mViewLocation = viewLocation;
+    mModifierFlags = modifierFlags;
   }
-
-  // public UserEvent(int code, Point location) {
-  // this(code, location, false);
-  // }
 
   public UserEvent(int code) {
     mCode = code;
@@ -60,10 +63,10 @@ public class UserEvent {
   public Point getWorldLocation() {
     if (!hasLocation())
       throw new IllegalStateException();
-    if (mLocation == null) {
-      mLocation = mView.viewToWorld(mViewLocation.toPoint());
+    if (mWorldLocation == null) {
+      mWorldLocation = mView.viewToWorld(mViewLocation.toPoint());
     }
-    return mLocation;
+    return mWorldLocation;
   }
 
   public boolean isDownVariant() {
@@ -79,7 +82,31 @@ public class UserEvent {
   }
 
   public boolean hasLocation() {
-    return mLocation != null;
+    return mViewLocation != null;
+  }
+
+  public boolean isRight() {
+    return hasFlag(FLAG_RIGHT);
+  }
+
+  public boolean isAlt() {
+    return hasFlag(FLAG_ALT);
+  }
+
+  public boolean isMeta() {
+    return hasFlag(FLAG_META);
+  }
+
+  public boolean isCtrl() {
+    return hasFlag(FLAG_CTRL);
+  }
+
+  public boolean isShift() {
+    return hasFlag(FLAG_SHIFT);
+  }
+
+  private boolean hasFlag(int f) {
+    return 0 != (mModifierFlags & f);
   }
 
   public boolean isMultipleTouch() {
@@ -127,6 +154,20 @@ public class UserEvent {
       sb.append(getWorldLocation());
       sb.append(" v:");
       sb.append(getViewLocation());
+      if (mModifierFlags != 0) {
+        sb.append(" <");
+        if (isAlt())
+          sb.append("A");
+        if (isCtrl())
+          sb.append("C");
+        if (isMeta())
+          sb.append("M");
+        if (isRight())
+          sb.append("R");
+        if (isShift())
+          sb.append("S");
+        sb.append(">");
+      }
     }
     return sb.toString();
   }
@@ -140,7 +181,8 @@ public class UserEvent {
 
   private int mCode;
   private IEditorView mView;
-  private Point mLocation;
   private IPoint mViewLocation;
+  private Point mWorldLocation;
   private boolean mMultipleTouchFlag;
+  private int mModifierFlags;
 }
