@@ -18,25 +18,22 @@ public class MouseOperSelectItems extends MouseOper {
   private static final int STATE_WAITFORDRAG2 = 3;
   private static final int STATE_ADJUSTINGBOX = 4;
 
-  public MouseOperSelectItems() {
-    ASSERT(sSingleton == null);
-    sSingleton = this;
-  }
 
   /**
    * Modify the singleton instance to start a move operation. Used to append a
    * 'move' operation to an 'add new item' operation.
    * 
-   * @return
+   * @deprecated
    */
   public static MouseOperSelectItems startMovingSelectedItems() {
-    ASSERT(sSingleton != null);
-    sSingleton.mMoveCommand = new MoveObjectsCommand(currentPtF);
-
-    sSingleton.setState(STATE_MOVINGITEMS);
-    ScriptEditor.editor().registerPush(sSingleton.mMoveCommand);
-
-    return sSingleton;
+    // ASSERT(sSingleton != null);
+    // sSingleton.mMoveCommand = new MoveObjectsCommand(currentPtF);
+    //
+    // sSingleton.setState(STATE_MOVINGITEMS);
+    // ScriptEditor.editor().registerPush(sSingleton.mMoveCommand);
+    //
+    // return sSingleton;
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -321,8 +318,6 @@ public class MouseOperSelectItems extends MouseOper {
       panel.drawFrame(box.x, box.y, box.width, box.height);
     }
   }
-
-  private static MouseOperSelectItems sSingleton;
 
   private static int sLastFoundCursor;
   private static int[] sItemsUnderMouse;
