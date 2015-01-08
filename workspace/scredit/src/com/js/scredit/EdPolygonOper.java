@@ -181,9 +181,9 @@ public class EdPolygonOper extends MouseOper {
     final boolean db = false;
 
     if (db)
-      pr("mouseDown, right=" + right());
+      pr("mouseDown, right=" + right(ev));
 
-    if (!right()) {
+    if (!right(ev)) {
       if (poly.nPoints() < PolygonObject.MAX_VERTICES)
         insertPt(Grid.snapToGrid(currentPtF, true));
       // we must return true, otherwise the operation will be cleared

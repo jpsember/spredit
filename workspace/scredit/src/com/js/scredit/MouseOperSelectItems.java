@@ -38,14 +38,14 @@ public class MouseOperSelectItems extends MouseOper {
 
     final boolean db = false;
     if (db)
-      pr("MouseOperSelectItems.mouseDown() " + mouseStateString());
+      pr("MouseOperSelectItems.mouseDown() " + mouseStateString(ev));
 
     boolean f = false;
 
     boolean resetDup = false;
 
     do {
-      if (right())
+      if (right(ev))
         break;
 
       boolean ctrlMode = ev.isControlDown();

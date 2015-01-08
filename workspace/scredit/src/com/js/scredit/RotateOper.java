@@ -26,7 +26,7 @@ public class RotateOper extends MouseOper {
 
     boolean f = false;
     do {
-      if (right() || ev.isControlDown() || ev.isShiftDown())
+      if (right(ev) || ev.isControlDown() || ev.isShiftDown())
         break;
 
       if (!oper.withinCircle(currentPtF))

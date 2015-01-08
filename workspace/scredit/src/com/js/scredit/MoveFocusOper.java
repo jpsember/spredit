@@ -9,7 +9,7 @@ public class MoveFocusOper extends MouseOper {
   public boolean mouseDown() {
     boolean f = false;
     do {
-      if (!right() || ev.isControlDown() || ev.isShiftDown())
+      if (!right(ev) || ev.isControlDown() || ev.isShiftDown())
         break;
       startFocus = new IPoint(ScriptEditor.focus());
       f = true;

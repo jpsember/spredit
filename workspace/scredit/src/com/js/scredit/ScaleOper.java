@@ -29,7 +29,7 @@ public class ScaleOper extends MouseOper {
   public boolean mouseDown() {
     boolean f = false;
     do {
-      if (right() || ev.isControlDown() || ev.isShiftDown())
+      if (right(ev) || ev.isControlDown() || ev.isShiftDown())
         break;
 
       if (!oper.withinCircle(currentPtF))

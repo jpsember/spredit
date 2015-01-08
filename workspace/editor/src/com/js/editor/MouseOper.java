@@ -60,7 +60,7 @@ public abstract class MouseOper {
    * 
    * @return
    */
-  public boolean right() {
+  public static boolean right(MouseEvent ev) {
     return SwingUtilities.isRightMouseButton(ev);
   }
 
@@ -85,11 +85,11 @@ public abstract class MouseOper {
    * 
    * @return
    */
-  public String mouseStateString() {
+  public static String mouseStateString(MouseEvent ev) {
     StringBuilder sb = new StringBuilder();
     sb.append("Mouse[");
 
-    sb.append("rt:" + d(right()));
+    sb.append("rt:" + d(right(ev)));
     sb.append(" ctrl:" + d(ev.isControlDown()));
     sb.append(" shift:" + d(ev.isShiftDown()));
     sb.append(" alt:" + d(ev.isAltDown()));

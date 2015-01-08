@@ -57,9 +57,9 @@ public class EdRectangleOper extends MouseOper {
   public boolean mouseDown() {
 
     if (db)
-      pr("mouseDown, right=" + right());
+      pr("mouseDown, right=" + right(ev));
 
-    if (!right()) {
+    if (!right(ev)) {
       if (slot < 0) {
         // create a new rectangle at mouse position
         origRect = new RectangleObject(ScriptEditor.color(), currentPtF,

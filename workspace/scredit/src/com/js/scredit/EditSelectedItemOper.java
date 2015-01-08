@@ -13,7 +13,8 @@ public class EditSelectedItemOper extends MouseOper {
     boolean f = false;
     do {
 
-      if (right() || ev.isControlDown() || ev.isMetaDown() || ev.isShiftDown())
+      if (right(ev) || ev.isControlDown() || ev.isMetaDown()
+          || ev.isShiftDown())
         break;
 
       // look through selected elements, front to rear,
