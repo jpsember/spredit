@@ -68,6 +68,7 @@ public abstract class MouseOper {
    * Specify view associated with mouse operations
    * 
    * @param view
+   * @deprecated use MouseEventGenerator instead
    */
   public static void setView(IEditorView view) {
     ASSERT(MouseOper.view == null);
@@ -188,6 +189,9 @@ public abstract class MouseOper {
     currentPt = new IPoint(currentPtF);
   }
 
+  /**
+   * @deprecated move to MouseEventGenerator
+   */
   private static class OurMouseListener implements MouseListener,
       MouseMotionListener {
     @Override

@@ -1,8 +1,8 @@
 package com.js.scredit;
 
-import com.js.editor.Command;
+//import com.js.editor.Command;
 import com.js.editor.MouseOper;
-import com.js.geometry.*;
+//import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
 

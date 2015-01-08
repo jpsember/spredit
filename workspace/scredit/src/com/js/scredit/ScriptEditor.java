@@ -19,7 +19,9 @@ import apputil.*;
 
 import com.js.basic.*;
 import com.js.editor.Command;
+import com.js.editor.MouseEventGenerator;
 import com.js.editor.MouseOper;
+import com.js.editor.UserEvent;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -1447,6 +1449,17 @@ public class ScriptEditor {
     {
       JPanel pnl = new JPanel(new BorderLayout());
       EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel);
+
+      MouseEventGenerator m = new MouseEventGenerator();
+      m.setView(editorPanel);
+      m.setListener(new UserEvent.Listener() {
+        @Override
+        public void handleUserEvent(UserEvent event) {
+          unimp("handle user events");
+          event.printProcessingMessage("ScriptEditor processing");
+        }
+      });
+
       sEditorPanelComponent = editorPanel.getComponent();
       pnl.add(sEditorPanelComponent, BorderLayout.CENTER);
 

@@ -18,12 +18,9 @@ public class MouseOperSelectItems extends MouseOper {
   private static final int STATE_WAITFORDRAG2 = 3;
   private static final int STATE_ADJUSTINGBOX = 4;
 
-
   /**
    * Modify the singleton instance to start a move operation. Used to append a
    * 'move' operation to an 'add new item' operation.
-   * 
-   * @deprecated
    */
   public static MouseOperSelectItems startMovingSelectedItems() {
     // ASSERT(sSingleton != null);
