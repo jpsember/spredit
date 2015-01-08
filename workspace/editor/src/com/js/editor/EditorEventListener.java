@@ -9,7 +9,7 @@ public interface EditorEventListener {
    * @return event after filtering
    * 
    */
-  public EditorEvent processEvent(EditorEvent event);
+  public UserEvent processEvent(UserEvent event);
 
   /**
    * Perform any rendering specific to this operation

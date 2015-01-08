@@ -3,7 +3,21 @@ package com.js.editor;
 import com.js.geometry.Point;
 import static com.js.basic.Tools.*;
 
-public class EditorEvent {
+/**
+ * <pre>
+ * 
+ * Represents a user-generated event to be manipulated by an editor.
+ * 
+ * The user generates events. 
+ * 
+ * These events are processed by the current operation.
+ * 
+ * An operation issues commands which modifies the state of the 
+ * object being edited.
+ * 
+ * </pre>
+ */
+public class UserEvent {
 
 	public static final int CODE_NONE = 0;
 
@@ -15,21 +29,21 @@ public class EditorEvent {
 	// stop existing operation, if one is occurring
 	public static final int CODE_STOP = 4;
 
-	public static final EditorEvent NONE = new EditorEvent(CODE_NONE);
-	public static final EditorEvent STOP = new EditorEvent(CODE_STOP);
+	public static final UserEvent NONE = new UserEvent(CODE_NONE);
+	public static final UserEvent STOP = new UserEvent(CODE_STOP);
 
-	public EditorEvent(int code, Point location, boolean multipleTouchFlag) {
+	public UserEvent(int code, Point location, boolean multipleTouchFlag) {
 		mCode = code;
 		mLocation = location;
 		mMultipleTouchFlag = multipleTouchFlag;
 	}
 
-	public EditorEvent(int code, Point location) {
+	public UserEvent(int code, Point location) {
 		mCode = code;
 		mLocation = location;
 	}
 
-	public EditorEvent(int code) {
+	public UserEvent(int code) {
 		this(code, null, false);
 	}
 
@@ -106,7 +120,7 @@ public class EditorEvent {
 		return sb.toString();
 	}
 
-	private static EditorEvent sPreviousPrintEvent = NONE;
+	private static UserEvent sPreviousPrintEvent = NONE;
 	private static String sPreviousPrintMessage;
 
 	private int mCode;
