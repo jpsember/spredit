@@ -67,6 +67,10 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
     return (T) mList.get(index);
   }
 
+  public <T extends EdObject> T last() {
+    return (T) Tools.last(mList);
+  }
+
   public EdObject remove(int index) {
     return mList.remove(index);
   }

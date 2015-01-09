@@ -105,6 +105,10 @@ public class UserEvent {
     return hasFlag(FLAG_SHIFT);
   }
 
+  public boolean hasModifierKeys() {
+    return hasFlag(FLAG_CTRL | FLAG_SHIFT | FLAG_ALT | FLAG_META);
+  }
+
   private boolean hasFlag(int f) {
     return 0 != (mModifierFlags & f);
   }

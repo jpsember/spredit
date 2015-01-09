@@ -1446,8 +1446,7 @@ public class ScriptEditor {
       m.setListener(new UserEvent.Listener() {
         @Override
         public void handleUserEvent(UserEvent event) {
-          unimp("handle user events");
-          event.printProcessingMessage("ScriptEditor processing");
+          ScriptEditor.handleUserEvent(event);
         }
       });
 
@@ -1458,16 +1457,13 @@ public class ScriptEditor {
       p.add(pnl, BorderLayout.CENTER);
     }
 
+    MouseOper.setDefaultOperation(new DefaultMouseOper());
+
     // add mouse edit operations, in the order they
     // are to be tested for activation
     MouseOper.add(new MoveFocusOper());
     MouseOper.add(new EditSelectedItemOper());
-
     MouseOper.add(new MouseOperSelectItems());
-    // {
-    // MouseOper.add(new MouseOperMoveItems());
-    // MouseOper.add(new BoxOper());
-    // }
     repaint();
   }
 
@@ -1928,6 +1924,24 @@ public class ScriptEditor {
   public Script getScript() {
     return mScript;
   }
+
+  // --- New MouseOper handling
+
+  private static void handleUserEvent(UserEvent event) {
+    // event.printProcessingMessage("ScriptEditor processing");
+
+    // Save most recent event for rendering cursor
+    mLastMouseEvent = event;
+
+    MouseOper.getOperation().processUserEvent(event);
+
+    // Request a refresh of the editor view after any event
+    repaint();
+  }
+
+  // private static MouseOper mCurrentOperation;
+  /* private */static UserEvent mLastMouseEvent;
+  static MouseOper sPendingAddObjectOperation;
 
   // --- Class fields
   private static Component sEditorPanelComponent;

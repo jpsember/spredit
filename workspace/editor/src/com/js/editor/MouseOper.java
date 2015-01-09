@@ -15,6 +15,10 @@ import com.js.geometry.Point;
  */
 public abstract class MouseOper {
 
+  public void processUserEvent(UserEvent event) {
+    unimp("processUserEvent, " + nameOf(this));
+  }
+
   /**
    * Determine if this operation should start in response to a mouse down event
    * 
@@ -69,13 +73,20 @@ public abstract class MouseOper {
    * @deprecated use MouseEventGenerator instead
    */
   public static void setView(IEditorView view) {
-    ASSERT(MouseOper.view == null);
+    ASSERT(MouseOper.sEditorView == null);
 
-    MouseOper.view = view;
-    OurMouseListener ls = new OurMouseListener();
-    Component c = view.getComponent();
-    c.addMouseListener(ls);
-    c.addMouseMotionListener(ls);
+    MouseOper.sEditorView = view;
+    warning("disabled");
+    if (false) {
+      OurMouseListener ls = new OurMouseListener();
+      Component c = view.getComponent();
+      c.addMouseListener(ls);
+      c.addMouseMotionListener(ls);
+    }
+  }
+
+  public static void setDefaultOperation(MouseOper defaultMouseOper) {
+    sDefaultMouseOper = defaultMouseOper;
   }
 
   /**
@@ -84,6 +95,8 @@ public abstract class MouseOper {
    * @return current operation, or null if none
    */
   public static MouseOper getOperation() {
+    if (editOper == null)
+      editOper = sDefaultMouseOper;
     return editOper;
   }
 
@@ -102,7 +115,7 @@ public abstract class MouseOper {
       editOper = oper;
       if (editOper != null)
         editOper.start();
-      view.repaint();
+      sEditorView.repaint();
     }
   }
 
@@ -114,6 +127,7 @@ public abstract class MouseOper {
    * Add an operation to the sequence
    * 
    * @param oper
+   * @deprecated
    */
   public static void add(MouseOper oper) {
     opers.add(oper);
@@ -139,11 +153,11 @@ public abstract class MouseOper {
   }
 
   private static void updateEventGlobals(MouseEvent evt) {
-    if (view == null)
+    if (sEditorView == null)
       throw new IllegalStateException();
     ev = evt;
     currentPtView = viewLoc(evt);
-    currentPtF = view.viewToWorld(new Point(currentPtView));
+    currentPtF = sEditorView.viewToWorld(new Point(currentPtView));
     currentPt = new IPoint(currentPtF);
   }
 
@@ -192,7 +206,7 @@ public abstract class MouseOper {
       if (editOper != null) {
         updateEventGlobals(ev);
         editOper.mouseUp();
-        view.repaint();
+        sEditorView.repaint();
       }
     }
 
@@ -201,7 +215,7 @@ public abstract class MouseOper {
       if (editOper != null) {
         updateEventGlobals(ev);
         editOper.mouseMove(true);
-        view.repaint();
+        sEditorView.repaint();
       }
     }
 
@@ -210,7 +224,7 @@ public abstract class MouseOper {
       if (editOper != null) {
         updateEventGlobals(ev);
         editOper.mouseMove(false);
-        view.repaint();
+        sEditorView.repaint();
       }
     }
 
@@ -242,13 +256,16 @@ public abstract class MouseOper {
   public static IPoint currentPt;
   public static IPoint currentPtView;
   // view generating event
-  private static IEditorView view;
+  private static IEditorView sEditorView;
 
   // active operation, or null
   private static MouseOper editOper;
   private static boolean sEnabled = true;
 
+  private static MouseOper sDefaultMouseOper;
+
   public static interface Listener {
     public void operationChanged(MouseOper oper);
   }
+
 }
