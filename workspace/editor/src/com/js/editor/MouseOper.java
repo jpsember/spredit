@@ -102,37 +102,13 @@ public abstract class MouseOper {
       editOper = oper;
       if (editOper != null)
         editOper.start();
-      notifyListeners();
       view.repaint();
-    }
-  }
-
-  private static void notifyListeners() {
-    Iterator it = listeners.iterator();
-    while (it.hasNext()) {
-      Listener ls = (Listener) it.next();
-      ls.operationChanged(editOper);
     }
   }
 
   public static void clearOperation() {
     setOperation(null);
-    // if (editOper != null) {
-    // editOper = null;
-    // notifyListeners();
-    // }
   }
-
-  @Deprecated
-  public static void addListener(Listener listener) {
-    listeners.add(listener);
-  }
-
-  public static void removeListener(Listener listener) {
-    listeners.remove(listener);
-  }
-
-  private static Set listeners = new HashSet();
 
   /**
    * Add an operation to the sequence
