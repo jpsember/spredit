@@ -569,20 +569,19 @@ public class ScriptEditor {
         repaint();
       }
     });
-    sSelectNoneMenuItem = m.addItem("Select None", KeyEvent.VK_ESCAPE, 0,
-        new ActionHandler() {
-          private SelectNoneOper r;
+    m.addItem("Select None", KeyEvent.VK_ESCAPE, 0, new ActionHandler() {
+      private SelectNoneOper r;
 
-          public boolean shouldBeEnabled() {
-            r = new SelectNoneOper();
-            return r.valid();
-          }
+      public boolean shouldBeEnabled() {
+        r = new SelectNoneOper();
+        return r.valid();
+      }
 
-          public void go() {
-            r.perform();
-            repaint();
-          }
-        });
+      public void go() {
+        r.perform();
+        repaint();
+      }
+    });
 
     m.addSeparator();
 
@@ -1039,26 +1038,18 @@ public class ScriptEditor {
 
   private static class SelectNoneOper {
     public SelectNoneOper() {
-      cancelOper = MouseOper.getOperation() != null;
-      if (!cancelOper) {
-        slots = items().getSelected();
-      }
+      slots = items().getSelected();
     }
 
     public void perform() {
-      if (cancelOper) {
-        MouseOper.clearOperation();
-      } else {
-        items().clearAllSelected();
-      }
+      items().clearAllSelected();
       repaint();
     }
 
     public boolean valid() {
-      return cancelOper || slots.length > 0;
+      return slots.length > 0;
     }
 
-    private boolean cancelOper;
     private int[] slots;
   }
 
@@ -1646,17 +1637,6 @@ public class ScriptEditor {
   public ScriptEditor() {
     assertProjectOpen();
     mScript = new Script(project(), null);
-    MouseOper.addListener(new MouseOper.Listener() {
-      @Override
-      public void operationChanged(MouseOper oper) {
-        if (sSelectNoneMenuItem != null) {
-          if (oper != null)
-            sSelectNoneMenuItem.setText("Stop " + oper);
-          else
-            sSelectNoneMenuItem.setText("Select None");
-        }
-      }
-    });
     resetUndo();
   }
 
@@ -1966,7 +1946,6 @@ public class ScriptEditor {
   private static RecentFiles.Menu sRecentScriptsMenuItem;
   private static RecentFiles.Menu sRecentScriptSetsMenuItem;
   private static JMenuItem sUndoMenuItem, sRedoMenuItem;
-  private static JMenuItem sSelectNoneMenuItem;
   private static MyFileFilter SCRIPT_SET_FILEFILTER = new MyFileFilter(
       "Script project files", "set");
   private static MyFileFilter SCRIPT_FILEFILTER = new MyFileFilter(

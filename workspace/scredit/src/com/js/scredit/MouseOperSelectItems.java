@@ -36,10 +36,6 @@ public class MouseOperSelectItems extends MouseOper {
   @Override
   public boolean mouseDown() {
 
-    final boolean db = false;
-    if (db)
-      pr("MouseOperSelectItems.mouseDown() " + mouseStateString(ev));
-
     boolean f = false;
 
     boolean resetDup = false;

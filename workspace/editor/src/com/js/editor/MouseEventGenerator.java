@@ -5,6 +5,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.SwingUtilities;
+
 import com.js.geometry.*;
 import static com.js.basic.Tools.*;
 
@@ -35,7 +37,7 @@ public class MouseEventGenerator {
     IPoint viewPoint = new IPoint(evt.getX(), evt.getY());
 
     int modifierFlags = 0;
-    if (MouseOper.right(evt))
+    if (SwingUtilities.isRightMouseButton(evt))
       modifierFlags |= UserEvent.FLAG_RIGHT;
     if (evt.isAltDown())
       modifierFlags |= UserEvent.FLAG_ALT;

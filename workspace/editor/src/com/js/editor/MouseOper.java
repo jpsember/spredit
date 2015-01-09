@@ -57,8 +57,6 @@ public abstract class MouseOper {
 
   /**
    * Determine if mouse up/down was right button
-   * 
-   * @return
    */
   public static boolean right(MouseEvent ev) {
     return SwingUtilities.isRightMouseButton(ev);
@@ -78,23 +76,6 @@ public abstract class MouseOper {
     Component c = view.getComponent();
     c.addMouseListener(ls);
     c.addMouseMotionListener(ls);
-  }
-
-  /**
-   * Construct a string describing the mouse button, modifier key states
-   * 
-   * @return
-   */
-  public static String mouseStateString(MouseEvent ev) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Mouse[");
-
-    sb.append("rt:" + d(right(ev)));
-    sb.append(" ctrl:" + d(ev.isControlDown()));
-    sb.append(" shift:" + d(ev.isShiftDown()));
-    sb.append(" alt:" + d(ev.isAltDown()));
-    sb.append(" meta:" + d(ev.isMetaDown()));
-    return sb.toString();
   }
 
   /**
@@ -142,6 +123,7 @@ public abstract class MouseOper {
     // }
   }
 
+  @Deprecated
   public static void addListener(Listener listener) {
     listeners.add(listener);
   }
