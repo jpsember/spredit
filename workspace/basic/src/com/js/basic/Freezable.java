@@ -51,6 +51,8 @@ public interface Freezable {
 
     @Override
     public <T extends Freezable> T getFrozenCopy() {
+      Tools
+          .unimp("if getting mutable copy, and using clone(), must clear the frozen/frozen copy instance vars");
       if (mFrozenCopy == null) {
         mFrozenCopy = getMutableCopy();
         mFrozenCopy.freeze();

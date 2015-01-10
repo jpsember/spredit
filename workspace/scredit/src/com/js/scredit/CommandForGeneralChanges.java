@@ -4,8 +4,20 @@ import com.js.editor.Command;
 
 public class CommandForGeneralChanges extends Command.Adapter {
 
+  /**
+   * Constructor
+   * 
+   * @param originalState
+   * @param newState
+   *          editor state after change; if null, constructs from current
+   *          editor's state
+   * @param mergeKey
+   *          optional merge key
+   */
   public CommandForGeneralChanges(ScriptEditorState originalState,
       ScriptEditorState newState, String mergeKey) {
+    if (newState == null)
+      newState = new ScriptEditorState();
     mOriginalState = originalState;
     mNewState = newState;
     mMergeKey = mergeKey;

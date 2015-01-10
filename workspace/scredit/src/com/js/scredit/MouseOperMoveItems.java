@@ -1,12 +1,69 @@
 package com.js.scredit;
 
-//import com.js.editor.Command;
+import java.util.List;
+
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
-//import com.js.geometry.*;
+import com.js.editor.UserEvent;
+import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
 
 public class MouseOperMoveItems extends MouseOper {
+
+  public static MouseOperMoveItems build(UserEvent initialDownEvent) {
+    return new MouseOperMoveItems(initialDownEvent);
+  }
+
+  @Override
+  public void processUserEvent(UserEvent event) {
+    event.printProcessingMessage("MouseOperMoveItems");
+    switch (event.getCode()) {
+    case UserEvent.CODE_DRAG:
+      updateMove(event);
+      pr("drag, objects now " + ScriptEditor.items());
+      break;
+    case UserEvent.CODE_UP:
+      Command command = new CommandForGeneralChanges(mInitialEditorState, null,
+          "move");
+      pr("performing command\n " + ScriptEditor.items());
+      ScriptEditor.perform(command);
+      pr("after performing:\n " + ScriptEditor.items());
+      unimp("distinguish between finishing and aborting operation; if aborting, restore editor state to initial");
+      MouseOper.clearOperation();
+      break;
+    }
+  }
+
+  private void updateMove(UserEvent event) {
+    Point translate = Point.difference(event.getWorldLocation(),
+        mInitialDownEvent.getWorldLocation());
+    pr("updateMove, translate " + translate);
+
+    String msg = null;
+
+    List<Integer> slots = mInitialEditorState.getSelectedSlots();
+    for (int slot : slots) {
+      EdObject object = mInitialEditorState.getObjects().get(slot);
+
+      Point newLoc = Point.sum(object.location(), translate);
+      newLoc = Grid.snapToGrid(newLoc, true);
+
+      EdObject modObject = ScriptEditor.items().get(slot);
+      modObject.setLocation(newLoc);
+
+      if (msg == null) {
+        msg = object.getInfoMsg();
+      }
+    }
+    ScriptEditor.setInfo(msg);
+  }
+
+  private MouseOperMoveItems(UserEvent initialDownEvent) {
+    mInitialDownEvent = initialDownEvent;
+    mInitialEditorState = new ScriptEditorState();
+    pr("------------- built MouseOperMoveItems");
+  }
 
   @Override
   public boolean mouseDown() {
@@ -29,9 +86,8 @@ public class MouseOperMoveItems extends MouseOper {
   @Override
   public void stop() {
     warning("what is distinction between mouseUp and stop?  is stop sort of like cancel or abort?");
-    // if (mMoveCommand.getTranslate().magnitude() == 0) {
-    // ScriptEditor.editor().registerPop();
-    // }
   }
 
+  private UserEvent mInitialDownEvent;
+  private ScriptEditorState mInitialEditorState;
 }

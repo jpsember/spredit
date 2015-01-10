@@ -8,6 +8,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.basic.Freezable;
 import com.js.basic.JSONTools;
 import com.js.editor.MouseOper;
 import com.js.geometry.*;
@@ -91,12 +92,11 @@ public class RectangleObject extends EdObject {
 
   public static final int CODE = 4; // code for rectangle object
 
-  /**
-   * Clone the object
-   */
-  public Object clone() {
-    RectangleObject e = (RectangleObject) super.clone();
-    return e;
+  @Override
+  public <T extends Freezable> T getMutableCopy() {
+    RectangleObject r = new RectangleObject(mColor, mBottomLeftCorner,
+        mTopRightCorner);
+    return (T) r;
   }
 
   public String toString() {
@@ -277,6 +277,7 @@ public class RectangleObject extends EdObject {
 
   @Override
   public void setLocation(Point pt) {
+    mutate();
     float w = width();
     float h = height();
     mBottomLeftCorner = new Point(pt);

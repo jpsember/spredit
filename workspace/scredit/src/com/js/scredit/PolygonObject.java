@@ -18,6 +18,9 @@ import static com.js.basic.Tools.*;
 
 public class PolygonObject extends EdObject {
 
+  private PolygonObject() {
+  }
+
   public PolygonObject(Color color, List<Point> pts) {
     this(color, pts.toArray(new Point[0]), null);
   }
@@ -29,7 +32,7 @@ public class PolygonObject extends EdObject {
   }
 
   private void setColorValue(Color c) {
-    this.color = c;
+    this.mColor = c;
   }
 
   @Override
@@ -53,7 +56,7 @@ public class PolygonObject extends EdObject {
   @Override
   public EdObject applyColor(Color color) {
     PolygonObject ret = this;
-    if (!color.equals(this.color)) {
+    if (!color.equals(this.mColor)) {
       ret = this.getCopy();
       ret.setColorValue(color);
     }
@@ -133,7 +136,7 @@ public class PolygonObject extends EdObject {
 
   @Override
   public Color getColor() {
-    return color;
+    return mColor;
   }
 
   public Point[] getPoints() {
@@ -199,20 +202,6 @@ public class PolygonObject extends EdObject {
 
   public static final int CODE = 2; // code for polygon object
 
-  /**
-   * Clone the object
-   */
-  public Object clone() {
-    PolygonObject e = (PolygonObject) super.clone();
-    e.tfm = new ObjTransform(tfm);
-
-    // reset some lazy-initialized fields
-    bounds = null;
-    flags = 0;
-    triangulation = null;
-    return e;
-  }
-
   @Override
   public boolean contains(Point pt) {
     boolean ret = boundingRect().contains(pt);
@@ -263,7 +252,7 @@ public class PolygonObject extends EdObject {
       pt = pts2[ptInds[index]];
     else
       pt = pts2[index];
-    return tfm.matrix().apply(pt);
+    return mTransform.matrix().apply(pt);
   }
 
   @Override
@@ -280,20 +269,20 @@ public class PolygonObject extends EdObject {
     if (isSimple()) {
       tri = triangulation();
       if (tri == null)
-        flags &= ~F_SIMPLE;
+        mFlags &= ~F_SIMPLE;
     }
     if (tri != null) {
       Point[] uPts = getPoints();
       Point[] tPts = new Point[uPts.length];
-      Matrix m = tfm.matrix();
+      Matrix m = mTransform.matrix();
       for (int i = 0; i < uPts.length; i++)
         tPts[i] = m.apply(uPts[i]);
 
       // final boolean SHOWTRI = false;
 
-      if (color != null) {
+      if (mColor != null) {
 
-        panel.setRenderColor(color);
+        panel.setRenderColor(mColor);
 
         int k = 0;
 
@@ -356,7 +345,7 @@ public class PolygonObject extends EdObject {
     //
     // }
 
-    if (color == null || isSelected()) {
+    if (mColor == null || isSelected()) {
       panel.setRenderColor(isSelected() ? Color.YELLOW : Color.DARK_GRAY);
 
       panel.lineWidth((isSelected() ? 2 : 1) / panel.getZoom());
@@ -568,8 +557,8 @@ public class PolygonObject extends EdObject {
 
   @Override
   public void setLocation(Point pt) {
-    tfm.setLocation(new Point(pt));
-    recalcLazy();
+    mutate();
+    mTransform.setLocation(new Point(pt));
   }
 
   public int fixIndex(int ind) {
@@ -580,35 +569,36 @@ public class PolygonObject extends EdObject {
 
   @Override
   public Point location() {
-    return new Point(tfm.location());
+    return new Point(mTransform.location());
   }
 
   @Override
   public void setRotation(float angle) {
-    tfm.setRotation(angle);
-    recalcLazy();
-
+    mutate();
+    mTransform.setRotation(angle);
   }
 
-  private void recalcLazy() {
+  @Override
+  public void mutate() {
+    super.mutate();
     triangulation = null;
     bounds = null;
   }
 
   @Override
   public float rotation() {
-    return tfm.rotation();
+    return mTransform.rotation();
   }
 
   @Override
   public void setScale(float scale) {
-    tfm.setScale(scale);
-    recalcLazy();
+    mutate();
+    mTransform.setScale(scale);
   }
 
   @Override
   public float scale() {
-    return tfm.scale();
+    return mTransform.scale();
   }
 
   public int nPoints() {
@@ -619,7 +609,7 @@ public class PolygonObject extends EdObject {
   }
 
   private boolean isFlag(int f) {
-    return (flags & f) != 0;
+    return (mFlags & f) != 0;
   }
 
   // private static class DbLine {
@@ -683,15 +673,15 @@ public class PolygonObject extends EdObject {
 
   private void calcFlags() {
     if (!isFlag(F_FLAGSVALID)) {
-      flags = F_FLAGSVALID;
+      mFlags = F_FLAGSVALID;
       do {
         if (nPoints() < 3)
           break;
-        flags |= F_WELLDEFINED;
+        mFlags |= F_WELLDEFINED;
 
         if (!calcSimple())
           break;
-        flags |= F_SIMPLE;
+        mFlags |= F_SIMPLE;
 
         int w = calcWinding();
         if (w == 0)
@@ -699,10 +689,10 @@ public class PolygonObject extends EdObject {
               + this);
 
         if (w < 0)
-          flags |= F_CWORIENTED;
+          mFlags |= F_CWORIENTED;
 
         if (calcConvex())
-          flags |= F_CONVEX;
+          mFlags |= F_CONVEX;
       } while (false);
     }
   }
@@ -847,8 +837,8 @@ public class PolygonObject extends EdObject {
       int[] vi = new int[nPoints()];
       for (int i = 0; i < vi.length; i++)
         vi[i] = i;
-      ret = new PolygonObject(color, getPoints(), vi);
-      ret.flags = flags;
+      ret = new PolygonObject(mColor, getPoints(), vi);
+      ret.mFlags = mFlags;
     }
     return ret;
   }
@@ -1027,23 +1017,37 @@ public class PolygonObject extends EdObject {
   }
 
   public Color color() {
-    return color;
+    return mColor;
+  }
+
+  @Override
+  public <T extends Freezable> T getMutableCopy() {
+    warning("refactor PolygonObject");
+    PolygonObject e = new PolygonObject();
+    e.pts2 = new Point[pts2.length];
+    for (int i = 0; i < pts2.length; i++)
+      e.pts2[i] = pts2[i];
+    e.mTransform = new ObjTransform(mTransform);
+    return (T) e;
   }
 
   public static boolean showVertices;
-
-  private ObjTransform tfm = new ObjTransform();
-  private Point[] pts2; //
-  private int[] ptInds;
-  private int flags;
-  // indices of vertices forming triangulation (only if simple)
-  private int[] triangulation;
-  private Rect bounds;
-  private Color color; // color and shade (to be clarified later)
 
   private static final int F_FLAGSVALID = (1 << 0), //
       F_WELLDEFINED = (1 << 1), //
       F_CWORIENTED = (1 << 2), //
       F_SIMPLE = (1 << 3), F_CONVEX = (1 << 4);
   public static final int MAX_VERTICES = 100;
+
+  private ObjTransform mTransform = new ObjTransform();
+  private Point[] pts2; //
+  private Color mColor; // color and shade (to be clarified later)
+
+  // lazy-initialized fields
+  private int[] ptInds;
+  private int mFlags;
+  private Rect bounds;
+  // indices of vertices forming triangulation (only if simple)
+  private int[] triangulation;
+
 }

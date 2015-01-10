@@ -4,6 +4,7 @@ import static com.js.basic.Tools.*;
 
 import java.awt.Color;
 
+import com.js.basic.Freezable;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 import com.js.geometry.Rect;
@@ -11,25 +12,9 @@ import com.js.myopengl.GLPanel;
 
 import tex.*;
 
-public abstract class EdObject implements Cloneable {
+public abstract class EdObject extends Freezable.Mutable {
   private static final int FLAG_SELECTED = (1 << 31);
   private static final int FLAG_EDITABLE = (1 << 30);
-
-  /**
-   * Clone the object
-   */
-  public Object clone() {
-    try {
-      EdObject e = (EdObject) super.clone();
-      return e;
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public <T extends EdObject> T getCopy() {
-    return (T) this.clone();
-  }
 
   public Color getColor() {
     return null;
@@ -226,7 +211,7 @@ public abstract class EdObject implements Cloneable {
   public abstract void setLocation(Point pt);
 
   public EdObject flip(boolean horz, Point newLocation) {
-    EdObject newObj = (EdObject) this.clone();
+    EdObject newObj = this.getMutableCopy();
     newObj.setLocation(newLocation);
     return newObj;
   }
@@ -245,7 +230,8 @@ public abstract class EdObject implements Cloneable {
    * Replace existing flags with new ones
    */
   public void setFlags(int f) {
-    this.mFlags = f;
+    mutate();
+    mFlags = f;
   }
 
   /**

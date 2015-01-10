@@ -18,6 +18,7 @@ import tex.Sprite;
 import apputil.AppTools;
 
 import com.js.basic.Files;
+import com.js.basic.Freezable;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -32,20 +33,11 @@ public class SpriteObject extends EdObject {
     return super.flip(horz, newLocation);
   }
 
-  /**
-   * Clone the object
-   */
-  public Object clone() {
-    final boolean db = false;
-    if (db)
-      pr("clone sprite " + this + ", rotation=" + rotation() + " location="
-          + location());
-
-    SpriteObject e = (SpriteObject) super.clone();
+  @Override
+  public <T extends Freezable> T getMutableCopy() {
+    SpriteObject e = new SpriteObject(atlas, spriteIndex);
     e.tfm = new ObjTransform(tfm);
-    if (db)
-      pr(" cloned rotation=" + e.rotation() + " location=" + e.location());
-    return e;
+    return (T) e;
   }
 
   public EdObject snapToGrid() {
@@ -342,9 +334,15 @@ public class SpriteObject extends EdObject {
   }
 
   @Override
-  public void setLocation(Point pt) {
-    tfm.setLocation(new Point(pt));
+  public void mutate() {
+    super.mutate();
     bounds = null;
+  }
+
+  @Override
+  public void setLocation(Point pt) {
+    mutate();
+    tfm.setLocation(new Point(pt));
   }
 
   public void setMissingId(String id) {
@@ -369,8 +367,8 @@ public class SpriteObject extends EdObject {
 
   @Override
   public void setRotation(float angle) {
+    mutate();
     tfm.setRotation(angle);
-    bounds = null;
   }
 
   @Override
@@ -380,8 +378,8 @@ public class SpriteObject extends EdObject {
 
   @Override
   public void setScale(float scale) {
+    mutate();
     tfm.setScale(scale);
-    bounds = null;
   }
 
   @Override

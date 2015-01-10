@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.js.basic.Freezable;
 import com.js.editor.Command;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
@@ -231,16 +232,14 @@ public class GroupObject extends EdObject {
     return objects.get(i);
   }
 
-  /**
-   * Clone the object
-   */
-  public Object clone() {
-    GroupObject g = (GroupObject) super.clone();
+  @Override
+  public <T extends Freezable> T getMutableCopy() {
+    GroupObject g = new GroupObject();
     g.objects = new ArrayList();
     // If we make objects immutable, we don't need to get copies of them...?
     for (int i = 0; i < size(); i++)
-      g.objects.add(obj(i).getCopy());
-    return g;
+      g.objects.add((EdObject) obj(i).getFrozenCopy());
+    return (T) g;
   }
 
   @Override
@@ -277,6 +276,7 @@ public class GroupObject extends EdObject {
 
   @Override
   public void setLocation(Point pt) {
+    mutate();
     Point prev = location();
     Point diff = Point.difference(pt, prev);
     bounds = null;

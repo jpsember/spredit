@@ -6,8 +6,8 @@ import com.js.editor.EditorState;
 
 public class ScriptEditorState extends EditorState {
 
-  public ScriptEditorState(ScriptEditor e) {
-    mObjects = e.getScript().items().getFrozenCopy();
+  public ScriptEditorState() {
+    mObjects = ScriptEditor.items().getFrozenCopy();
     mSelectedSlots = mObjects.getSelectedSlots();
     mClipboard = ScriptEditor.clipboard();
     // mDupAccumulator = e.getDupAccumulator();

@@ -142,9 +142,11 @@ public class DefaultMouseOper extends MouseOper {
      */
     if (!event.isShift()) {
       if (!mPickSetSelected.isEmpty()) {
-        unimp("start move operation with pick set");
+        MouseOper.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
       } else if (!mPickSet.isEmpty()) {
-        unimp("select just topmost, and move that");
+        unimp("consider doing selection changes as commands");
+        ScriptEditor.items().setSelected(SlotList.build(last(mPickSet)));
+        MouseOper.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
       } else {
         unimp("unselect all, start drag rectangle");
       }

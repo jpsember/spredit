@@ -1720,8 +1720,9 @@ public class ScriptEditor {
   }
 
   public void setState(ScriptEditorState state) {
-    getScript().setItems(state.getObjects().getMutableCopy());
-    getScript().items().setSelected(state.getSelectedSlots());
+    Script script = getScript();
+    script.setItems(state.getObjects().getMutableCopy());
+    script.items().setSelected(state.getSelectedSlots());
     setClipboard(state.getClipboard());
   }
 
