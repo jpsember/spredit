@@ -1190,6 +1190,33 @@ public final class Tools {
     return ret;
   }
 
+  /**
+   * Get a copy of a Freezable object. A generic class method to eliminate
+   * casting that is sometimes required when using the interface method. This
+   * has a different name than that method to avoid confusion
+   */
+  public static <T extends Freezable> T copyOf(T orig) {
+    return orig.getCopy();
+  }
+
+  /**
+   * Get a mutable copy of a Freezable object. A generic class method to
+   * eliminate casting that is sometimes required when using the interface
+   * method. This has a different name than that method to avoid confusion
+   */
+  public static <T extends Freezable> T mutableCopyOf(T orig) {
+    return orig.getMutableCopy();
+  }
+
+  /**
+   * Get a frozen copy of a Freezable object. A generic class method to
+   * eliminate casting that is sometimes required when using the interface
+   * method. This has a different name than that method to avoid confusion
+   */
+  public static <T extends Freezable> T frozen(T orig) {
+    return orig.getFrozenCopy();
+  }
+
   private static boolean sSanitizeLineNumbersFlag;
   private static Pattern sLineNumbersPattern;
   private static long sTimeStampPreviousTime;

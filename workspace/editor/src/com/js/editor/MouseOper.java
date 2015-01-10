@@ -70,7 +70,7 @@ public abstract class MouseOper {
    * Specify view associated with mouse operations
    * 
    * @param view
-   * @deprecated use MouseEventGenerator instead
+   *          --- @deprecated use MouseEventGenerator instead
    */
   public static void setView(IEditorView view) {
     ASSERT(MouseOper.sEditorView == null);
@@ -127,7 +127,7 @@ public abstract class MouseOper {
    * Add an operation to the sequence
    * 
    * @param oper
-   * @deprecated
+   *          --- make this deprecated
    */
   public static void add(MouseOper oper) {
     opers.add(oper);

@@ -35,10 +35,13 @@ public interface Freezable {
   public boolean isFrozen();
 
   /**
-   * Prepare for mutating this object; should throw IllegalStateException if
+   * Prepare for mutating this object; should throw IllegalMutationException if
    * object is frozen
    */
   public void mutate();
+
+  public class IllegalMutationException extends UnsupportedOperationException {
+  }
 
   /**
    * Concrete implementation of the Freezable interface, for objects that can be
@@ -51,8 +54,6 @@ public interface Freezable {
 
     @Override
     public <T extends Freezable> T getFrozenCopy() {
-      Tools
-          .unimp("if getting mutable copy, and using clone(), must clear the frozen/frozen copy instance vars");
       if (mFrozenCopy == null) {
         mFrozenCopy = getMutableCopy();
         mFrozenCopy.freeze();
@@ -83,9 +84,13 @@ public interface Freezable {
     @Override
     public void mutate() {
       if (isFrozen())
-        throw new IllegalStateException();
+        throw new IllegalMutationException();
       // Throw out any frozen version of this object prior to mutation
       mFrozenCopy = null;
+    }
+
+    public boolean isMutable() {
+      return !mFrozen;
     }
 
     private boolean mFrozen;

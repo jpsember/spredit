@@ -80,7 +80,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
    * Replace an item with a copy, and return the copy
    */
   public EdObject getCopy(int n) {
-    EdObject r = (EdObject) get(n).getCopy();
+    EdObject r = copyOf(get(n));
     mList.set(n, r);
     return r;
   }
@@ -214,7 +214,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
     mutate();
     for (int slot : selectedSlots) {
       EdObject obj = get(slot);
-      set(slot, (EdObject) obj.getCopy());
+      set(slot, copyOf(obj));
     }
   }
 
@@ -240,8 +240,9 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
   @Override
   public EdObjectArray getMutableCopy() {
     EdObjectArray copy = new EdObjectArray();
-    for (EdObject obj : mList)
-      copy.add((EdObject) obj.getCopy());
+    for (EdObject obj : mList) {
+      copy.add(frozen(obj));
+    }
     return copy;
   }
 
@@ -262,7 +263,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
       return;
     warning("figure out this frozen business...");
     for (int i = 0; i < mList.size(); i++)
-      set(i, (EdObject) get(i).getFrozenCopy());
+      set(i, frozen(get(i)));
     // Perform any lazy initialization, so object is truly immutable once frozen
     getSelectedSlots();
     super.freeze();

@@ -211,7 +211,7 @@ public abstract class EdObject extends Freezable.Mutable {
   public abstract void setLocation(Point pt);
 
   public EdObject flip(boolean horz, Point newLocation) {
-    EdObject newObj = this.getMutableCopy();
+    EdObject newObj = getMutableCopy();
     newObj.setLocation(newLocation);
     return newObj;
   }
