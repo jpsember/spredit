@@ -17,28 +17,27 @@ public class MouseOperMoveItems extends MouseOper {
 
   @Override
   public void processUserEvent(UserEvent event) {
-    event.printProcessingMessage("MouseOperMoveItems");
+
     switch (event.getCode()) {
+
     case UserEvent.CODE_DRAG:
       updateMove(event);
-      pr("drag, objects now " + ScriptEditor.items());
       break;
+
     case UserEvent.CODE_UP:
       Command command = new CommandForGeneralChanges(mInitialEditorState, null,
           "move");
-      pr("performing command\n " + ScriptEditor.items());
       ScriptEditor.perform(command);
-      pr("after performing:\n " + ScriptEditor.items());
       unimp("distinguish between finishing and aborting operation; if aborting, restore editor state to initial");
       MouseOper.clearOperation();
       break;
+
     }
   }
 
   private void updateMove(UserEvent event) {
     Point translate = Point.difference(event.getWorldLocation(),
         mInitialDownEvent.getWorldLocation());
-    pr("updateMove, translate " + translate);
 
     String msg = null;
 
@@ -62,7 +61,6 @@ public class MouseOperMoveItems extends MouseOper {
   private MouseOperMoveItems(UserEvent initialDownEvent) {
     mInitialDownEvent = initialDownEvent;
     mInitialEditorState = new ScriptEditorState();
-    pr("------------- built MouseOperMoveItems");
   }
 
   @Override

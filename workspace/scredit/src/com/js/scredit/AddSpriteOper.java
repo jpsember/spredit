@@ -15,7 +15,7 @@ public class AddSpriteOper extends MouseOper {
 
     boolean f = false;
     do {
-      SpriteObject sp = new SpriteObject();
+      SpriteObject sp = new SpriteObject(null);
       sp.setLocation(currentPtF);
       ScriptEditor.items().clearAllSelected();
 

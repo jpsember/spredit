@@ -16,6 +16,10 @@ import static com.js.basic.Tools.*;
 
 public class GroupObject extends EdObject {
 
+  private GroupObject(EdObject source) {
+    super(source);
+  }
+
   private static final boolean db = false;
 
   private static class GroupReversible extends Command.Adapter {
@@ -67,7 +71,7 @@ public class GroupObject extends EdObject {
         getReverse(); // make sure we've constructed origObj
         origObj.setSelected(slots, false);
         EdObjectArray a = new EdObjectArray();
-        GroupObject group = new GroupObject();
+        GroupObject group = new GroupObject(null);
         group.setSelected(true);
         int slot = 0;
         for (int i = 0; i < origObj.size(); i++) {
@@ -234,7 +238,7 @@ public class GroupObject extends EdObject {
 
   @Override
   public Freezable getMutableCopy() {
-    GroupObject g = new GroupObject();
+    GroupObject g = new GroupObject(this);
     g.objects = new ArrayList();
     // If we make objects immutable, we don't need to get copies of them...?
     for (int i = 0; i < size(); i++)
@@ -388,7 +392,7 @@ public class GroupObject extends EdObject {
 
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
-      GroupObject so = new GroupObject();
+      GroupObject so = new GroupObject(null);
       so.expectedSize = map.getInt("size");
 
       // the caller will handle reading additional objects and adding them to

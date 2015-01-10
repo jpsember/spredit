@@ -840,7 +840,14 @@ public final class Tools {
       identifier = UniqueIdentifier.nameFor(obj);
     if (!includeClassName)
       return identifier;
-    return obj.getClass().getSimpleName() + ":" + identifier;
+    String s = obj.getClass().getSimpleName() + ":" + identifier;
+    if (obj instanceof Freezable) {
+      if (((Freezable) obj).isFrozen())
+        s += " FROZEN ";
+      else
+        s += " MUTABLE";
+    }
+    return s;
   }
 
   /**

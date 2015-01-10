@@ -123,7 +123,8 @@ public class UserEvent {
     if (!DEBUG_ONLY_FEATURES)
       return;
     else {
-      if (isDragVariant() && getCode() == sPreviousPrintEvent.getCode()
+      if (isDragVariant()
+          && getCode() == sPreviousPrintEvent.getCode()
           && message.equals(sPreviousPrintMessage))
         return;
       pr(message + "; processing:   " + this);

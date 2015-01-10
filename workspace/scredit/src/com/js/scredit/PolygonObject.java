@@ -18,14 +18,17 @@ import static com.js.basic.Tools.*;
 
 public class PolygonObject extends EdObject {
 
-  private PolygonObject() {
+  private PolygonObject(EdObject source) {
+    super(source);
   }
 
-  public PolygonObject(Color color, List<Point> pts) {
-    this(color, pts.toArray(new Point[0]), null);
+  public PolygonObject(EdObject source, Color color, List<Point> pts) {
+    this(source, color, pts.toArray(new Point[0]), null);
   }
 
-  public PolygonObject(Color color, Point[] pts, int[] vertIndices) {
+  public PolygonObject(EdObject source, Color color, Point[] pts,
+      int[] vertIndices) {
+    this(source);
     setColorValue(color);
     this.pts2 = pts;
     this.ptInds = vertIndices;
@@ -48,7 +51,7 @@ public class PolygonObject extends EdObject {
     if (!changed)
       return this;
 
-    PolygonObject p = new PolygonObject(color(), pts, null);
+    PolygonObject p = new PolygonObject(this, color(), pts, null);
     return p;
 
   }
@@ -225,7 +228,7 @@ public class PolygonObject extends EdObject {
       pt.add(newLocation);
       a.add(pt);
     }
-    return new PolygonObject(getColor(), a);
+    return new PolygonObject(this, getColor(), a);
   }
 
   @Override
@@ -495,7 +498,8 @@ public class PolygonObject extends EdObject {
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
       List<Point> a = Point.getList(map, "vertices");
-      PolygonObject so = new PolygonObject(JSONTools.getColor(map, "color"), a);
+      PolygonObject so = new PolygonObject(null, JSONTools.getColor(map,
+          "color"), a);
       return so;
     }
 
@@ -837,7 +841,7 @@ public class PolygonObject extends EdObject {
       int[] vi = new int[nPoints()];
       for (int i = 0; i < vi.length; i++)
         vi[i] = i;
-      ret = new PolygonObject(mColor, getPoints(), vi);
+      ret = new PolygonObject(this, mColor, getPoints(), vi);
       ret.mFlags = mFlags;
     }
     return ret;
@@ -992,9 +996,9 @@ public class PolygonObject extends EdObject {
               a2.add(vi[i]);
           }
 
-          PolygonObject s1 = new PolygonObject(p.color(), p.getPoints(),
+          PolygonObject s1 = new PolygonObject(orig, p.color(), p.getPoints(),
               Tools.toArray(a1));
-          PolygonObject s2 = new PolygonObject(p.color(), p.getPoints(),
+          PolygonObject s2 = new PolygonObject(orig, p.color(), p.getPoints(),
               Tools.toArray(a2));
           if (db)
             pr(" s1=" + s1 + "\n s2=" + s2);
@@ -1023,7 +1027,7 @@ public class PolygonObject extends EdObject {
   @Override
   public Freezable getMutableCopy() {
     warning("refactor PolygonObject");
-    PolygonObject e = new PolygonObject();
+    PolygonObject e = new PolygonObject(this);
     e.pts2 = new Point[pts2.length];
     for (int i = 0; i < pts2.length; i++)
       e.pts2[i] = pts2[i];

@@ -19,8 +19,9 @@ import static com.js.basic.Tools.*;
 
 public class RectangleObject extends EdObject {
 
-  public RectangleObject(Color color, Point cornerA, Point cornerB) {
-
+  public RectangleObject(EdObject source, Color color, Point cornerA,
+      Point cornerB) {
+    super(source);
     cornerA = Grid.snapToGrid(cornerA, true);
     cornerB = Grid.snapToGrid(cornerB, true);
 
@@ -47,7 +48,7 @@ public class RectangleObject extends EdObject {
     }
     nc1 = new Point(nc0.x + width(), nc0.y + height());
 
-    return new RectangleObject(mColor, nc0, nc1);
+    return new RectangleObject(this, mColor, nc0, nc1);
   }
 
   public EdObject snapToGrid() {
@@ -71,7 +72,7 @@ public class RectangleObject extends EdObject {
    * @return
    */
   private RectangleObject constructNew(Point spt1, Point spt2) {
-    RectangleObject r = new RectangleObject(getColor(), spt1, spt2);
+    RectangleObject r = new RectangleObject(this, getColor(), spt1, spt2);
     r.setSelected(this.isSelected());
     return r;
   }
@@ -94,7 +95,7 @@ public class RectangleObject extends EdObject {
 
   @Override
   public Freezable getMutableCopy() {
-    RectangleObject r = new RectangleObject(mColor, mBottomLeftCorner,
+    RectangleObject r = new RectangleObject(this, mColor, mBottomLeftCorner,
         mTopRightCorner);
     return r;
   }
@@ -228,8 +229,8 @@ public class RectangleObject extends EdObject {
       List<Point> points = Point.getList(map, "points");
       Point ptA = points.get(0);
       Point ptB = points.get(1);
-      RectangleObject so = new RectangleObject(
-          JSONTools.getColor(map, "color"), ptA, ptB);
+      RectangleObject so = new RectangleObject(null, JSONTools.getColor(map,
+          "color"), ptA, ptB);
       return so;
     }
 
@@ -245,7 +246,7 @@ public class RectangleObject extends EdObject {
       for (int i = 0; i < 4; i++)
         a.add(so.getCorner(i));
 
-      PolygonObject p = new PolygonObject(so.getColor(), a);
+      PolygonObject p = new PolygonObject(obj, so.getColor(), a);
 
       p.getFactory().write(sf, p);
       // DataOutput dw = sf.outputStream();

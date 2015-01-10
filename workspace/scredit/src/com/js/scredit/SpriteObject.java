@@ -189,7 +189,8 @@ public class SpriteObject extends EdObject {
     }
   }
 
-  public SpriteObject() {
+  public SpriteObject(EdObject source) {
+    super(source);
   }
 
   /**
@@ -200,7 +201,7 @@ public class SpriteObject extends EdObject {
    * @param sprite
    */
   public SpriteObject(Atlas atlas, int spriteIndex) {
-    this();
+    this(null);
     this.atlas = atlas;
     this.spriteIndex = spriteIndex;
   }
@@ -221,7 +222,7 @@ public class SpriteObject extends EdObject {
     @Override
     public EdObject parse(Script script, JSONObject map) throws JSONException {
 
-      SpriteObject so = new SpriteObject();
+      SpriteObject so = new SpriteObject(null);
       String atlasStr = map.optString(ATLAS);
       if (atlasStr != null) {
         File atlasPath = new File(script.project().directory(), atlasStr);

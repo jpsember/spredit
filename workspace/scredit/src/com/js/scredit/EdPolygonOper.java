@@ -13,8 +13,10 @@ import com.js.myopengl.GLPanel;
 public class EdPolygonOper extends MouseOper {
 
   /**
-   * Get the polygon currently being edited, if such an operation is being performed
-   * @return polygon, or null  
+   * Get the polygon currently being edited, if such an operation is being
+   * performed
+   * 
+   * @return polygon, or null
    */
   public static PolygonObject activePoly() {
     if (activeEditor == null)
@@ -39,9 +41,10 @@ public class EdPolygonOper extends MouseOper {
   }
 
   /**
-   * Advance target by a number of vertices;
-   * adjusts for editing orientation
-   * @param amt amount to advance target by
+   * Advance target by a number of vertices; adjusts for editing orientation
+   * 
+   * @param amt
+   *          amount to advance target by
    */
   public void adjustTarget(int amt) {
     final boolean db = false;
@@ -74,7 +77,7 @@ public class EdPolygonOper extends MouseOper {
         a.add(poly.getPoint(i));
       }
     }
-    PolygonObject np = new PolygonObject(poly.color(), a);
+    PolygonObject np = new PolygonObject(poly, poly.color(), a);
     setActivePolygon(np);
 
     adjustTarget(reversed ? 1 : 0);
@@ -82,6 +85,7 @@ public class EdPolygonOper extends MouseOper {
 
   /**
    * Get the polygon editing operation currently being performed
+   * 
    * @return EdPolygonOper, or null
    */
   public static EdPolygonOper activeEditor() {
@@ -90,10 +94,14 @@ public class EdPolygonOper extends MouseOper {
 
   /**
    * Construct an editor for a polygon
-   * @param slot slot containing polygon; if no such slot exists,
-   *   assumes polygon is being created and added to end
-   * @param target which vertex is to be the target
-   * @param edgeMode true if user grabbed an edge, false if grabbed a vertex
+   * 
+   * @param slot
+   *          slot containing polygon; if no such slot exists, assumes polygon
+   *          is being created and added to end
+   * @param target
+   *          which vertex is to be the target
+   * @param edgeMode
+   *          true if user grabbed an edge, false if grabbed a vertex
    */
   public EdPolygonOper(int slot, int target, boolean edgeMode) {
 
@@ -118,7 +126,9 @@ public class EdPolygonOper extends MouseOper {
 
   /**
    * Update this operation in response to a mouse drag / move event
-   * @param drag true if drag; false if hover
+   * 
+   * @param drag
+   *          true if drag; false if hover
    */
   public void mouseMove(boolean drag) {
     dragPt = Grid.snapToGrid(currentPtF, true);
@@ -130,7 +140,9 @@ public class EdPolygonOper extends MouseOper {
 
   /**
    * Determine which polygon editing operation, if any, is editing a polygon
-   * @param p polygon
+   * 
+   * @param p
+   *          polygon
    * @return editing operation, or null
    */
   public static EdPolygonOper getEditorFor(PolygonObject p) {
@@ -139,6 +151,7 @@ public class EdPolygonOper extends MouseOper {
       ret = null;
     return ret;
   }
+
   private static EdPolygonOper activeEditor;
 
   private int target() {
@@ -201,7 +214,8 @@ public class EdPolygonOper extends MouseOper {
     if (db)
       pr("EdPolygonOper, start; slot=" + slot + " poly=" + poly);
 
-    // create a new Reversible, one that either adds new polygon, or edits existing one,
+    // create a new Reversible, one that either adds new polygon, or edits
+    // existing one,
     // based upon whether an item in the slot exists
 
     Command rev = null;
@@ -215,7 +229,8 @@ public class EdPolygonOper extends MouseOper {
         pr(" constructed ModObjRev for slot " + slot + ", poly " + poly);
 
     } else {
-      poly = new PolygonObject(ScriptEditor.color(), new ArrayList<Point>());
+      poly = new PolygonObject(null, ScriptEditor.color(),
+          new ArrayList<Point>());
       rev = new AddObjectsReversible(poly);
       if (db)
         pr(" constructed AddObjRev for new poly");
@@ -227,27 +242,27 @@ public class EdPolygonOper extends MouseOper {
 
   }
 
-  //  private static class RotateReversible extends ModifyObjectsReversible {
-  //    public RotateReversible(int slot) {
-  //      super(slot);
-  //      //  EdObject[] orig = getOrigObjects();
-  //      setName("Edit");
-  //    }
-  //    @Override
-  //    public boolean valid() {
-  //      return nSlots() > 0;
-  //    }
+  // private static class RotateReversible extends ModifyObjectsReversible {
+  // public RotateReversible(int slot) {
+  // super(slot);
+  // // EdObject[] orig = getOrigObjects();
+  // setName("Edit");
+  // }
+  // @Override
+  // public boolean valid() {
+  // return nSlots() > 0;
+  // }
   //
-  ////    @Override
-  ////    public EdObject perform1(EdObject objOld) {
-  ////      EdObject ret = objOld;
-  ////      if (rotation != 0) {
-  ////        ret = (EdObject) objOld.clone();
-  ////        ret.rotAndScale(objOld, 1, circ.getOrigin(), rotation);
-  ////      }
-  ////      return ret;
-  ////    }
-  //  }
+  // // @Override
+  // // public EdObject perform1(EdObject objOld) {
+  // // EdObject ret = objOld;
+  // // if (rotation != 0) {
+  // // ret = (EdObject) objOld.clone();
+  // // ret.rotAndScale(objOld, 1, circ.getOrigin(), rotation);
+  // // }
+  // // return ret;
+  // // }
+  // }
 
   @Override
   public void stop() {
@@ -256,17 +271,18 @@ public class EdPolygonOper extends MouseOper {
     if (db)
       pr("EdPolygonOper, stop");
 
-    // Update the last reversible action to reflect the final state of the polygon.
+    // Update the last reversible action to reflect the final state of the
+    // polygon.
 
     // The top of stack reversible action is either
-    //  1) AddObjectsOper
-    //  2) ModifyObjectsReversible
+    // 1) AddObjectsOper
+    // 2) ModifyObjectsReversible
     //
 
     // If final polygon is not well defined {
-    //     If stacked reversible was AddObjectsOper, pop stack
-    //   else
-    //     replace stack reversible with DeleteObjectsReversible
+    // If stacked reversible was AddObjectsOper, pop stack
+    // else
+    // replace stack reversible with DeleteObjectsReversible
     // }
 
     if (!poly.isWellDefined()) {
@@ -308,24 +324,25 @@ public class EdPolygonOper extends MouseOper {
           if (db)
             pr(" updating " + op);
           warning("this can be simplified as we did before");
-          //op.setObject(ScriptEditor.item(slot));
+          // op.setObject(ScriptEditor.item(slot));
         }
       } else {
         ModifyObjectsReversible mr = (ModifyObjectsReversible) tos;
         if (db)
           pr(" updating " + mr);
         mr.updateModifiedObjects();
-        //        ASSERT(mr.nSlots() == 1);
-        //        // replace the object being added with the newer polygon
-        //        warn("not sure this is required");
-        //        if (false)
-        //          mr.updateSelectedObjects(null);
-        //        mr.updateModifiedObjects();
+        // ASSERT(mr.nSlots() == 1);
+        // // replace the object being added with the newer polygon
+        // warn("not sure this is required");
+        // if (false)
+        // mr.updateSelectedObjects(null);
+        // mr.updateModifiedObjects();
       }
     }
     activeEditor = null;
 
   }
+
   private void insertPt(Point pt) {
     final boolean db = false;
     if (db)
@@ -351,7 +368,7 @@ public class EdPolygonOper extends MouseOper {
     if (poly.nPoints() == 0) {
       pts.add(pt);
     }
-    PolygonObject np = new PolygonObject(poly.color(), pts);
+    PolygonObject np = new PolygonObject(poly, poly.color(), pts);
 
     target = np.fixIndex(newTarget);
     setActivePolygon(np);
@@ -359,6 +376,7 @@ public class EdPolygonOper extends MouseOper {
 
   /**
    * Determine current editing orientation (ccw vs cw)
+   * 
    * @return true if cw, false if ccw
    */
   public static boolean currentOrientation() {
@@ -378,7 +396,8 @@ public class EdPolygonOper extends MouseOper {
     ScriptEditor.items().set(slot, p);
   }
 
-  // operation used to start this edit operation; null if polygon existed previously
+  // operation used to start this edit operation; null if polygon existed
+  // previously
   // private AddObjectsOper addOper;
   private PolygonObject poly;
   private int target;

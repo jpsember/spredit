@@ -54,18 +54,17 @@ public interface Freezable {
 
     @Override
     public Freezable getFrozenCopy() {
-      if (mFrozenCopy == null) {
-        mFrozenCopy = (Mutable) getMutableCopy();
-        mFrozenCopy.freeze();
-      }
-      return mFrozenCopy;
+      if (mFrozen)
+        return this;
+      Freezable copy = getMutableCopy();
+      copy.freeze();
+      return copy;
     }
 
     @Override
     public void freeze() {
       if (!mFrozen) {
         mFrozen = true;
-        mFrozenCopy = this;
       }
     }
 
@@ -85,8 +84,6 @@ public interface Freezable {
     public void mutate() {
       if (isFrozen())
         throw new IllegalMutationException();
-      // Throw out any frozen version of this object prior to mutation
-      mFrozenCopy = null;
     }
 
     public boolean isMutable() {
@@ -94,7 +91,5 @@ public interface Freezable {
     }
 
     private boolean mFrozen;
-    // Frozen version of this object (an optimization)
-    private Mutable mFrozenCopy;
   }
 }

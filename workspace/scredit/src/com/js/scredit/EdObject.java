@@ -16,6 +16,11 @@ public abstract class EdObject extends Freezable.Mutable {
   private static final int FLAG_SELECTED = (1 << 31);
   private static final int FLAG_EDITABLE = (1 << 30);
 
+  public EdObject(EdObject source) {
+    if (source != null)
+      mFlags = source.mFlags;
+  }
+
   public Color getColor() {
     return null;
   }

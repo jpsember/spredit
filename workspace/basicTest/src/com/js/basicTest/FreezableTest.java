@@ -162,19 +162,6 @@ public class FreezableTest extends MyTestCase {
     assertEquals(24, b.derived());
   }
 
-  public void testGetFrozenCopyCached() {
-    Alpha a = new Alpha(7);
-    a.setValue(8);
-    Alpha b = frozen(a);
-    assertFalse(a == b);
-    Alpha c = frozen(a);
-    assertTrue(b == c);
-    assertTrue(c == c.getFrozenCopy());
-    assertTrue(c == c.getCopy());
-    Alpha d = mutableCopyOf(c);
-    assertFalse(c == d);
-  }
-
   public void testSubclass() {
     Gamma g = new Gamma(10);
     assertEquals(14, g.value());

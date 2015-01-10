@@ -62,7 +62,8 @@ public class EdRectangleOper extends MouseOper {
     if (!right(ev)) {
       if (slot < 0) {
         // create a new rectangle at mouse position
-        origRect = new RectangleObject(ScriptEditor.color(), currentPtF,
+        origRect = new RectangleObject(null, ScriptEditor.color(),
+            currentPtF,
             currentPtF);
         grabOffset = new Point();
         editElement = 0;

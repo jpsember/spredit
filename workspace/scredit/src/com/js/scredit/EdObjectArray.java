@@ -139,17 +139,15 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
    * Get slots of selected items
    */
   public List<Integer> getSelectedSlots() {
-    if (mSelectedSlots == null) {
-      List<Integer> slots = SlotList.build();
-      for (int i = 0; i < mList.size(); i++) {
-        if (mList.get(i).isSelected()) {
-          slots.add(i);
-        }
+    if (isFrozen())
+      return mSelectedSlots;
+    List<Integer> slots = SlotList.build();
+    for (int i = 0; i < mList.size(); i++) {
+      if (mList.get(i).isSelected()) {
+        slots.add(i);
       }
-      mutate();
-      mSelectedSlots = slots;
     }
-    return mSelectedSlots;
+    return slots;
   }
 
   /**
@@ -164,7 +162,6 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
       if (sel)
         j++;
     }
-    mSelectedSlots = slots;
   }
 
   public void removeSelected() {
@@ -208,12 +205,6 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
   // Freezable interface
 
   @Override
-  public void mutate() {
-    super.mutate();
-    mSelectedSlots = null;
-  }
-
-  @Override
   public EdObjectArray getMutableCopy() {
     EdObjectArray copy = new EdObjectArray();
     for (EdObject obj : mList) {
@@ -224,10 +215,12 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("ObjArray");
+    StringBuilder sb = new StringBuilder();
+    sb.append(nameOf(this));
     sb.append(" [");
     for (EdObject obj : mList) {
       sb.append(" " + obj.getFactory().getTag());
+      sb.append(obj.boundingRect().bottomLeft());
     }
     sb.append("]");
     return sb.toString();
@@ -240,7 +233,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
     for (int i = 0; i < mList.size(); i++)
       set(i, frozen(get(i)));
     // Perform any lazy initialization, so object is truly immutable once frozen
-    getSelectedSlots();
+    mSelectedSlots = getSelectedSlots();
     super.freeze();
   }
 
