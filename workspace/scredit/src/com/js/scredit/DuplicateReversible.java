@@ -38,7 +38,7 @@ public class DuplicateReversible extends Command.Adapter {
     Point ds = Dup.getAccum(true); // )getFilteredDupAccum();
 
     for (int i = 0; i < slots.length; i++) {
-      EdObject newInstance = items.getCopy(slots[i]);
+      EdObject newInstance = items.get(slots[i]);
       if (db)
         pr("adding dupAmount " + ds + "  to duplicated object #" + i + ": "
             + newInstance);

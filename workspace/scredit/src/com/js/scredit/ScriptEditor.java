@@ -282,7 +282,7 @@ public class ScriptEditor {
         @Override
         public void perform() {
           for (int i = 0; i < nSelected(); i++) {
-            EdObject obj = items().getCopy(slot(i));
+            EdObject obj = items().get(slot(i));
             Point pt = new Point(obj.location());
             pt.x += xm[dir];
             pt.y += ym[dir];
@@ -1333,8 +1333,7 @@ public class ScriptEditor {
           EdObject obj = items().get(slot(i));
           if (!(obj instanceof SpriteObject))
             continue;
-          obj = items().getCopy(slot(i));
-          SpriteObject s = (SpriteObject) obj;
+          SpriteObject s = (SpriteObject) items().get(slot(i));
           s.setSprite(si2);
         }
       }
@@ -1362,7 +1361,7 @@ public class ScriptEditor {
    * Set clipboard
    */
   public static void setClipboard(EdObjectArray newClip) {
-    sClipboard = newClip.getFrozenCopy();
+    sClipboard = frozen(newClip);
   }
 
   private static boolean flushAll() {
@@ -1949,7 +1948,7 @@ public class ScriptEditor {
   private static float sZoomFactor = 1.0f;
   private static SpriteObject sSelectedSprite;
   private static IPoint sFocus = new IPoint();
-  private static EdObjectArray sClipboard = new EdObjectArray().getFrozenCopy();
+  private static EdObjectArray sClipboard = frozen(new EdObjectArray());
   private static ScriptProject sProject;
   private static ScriptSet sScriptSet;
   private static AtlasPanel sAtlasPanel;

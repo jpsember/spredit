@@ -2,6 +2,7 @@ package com.js.scredit;
 
 import com.js.editor.Command;
 import com.js.geometry.*;
+import static com.js.basic.Tools.*;
 
 public class PasteReversible extends Command.Adapter {
   @Override
@@ -37,7 +38,7 @@ public class PasteReversible extends Command.Adapter {
     Point ds = Point.sum(Dup.getAccum(true), Dup.getClipboardAdjust());
 
     for (EdObject obj : clip) {
-      EdObject newInstance = obj.getCopy();
+      EdObject newInstance = copyOf(obj);
       newInstance.setLocation(Point.sum(newInstance.location(), ds));
       newInstance.setSelected(true);
       items.add(newInstance);

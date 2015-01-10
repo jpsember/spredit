@@ -102,7 +102,7 @@ public class ScaleOper extends MouseOper {
     public EdObject perform(EdObject orig) {
       EdObject ret = orig;
       if (orig.scale() != 1) {
-        ret = orig.getMutableCopy();
+        ret = mutableCopyOf(orig);
         ret.setScale(1);
       }
       return ret;
@@ -152,7 +152,7 @@ public class ScaleOper extends MouseOper {
     public EdObject perform(EdObject orig) {
       EdObject ret = orig;
       if (scale != 1) {
-        ret = orig.getMutableCopy();
+        ret = mutableCopyOf(orig);
         ret.rotAndScale(orig, scale, circ.getOrigin(), 0);
       }
       return ret;

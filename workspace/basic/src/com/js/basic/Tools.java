@@ -1196,7 +1196,7 @@ public final class Tools {
    * has a different name than that method to avoid confusion
    */
   public static <T extends Freezable> T copyOf(T orig) {
-    return orig.getCopy();
+    return (T) orig.getCopy();
   }
 
   /**
@@ -1205,7 +1205,7 @@ public final class Tools {
    * method. This has a different name than that method to avoid confusion
    */
   public static <T extends Freezable> T mutableCopyOf(T orig) {
-    return orig.getMutableCopy();
+    return (T) orig.getMutableCopy();
   }
 
   /**
@@ -1214,7 +1214,15 @@ public final class Tools {
    * method. This has a different name than that method to avoid confusion
    */
   public static <T extends Freezable> T frozen(T orig) {
-    return orig.getFrozenCopy();
+    return (T) orig.getFrozenCopy();
+  }
+
+  /**
+   * Make a Freezable object frozen, if not already
+   */
+  public static <T extends Freezable> T freeze(T obj) {
+    obj.freeze();
+    return obj;
   }
 
   private static boolean sSanitizeLineNumbersFlag;

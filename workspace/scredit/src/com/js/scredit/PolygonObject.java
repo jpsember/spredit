@@ -57,7 +57,7 @@ public class PolygonObject extends EdObject {
   public EdObject applyColor(Color color) {
     PolygonObject ret = this;
     if (!color.equals(this.mColor)) {
-      ret = this.getCopy();
+      ret = copyOf(this);
       ret.setColorValue(color);
     }
     return ret;
@@ -1021,14 +1021,14 @@ public class PolygonObject extends EdObject {
   }
 
   @Override
-  public <T extends Freezable> T getMutableCopy() {
+  public Freezable getMutableCopy() {
     warning("refactor PolygonObject");
     PolygonObject e = new PolygonObject();
     e.pts2 = new Point[pts2.length];
     for (int i = 0; i < pts2.length; i++)
       e.pts2[i] = pts2[i];
     e.mTransform = new ObjTransform(mTransform);
-    return (T) e;
+    return e;
   }
 
   public static boolean showVertices;

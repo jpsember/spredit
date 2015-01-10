@@ -41,7 +41,7 @@ public class GroupObject extends EdObject {
       ASSERT(!undoFlag);
 
       if (origObj == null) {
-        origObj = ScriptEditor.items().getFrozenCopy();
+        origObj = frozen(ScriptEditor.items());
         // observe we are actually mutating the frozen object here; later
         // perhaps we'll move selected flags out of the EdObjectArray
         origObj.clearAllSelected();
@@ -192,7 +192,7 @@ public class GroupObject extends EdObject {
           EdObject obj = a.get(i);
           if (i == slot) {
             for (int k = 0; k < group.size(); k++) {
-              EdObject o2 = group.obj(k).getCopy();
+              EdObject o2 = copyOf(group.obj(k));
               o2.setSelected(true);
               b.add(o2);
             }
@@ -233,13 +233,13 @@ public class GroupObject extends EdObject {
   }
 
   @Override
-  public <T extends Freezable> T getMutableCopy() {
+  public Freezable getMutableCopy() {
     GroupObject g = new GroupObject();
     g.objects = new ArrayList();
     // If we make objects immutable, we don't need to get copies of them...?
     for (int i = 0; i < size(); i++)
-      g.objects.add((EdObject) obj(i).getFrozenCopy());
-    return (T) g;
+      g.objects.add(frozen(obj(i)));
+    return g;
   }
 
   @Override
@@ -336,7 +336,7 @@ public class GroupObject extends EdObject {
   public EdObject applyColor(Color color) {
     EdObject ret = this;
 
-    GroupObject g = this.getCopy();
+    GroupObject g = mutableCopyOf(this);
     for (int i = 0; i < g.size(); i++) {
       EdObject obj = obj(i);
       EdObject obj2 = obj.applyColor(color);

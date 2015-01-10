@@ -28,8 +28,8 @@ public class FreezableTest extends MyTestCase {
     }
 
     @Override
-    public <T extends Freezable> T getMutableCopy() {
-      return (T) new Alpha(mValue);
+    public Freezable getMutableCopy() {
+      return new Alpha(mValue);
     }
 
     @Override
@@ -80,16 +80,16 @@ public class FreezableTest extends MyTestCase {
     }
 
     @Override
-    public <T extends Freezable> T getMutableCopy() {
+    public Freezable getMutableCopy() {
       Gamma g = new Gamma(value());
-      return (T) g;
+      return g;
     }
   }
 
   public void testGetFrozenCopy() {
     Alpha a = new Alpha(7);
     a.setValue(8);
-    Alpha b = a.getFrozenCopy();
+    Alpha b = frozen(a);
     assertFalse(a.isFrozen());
     assertTrue(b.isFrozen());
     assertEquals(16, b.derived());
@@ -100,18 +100,9 @@ public class FreezableTest extends MyTestCase {
     assertEquals(16, b.derived());
   }
 
-  public void testGetFrozenCopyStaticMethod() {
-    Alpha a = new Alpha(7);
-    a.setValue(8);
-    Alpha b = frozen(a);
-    assertFalse(a.isFrozen());
-    assertTrue(b.isFrozen());
-    assertEquals(16, b.derived());
-  }
-
   public void testGetCopyNotFrozen() {
     Alpha a = new Alpha(7);
-    Alpha b = a.getCopy();
+    Alpha b = copyOf(a);
     assertFalse(a == b);
   }
 
@@ -123,23 +114,21 @@ public class FreezableTest extends MyTestCase {
   }
 
   public void testGetCopyAlreadyFrozen() {
-    Alpha a = new Alpha(7);
-    a.freeze();
-    Alpha b = a.getCopy();
+    Alpha a = freeze(new Alpha(7));
+    Alpha b = copyOf(a);
     assertTrue(a == b);
   }
 
   public void testGetMutableCopyOfNonFrozen() {
     Alpha a = new Alpha(7);
-    Alpha b = a.getMutableCopy();
+    Alpha b = mutableCopyOf(a);
     assertFalse(a == b);
     assertFalse(b.isFrozen());
   }
 
   public void testGetMutableCopyOfFrozen() {
-    Alpha a = new Alpha(7);
-    a.freeze();
-    Alpha b = a.getMutableCopy();
+    Alpha a = freeze(new Alpha(7));
+    Alpha b = mutableCopyOf(a);
     assertTrue(a.isFrozen());
     assertFalse(a == b);
     assertFalse(b.isFrozen());
@@ -167,9 +156,8 @@ public class FreezableTest extends MyTestCase {
   }
 
   public void testMutateMutableCopyOfFrozen() {
-    Alpha a = new Alpha(7);
-    a.freeze();
-    Alpha b = a.getMutableCopy();
+    Alpha a = freeze(new Alpha(7));
+    Alpha b = mutableCopyOf(a);
     b.setValue(12);
     assertEquals(24, b.derived());
   }
@@ -177,13 +165,13 @@ public class FreezableTest extends MyTestCase {
   public void testGetFrozenCopyCached() {
     Alpha a = new Alpha(7);
     a.setValue(8);
-    Alpha b = a.getFrozenCopy();
+    Alpha b = frozen(a);
     assertFalse(a == b);
-    Alpha c = a.getFrozenCopy();
+    Alpha c = frozen(a);
     assertTrue(b == c);
     assertTrue(c == c.getFrozenCopy());
     assertTrue(c == c.getCopy());
-    Alpha d = c.getMutableCopy();
+    Alpha d = mutableCopyOf(c);
     assertFalse(c == d);
   }
 

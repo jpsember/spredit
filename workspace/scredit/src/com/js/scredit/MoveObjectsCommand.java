@@ -66,7 +66,7 @@ public class MoveObjectsCommand extends Command.Adapter {
 
     for (int i = 0; i < slots.length; i++) {
       int slot = slots[i];
-      EdObject objCurr = ScriptEditor.items().getCopy(slot);
+      EdObject objCurr = ScriptEditor.items().get(slot);
 
       Point newLoc = Point.sum(origLocs[i], translate);
       newLoc = Grid.snapToGrid(newLoc, true);
@@ -99,7 +99,7 @@ public class MoveObjectsCommand extends Command.Adapter {
       public void perform() {
         EdObjectArray items = ScriptEditor.items();
         for (int i = 0; i < slots.length; i++) {
-          EdObject obj = items.getCopy(slots[i]);
+          EdObject obj = items.get(slots[i]);
           obj.setLocation(origLocs[i]);
         }
       }

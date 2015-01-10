@@ -80,7 +80,7 @@ public class RectangleObject extends EdObject {
   public EdObject applyColor(Color color) {
     RectangleObject ret = this;
     if (!color.equals(this.mColor)) {
-      ret = this.getCopy();
+      ret = copyOf(this);
       ret.setColor(color);
     }
     return ret;
@@ -93,10 +93,10 @@ public class RectangleObject extends EdObject {
   public static final int CODE = 4; // code for rectangle object
 
   @Override
-  public <T extends Freezable> T getMutableCopy() {
+  public Freezable getMutableCopy() {
     RectangleObject r = new RectangleObject(mColor, mBottomLeftCorner,
         mTopRightCorner);
-    return (T) r;
+    return r;
   }
 
   public String toString() {

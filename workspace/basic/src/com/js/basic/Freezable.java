@@ -12,17 +12,17 @@ public interface Freezable {
   /**
    * Get a copy of this object; if already frozen, returns this
    */
-  public <T extends Freezable> T getCopy();
+  public Freezable getCopy();
 
   /**
    * Get a mutable copy of this object
    */
-  public <T extends Freezable> T getMutableCopy();
+  public Freezable getMutableCopy();
 
   /**
    * Get a frozen copy of this object; if already frozen, returns this
    */
-  public <T extends Freezable> T getFrozenCopy();
+  public Freezable getFrozenCopy();
 
   /**
    * Make this object frozen (if not already)
@@ -50,15 +50,15 @@ public interface Freezable {
   public abstract class Mutable implements Freezable {
 
     @Override
-    public abstract <T extends Freezable> T getMutableCopy();
+    public abstract Freezable getMutableCopy();
 
     @Override
-    public <T extends Freezable> T getFrozenCopy() {
+    public Freezable getFrozenCopy() {
       if (mFrozenCopy == null) {
-        mFrozenCopy = getMutableCopy();
+        mFrozenCopy = (Mutable) getMutableCopy();
         mFrozenCopy.freeze();
       }
-      return (T) mFrozenCopy;
+      return mFrozenCopy;
     }
 
     @Override
@@ -75,9 +75,9 @@ public interface Freezable {
     }
 
     @Override
-    public <T extends Freezable> T getCopy() {
+    public Freezable getCopy() {
       if (isFrozen())
-        return (T) this;
+        return this;
       return getMutableCopy();
     }
 

@@ -47,7 +47,7 @@ class AddObjectsReversible extends Command.Adapter {
 
     EdObjectArray items = ScriptEditor.items();
 
-    EdObject obj = items.getCopy(items.size() - 1);
+    EdObject obj = items.get(items.size() - 1);
     obj.setLocation(Point.sum(addObj.location(), delta));
 
   }

@@ -34,10 +34,10 @@ public class SpriteObject extends EdObject {
   }
 
   @Override
-  public <T extends Freezable> T getMutableCopy() {
+  public Freezable getMutableCopy() {
     SpriteObject e = new SpriteObject(atlas, spriteIndex);
     e.tfm = new ObjTransform(tfm);
-    return (T) e;
+    return e;
   }
 
   public EdObject snapToGrid() {
@@ -46,7 +46,7 @@ public class SpriteObject extends EdObject {
     Point loc2 = Grid.snapToGrid(loc, false);
     if (loc == loc2)
       return this;
-    SpriteObject s = getCopy();
+    SpriteObject s = mutableCopyOf(this);
     s.setLocation(loc2);
     return s;
   }
@@ -54,7 +54,7 @@ public class SpriteObject extends EdObject {
   public EdObject applyColor(Color color) {
     EdObject ret = this;
     if (tintColor != color) {
-      SpriteObject so = getCopy();
+      SpriteObject so = mutableCopyOf(this);
       so.tintColor = color;
       ret = so;
     }

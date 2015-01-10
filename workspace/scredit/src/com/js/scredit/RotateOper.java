@@ -111,7 +111,7 @@ public class RotateOper extends MouseOper {
     public EdObject perform(EdObject objOld) {
       EdObject ret = objOld;
       if (rotation != 0) {
-        ret = objOld.getCopy();
+        ret = copyOf(objOld);
         ret.rotAndScale(objOld, 1, circ.getOrigin(), rotation);
       }
       return ret;
@@ -156,7 +156,7 @@ public class RotateOper extends MouseOper {
       EdObject ret = orig;
       float rot = orig.rotation();
       if (rot != 0) {
-        ret = orig.getCopy();
+        ret = copyOf(orig);
 
         Circle circ = EdTools.smallestBoundingDisc(orig);
 
