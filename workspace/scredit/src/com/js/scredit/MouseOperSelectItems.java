@@ -11,6 +11,7 @@ import com.js.myopengl.GLPanel;
 
 import static com.js.basic.Tools.*;
 
+@Deprecated
 public class MouseOperSelectItems extends UserOperation {
 
   @Override

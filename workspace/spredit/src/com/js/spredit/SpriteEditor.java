@@ -28,13 +28,13 @@ public class SpriteEditor {
 
   public static void init(JComponent c) {
 
-    UserOperation.add(new MoveFocusOper());
-    for (int i = 0; i < 4; i++)
-      UserOperation.add(new CornerOper(i));
-    for (int i = 0; i < 4; i++)
-      UserOperation.add(new EdgeOper(i));
-    UserOperation.add(new MoveClipOper());
-    UserOperation.add(new MoveCPOper());
+    // UserOperation.add(new MoveFocusOper());
+    // for (int i = 0; i < 4; i++)
+    // UserOperation.add(new CornerOper(i));
+    // for (int i = 0; i < 4; i++)
+    // UserOperation.add(new EdgeOper(i));
+    // UserOperation.add(new MoveClipOper());
+    // UserOperation.add(new MoveCPOper());
 
     JPanel pnl = new JPanel(new BorderLayout());
 
@@ -770,7 +770,7 @@ public class SpriteEditor {
     return new IPoint(ev.getX(), ev.getY());
   }
 
-  private static class MoveFocusOper extends UserOperation {
+  /* private */static class MoveFocusOper extends UserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -807,7 +807,7 @@ public class SpriteEditor {
     private Point startOrigin;
   }
 
-  private static class MoveClipOper extends UserOperation {
+  /* private */static class MoveClipOper extends UserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -860,7 +860,7 @@ public class SpriteEditor {
     private IPoint origLoc;
   }
 
-  private static class MoveCPOper extends UserOperation {
+  /* private */static class MoveCPOper extends UserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -910,7 +910,7 @@ public class SpriteEditor {
     private Point origLoc;
   }
 
-  private static class EdgeOper extends UserOperation {
+  /* private */static class EdgeOper extends UserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -1014,7 +1014,7 @@ public class SpriteEditor {
     private IRect origClip;
   };
 
-  private static class CornerOper extends UserOperation {
+  /* private */static class CornerOper extends UserOperation {
     @Override
     public void processUserEvent(UserEvent event) {
       die("not implemented yet");

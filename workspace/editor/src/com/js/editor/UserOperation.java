@@ -77,16 +77,6 @@ public abstract class UserOperation implements UserEvent.Listener {
     warning("clearOperation is deprecated; " + stackTrace(1, 1));
   }
 
-  /**
-   * Add an operation to the sequence
-   * 
-   * @param oper
-   *          --- make this deprecated
-   */
-  public static void add(UserOperation oper) {
-    warning("MouseOper.add() is deprecated; " + stackTrace(1, 1));
-  }
-
   public static void setEnabled(boolean enabled) {
     warning("setEnabled is deprecated; " + stackTrace(1, 1));
     if (!enabled) {

@@ -1463,9 +1463,6 @@ public class ScriptEditor {
       p.add(pnl, BorderLayout.CENTER);
     }
 
-    // add mouse edit operations, in the order they
-    // are to be tested for activation
-    UserOperation.add(new MouseOperSelectItems());
     repaint();
   }
 

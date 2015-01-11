@@ -13,7 +13,7 @@ public class AddSpriteOper extends UserOperation {
 
     case UserEvent.CODE_DOWN: {
       SpriteObject sp = new SpriteObject(null);
-      sp.setLocation(currentPtF);
+      sp.setLocation(event.getWorldLocation());
       ScriptEditor.items().clearAllSelected();
 
       // get id of sprite from panel
@@ -25,8 +25,7 @@ public class AddSpriteOper extends UserOperation {
       ScriptEditor.perform(oper);
 
       // change to move oper
-
-      UserOperation m = MouseOperSelectItems.startMovingSelectedItems();
+      UserOperation m = MouseOperMoveItems.build(event);
       event.setOperation(m);
     }
       break;
