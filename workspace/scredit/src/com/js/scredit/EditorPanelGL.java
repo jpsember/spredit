@@ -131,4 +131,9 @@ public class EditorPanelGL extends GLPanel implements UserEventSource {
     }
 
   }
+
+  @Override
+  public MouseOper getDefaultOperation() {
+    return new DefaultMouseOper();
+  }
 }

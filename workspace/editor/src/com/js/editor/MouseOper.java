@@ -73,14 +73,16 @@ public abstract class MouseOper {
     return SwingUtilities.isRightMouseButton(ev);
   }
 
+  // At some point, we may want to refactor to make the 'current' and 'default'
+  // operations belong to the UserEventSource, so that there can exist multiple
+  // views, each with their own independent operations
+
   public static void setDefaultOperation(MouseOper defaultMouseOper) {
     sDefaultMouseOper = defaultMouseOper;
   }
 
   /**
    * Get current operation
-   * 
-   * @return current operation, or null if none
    */
   public static MouseOper getOperation() {
     if (editOper == null)
@@ -92,6 +94,11 @@ public abstract class MouseOper {
    * Set current operation
    */
   public static void setOperation(MouseOper oper) {
+    if (oper == null) {
+      if (sDefaultMouseOper == null)
+        throw new IllegalStateException("no default mouse oper defined");
+      oper = sDefaultMouseOper;
+    }
     if (editOper != oper) {
       if (editOper != null)
         editOper.stop();

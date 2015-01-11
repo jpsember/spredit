@@ -7,6 +7,7 @@ import javax.swing.JCheckBox;
 
 import com.js.myopengl.GLPanel;
 
+import com.js.editor.MouseOper;
 import com.js.editor.UserEventSource;
 import com.js.geometry.*;
 
@@ -107,6 +108,11 @@ public class SpritePanel extends GLPanel implements UserEventSource {
 
   public void setShowClipCheckBox(JCheckBox showClip) {
     mShowClip = showClip;
+  }
+
+  @Override
+  public MouseOper getDefaultOperation() {
+    throw new UnsupportedOperationException("finish refactoring");
   }
 
   private boolean sFocusValid;

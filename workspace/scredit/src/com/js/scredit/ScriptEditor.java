@@ -1997,4 +1997,5 @@ public class ScriptEditor {
   // of Script, but we'll favor composition over inheritance, at the expense of
   // some extra methods to call Script method counterparts (e.g. hasName())
   private final Script mScript;
+
 }
