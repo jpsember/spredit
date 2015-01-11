@@ -856,7 +856,7 @@ public class ScriptEditor {
     m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new ActionHandler() {
 
       public void go() {
-        setPendingTouchOperation(RectangleObject.buildNewObjectOperation());
+        MouseOper.setOperation(RectangleObject.buildNewObjectOperation());
       }
     });
 
@@ -1442,7 +1442,7 @@ public class ScriptEditor {
       EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel);
 
       MouseEventGenerator m = new MouseEventGenerator();
-      m.setView(editorPanel);
+      m.setView(editorPanel, editorPanel.getComponent());
       m.setListener(new UserEvent.Listener() {
         @Override
         public void handleUserEvent(UserEvent event) {
@@ -1963,13 +1963,8 @@ public class ScriptEditor {
     repaint();
   }
 
-  public static void setPendingTouchOperation(MouseOper oper) {
-    sPendingAddObjectOperation = oper;
-  }
-
   // private static MouseOper mCurrentOperation;
   /* private */static UserEvent mLastMouseEvent;
-  static MouseOper sPendingAddObjectOperation;
 
   // --- Class fields
   private static Component sEditorPanelComponent;

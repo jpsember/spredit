@@ -1,7 +1,5 @@
 package com.js.editor;
 
-import java.awt.Component;
-
 import com.js.geometry.Point;
 
 public interface IEditorView {
@@ -23,5 +21,4 @@ public interface IEditorView {
    */
   public float getZoom();
 
-  public Component getComponent();
 }

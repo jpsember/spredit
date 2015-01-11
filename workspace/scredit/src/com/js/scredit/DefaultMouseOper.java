@@ -16,9 +16,6 @@ public class DefaultMouseOper extends MouseOper {
     if (db)
       pr("DefaultMouseOper.processUserEvent " + event);
 
-    if (processPendingAddOperation(event))
-      return;
-
     switch (event.getCode()) {
     case UserEvent.CODE_DOWN:
       mInitialDownEvent = event;
@@ -167,24 +164,6 @@ public class DefaultMouseOper extends MouseOper {
   public boolean mouseDown() {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  // If user wants to add a new object, do so
-  private boolean processPendingAddOperation(UserEvent event) {
-
-    if (!(event.isDownVariant() && !event.isRight() && !event.isMeta()))
-      return false;
-
-    MouseOper addObjectOper = ScriptEditor.sPendingAddObjectOperation;
-    if (addObjectOper == null)
-      return false;
-    ScriptEditor.sPendingAddObjectOperation = null;
-
-    MouseOper.setOperation(addObjectOper);
-    unimp("have the 'add object' operation handle the down event to add object at mouse loc");
-    MouseOper.getOperation().processUserEvent(event);
-
-    return true;
   }
 
   /**

@@ -8,14 +8,12 @@ import javax.swing.JCheckBox;
 import com.js.myopengl.GLPanel;
 
 import com.js.editor.IEditorView;
-import com.js.editor.MouseOper;
 import com.js.geometry.*;
 
 public class SpritePanel extends GLPanel implements IEditorView {
 
   public SpritePanel() {
     getComponent().setBackground(Color.white.darker());
-    MouseOper.setView(this);
   }
 
   @Override

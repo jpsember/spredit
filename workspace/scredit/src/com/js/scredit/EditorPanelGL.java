@@ -17,7 +17,6 @@ public class EditorPanelGL extends GLPanel implements IEditorView {
 
   public EditorPanelGL(InfoPanel infoPanel) {
     mInfoPanel = infoPanel;
-    MouseOper.setView(this);
   }
 
   private static Atlas sOurFont;
