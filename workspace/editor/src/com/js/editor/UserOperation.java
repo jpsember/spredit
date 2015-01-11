@@ -73,10 +73,6 @@ public abstract class UserOperation implements UserEvent.Listener {
     return SwingUtilities.isRightMouseButton(ev);
   }
 
-  public static void setOperation(UserOperation oper) {
-    warning("setOperation is deprecated; " + stackTrace(1, 1));
-  }
-
   public static void clearOperation() {
     warning("clearOperation is deprecated; " + stackTrace(1, 1));
   }

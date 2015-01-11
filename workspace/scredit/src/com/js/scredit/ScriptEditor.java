@@ -717,7 +717,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        UserOperation.setOperation(r);
+        sUserEventManager.setOperation(r);
       }
     });
     m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new ActionHandler() {
@@ -743,7 +743,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        UserOperation.setOperation(oper);
+        sUserEventManager.setOperation(oper);
       }
     });
     m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new ActionHandler() {
@@ -830,7 +830,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        UserOperation.setOperation(new AddSpriteOper());
+        sUserEventManager.setOperation(new AddSpriteOper());
       }
     });
     m.addItem("Select Atlas", KeyEvent.VK_T, CTRL, new ActionHandler() {
@@ -842,7 +842,8 @@ public class ScriptEditor {
     m.addSeparator();
     m.addItem("Add Polygon", KeyEvent.VK_P, 0, new ActionHandler() {
       public void go() {
-        UserOperation.setOperation(new EdPolygonOper(items().size(), 0, false));
+        sUserEventManager.setOperation(new EdPolygonOper(items().size(), 0,
+            false));
       }
     });
     m.addItem("Delete Vertex", KeyEvent.VK_DELETE, 0,
@@ -857,7 +858,8 @@ public class ScriptEditor {
     m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new ActionHandler() {
 
       public void go() {
-        UserOperation.setOperation(RectangleObject.buildNewObjectOperation());
+        sUserEventManager.setOperation(RectangleObject
+            .buildNewObjectOperation());
       }
     });
 
@@ -1351,7 +1353,7 @@ public class ScriptEditor {
       perform(r);
       repaint();
     } else {
-      UserOperation.setOperation(new AddSpriteOper());
+      sUserEventManager.setOperation(new AddSpriteOper());
     }
   }
 
