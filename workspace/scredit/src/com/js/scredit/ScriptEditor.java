@@ -20,7 +20,6 @@ import apputil.*;
 import com.js.basic.*;
 import com.js.editor.Command;
 import com.js.editor.MouseEventGenerator;
-import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.editor.UserEventManager;
 import com.js.geometry.*;
@@ -172,6 +171,7 @@ public class ScriptEditor {
    * Repaint the current editor, and its associated components
    */
   public static void repaint() {
+    if (isProjectOpen())
     updateEditableObjectStatus();
     sInfoPanel
         .refresh(isProjectOpen() ? editor() : null, project(), sScriptSet);
@@ -1020,7 +1020,7 @@ public class ScriptEditor {
         writeProjectDefaults();
         sProject.flush();
         sProject = null;
-        UserOperation.setEnabled(false);
+        sUserEventManager.setEnabled(false);
         sRecentScriptsMenuItem.setRecentFiles(null);
         sRecentScriptSetsMenuItem.setRecentFiles(null);
         unimp("update recent atlas list");
@@ -1387,8 +1387,6 @@ public class ScriptEditor {
 
   public static void init(JComponent p) {
 
-    UserOperation.setEnabled(false);
-
     JPanel ac = new JPanel(new BorderLayout());
     p.add(ac, BorderLayout.EAST);
 
@@ -1431,6 +1429,8 @@ public class ScriptEditor {
 
     addMenus();
 
+    sUserEventManager = new UserEventManager(new DefaultMouseOper());
+
     {
       File base = sRecentProjects.getMostRecentFile();
       if (base != null && !ScriptProject.FILES.accept(base))
@@ -1442,7 +1442,6 @@ public class ScriptEditor {
 
     {
       JPanel pnl = new JPanel(new BorderLayout());
-      sUserEventManager = new UserEventManager(new DefaultMouseOper());
       EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel,
           sUserEventManager);
 
@@ -1557,7 +1556,7 @@ public class ScriptEditor {
           pr("ScrMain, openProject " + f + ":" + newProject);
 
         sProject = newProject;
-        UserOperation.setEnabled(true);
+        sUserEventManager.setEnabled(true);
         sRecentScriptsMenuItem.setRecentFiles(sProject.recentScripts());
         sRecentScriptSetsMenuItem.setRecentFiles(sProject.recentScriptSets());
         unimp("update recent atlas list");

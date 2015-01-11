@@ -1,5 +1,7 @@
 package com.js.editor;
 
+import static com.js.basic.Tools.warning;
+
 public class UserEventManager implements UserEvent.Listener {
 
   /**
@@ -13,6 +15,16 @@ public class UserEventManager implements UserEvent.Listener {
     if (defaultOper == null)
       throw new IllegalArgumentException();
     sDefaultOperation = defaultOper;
+  }
+
+  /**
+   * Set enabled state of manager. It is constructed in DISABLED state; only
+   * when enabled will it process any user events
+   * 
+   * @param enabled
+   */
+  public void setEnabled(boolean enabled) {
+    mEnabled = enabled;
   }
 
   /**
@@ -46,6 +58,10 @@ public class UserEventManager implements UserEvent.Listener {
 
   @Override
   public void processUserEvent(UserEvent event) {
+    if (!mEnabled) {
+      warning("UserEventManager isn't enabled, ignoring " + event.getCode());
+      return;
+    }
     mLastEventHandled = event;
 
     // Pass this event to the current operation
@@ -70,6 +86,7 @@ public class UserEventManager implements UserEvent.Listener {
     return mLastEventHandled;
   }
 
+  private boolean mEnabled;
   private UserEvent.Listener mListener;
   private UserOperation sDefaultOperation;
   private UserOperation sCurrentOperation;

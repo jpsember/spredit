@@ -1,7 +1,5 @@
 package com.js.editor;
 
-import static com.js.basic.Tools.*;
-
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -45,14 +43,6 @@ public abstract class UserOperation implements UserEvent.Listener {
    */
   public static boolean right(MouseEvent ev) {
     return SwingUtilities.isRightMouseButton(ev);
-  }
-
-  public static void setEnabled(boolean enabled) {
-    warning("setEnabled is deprecated; " + stackTrace(1, 1));
-    if (!enabled) {
-      // Cancel any active operation
-      // editOper = null;
-    }
   }
 
 }
