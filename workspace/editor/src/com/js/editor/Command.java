@@ -37,6 +37,17 @@ public interface Command {
   public boolean valid();
 
   /**
+   * Get description of command; this could show up, e.g., in an 'undo' or
+   * 'redo' menu item
+   */
+  public String getDescription();
+
+  /**
+   * Set description of command
+   */
+  public void setDescription(String description);
+
+  /**
    * Abstract class that implements the Command interface
    */
   public abstract class Adapter implements Command {
@@ -64,5 +75,17 @@ public interface Command {
     public boolean valid() {
       return true;
     }
+
+    @Override
+    public String getDescription() {
+      return mDescription;
+    }
+
+    @Override
+    public void setDescription(String description) {
+      mDescription = description;
+    }
+
+    private String mDescription;
   }
 }

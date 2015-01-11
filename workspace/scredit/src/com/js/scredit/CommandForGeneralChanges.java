@@ -15,30 +15,20 @@ public class CommandForGeneralChanges extends Command.Adapter {
    *          optional merge key
    */
   public CommandForGeneralChanges(ScriptEditorState originalState,
-      ScriptEditorState newState, String mergeKey) {
+      ScriptEditorState newState, String mergeKey, String description) {
     if (newState == null)
       newState = new ScriptEditorState();
     mOriginalState = originalState;
     mNewState = newState;
     mMergeKey = mergeKey;
-  }
-
-  /**
-   * Set description of command; this shows up in the 'undo' and 'redo' menu
-   * items. If none is specified, uses generic 'last command' description
-   * 
-   * @param description
-   * @return this, for chaining
-   */
-  public CommandForGeneralChanges setDescription(String description) {
-    mCommandDescription = description;
-    return this;
+    setDescription(description);
   }
 
   @Override
   public Command getReverse() {
     if (mReverse == null) {
-      mReverse = new CommandForGeneralChanges(mNewState, mOriginalState, null);
+      mReverse = new CommandForGeneralChanges(mNewState, mOriginalState, null,
+          null);
     }
     return mReverse;
   }
@@ -68,9 +58,13 @@ public class CommandForGeneralChanges extends Command.Adapter {
           f.mOriginalState.getSelectedSlots()))
         break;
 
+      String mergedDescription = this.getDescription();
+      if (mergedDescription == null)
+        mergedDescription = follower.getDescription();
+
       // Merging is possible, so construct merged command
       merged = new CommandForGeneralChanges(mOriginalState, f.mNewState,
-          mMergeKey);
+          mMergeKey, mergedDescription);
 
     } while (false);
     return merged;

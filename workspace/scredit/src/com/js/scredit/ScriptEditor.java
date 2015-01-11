@@ -1812,19 +1812,26 @@ public class ScriptEditor {
     return rev;
   }
 
+  private String commandDescription(Command r) {
+    String description = r.getDescription();
+    if (description == null)
+      description = "Command";
+    return description;
+  }
+
   private void updateUndoLabels() {
     {
       String lbl = "Undo";
       Command r = registerPeek();
       if (r != null)
-        lbl = "Undo " + r;
+        lbl = "Undo " + commandDescription(r);
       sUndoMenuItem.setText(lbl);
     }
     {
       String lbl = "Redo";
       Command r = editor().getRedoOper();
       if (r != null) {
-        lbl = "Redo " + r;
+        lbl = "Redo " + commandDescription(r);
       }
       sRedoMenuItem.setText(lbl);
     }

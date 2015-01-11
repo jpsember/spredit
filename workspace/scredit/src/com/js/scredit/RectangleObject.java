@@ -429,8 +429,7 @@ public class RectangleObject extends EdObject {
           ScriptEditor.editor().setState(mOriginalState);
         } else {
           Command command = new CommandForGeneralChanges(mOriginalState, null,
-              "add rect").setDescription((mAddingNew ? "Add" : "Edit")
-              + " Rectangle");
+              "add rect", (mAddingNew ? "Add" : "Edit") + " Rectangle");
           ScriptEditor.editor().registerPush(command);
         }
         MouseOper.clearOperation();
