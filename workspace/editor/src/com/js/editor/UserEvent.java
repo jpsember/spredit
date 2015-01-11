@@ -38,10 +38,10 @@ public class UserEvent {
   public static final int FLAG_ALT = (1 << 3);
   public static final int FLAG_META = (1 << 4);
 
-  public UserEvent(int code, UserEventSource view, IPoint viewLocation,
+  public UserEvent(int code, UserEventSource source, IPoint viewLocation,
       int modifierFlags) {
     mCode = code;
-    mView = view;
+    mSource = source;
     mViewLocation = viewLocation;
     mModifierFlags = modifierFlags;
   }
@@ -64,9 +64,13 @@ public class UserEvent {
     if (!hasLocation())
       throw new IllegalStateException();
     if (mWorldLocation == null) {
-      mWorldLocation = mView.viewToWorld(mViewLocation.toPoint());
+      mWorldLocation = mSource.viewToWorld(mViewLocation.toPoint());
     }
     return mWorldLocation;
+  }
+
+  public UserEventSource getSource() {
+    return mSource;
   }
 
   public boolean isDownVariant() {
@@ -123,8 +127,7 @@ public class UserEvent {
     if (!DEBUG_ONLY_FEATURES)
       return;
     else {
-      if (isDragVariant()
-          && getCode() == sPreviousPrintEvent.getCode()
+      if (isDragVariant() && getCode() == sPreviousPrintEvent.getCode()
           && message.equals(sPreviousPrintMessage))
         return;
       pr(message + "; processing:   " + this);
@@ -185,7 +188,7 @@ public class UserEvent {
   private static String sPreviousPrintMessage;
 
   private int mCode;
-  private UserEventSource mView;
+  private UserEventSource mSource;
   private IPoint mViewLocation;
   private Point mWorldLocation;
   private boolean mMultipleTouchFlag;
