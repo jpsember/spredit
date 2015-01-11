@@ -10,6 +10,8 @@ public class UserEventManager implements UserEvent.Listener {
    *          specified
    */
   public UserEventManager(UserOperation defaultOper) {
+    if (defaultOper == null)
+      throw new IllegalArgumentException();
     sDefaultOperation = defaultOper;
   }
 

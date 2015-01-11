@@ -51,9 +51,9 @@ public class RotateOper extends UserOperation {
 
     } while (false);
 
-    // if not a valid rotate mouse press, cancel the rotate operation.
-    if (!f)
-      clearOperation();
+    // // if not a valid rotate mouse press, cancel the rotate operation.
+    // if (!f)
+    // clearOperation();
 
     return f;
   }
@@ -148,7 +148,7 @@ public class RotateOper extends UserOperation {
 
     @Override
     public void perform() {
-      UserOperation.clearOperation();
+      // UserOperation.clearOperation();
       super.perform();
     }
 

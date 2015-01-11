@@ -116,8 +116,7 @@ public class EditorPanelGL extends GLPanel implements UserEventSource {
     ScriptEditor.editor().render(this, false);
 
     UserOperation op = mUserEventManager.getOperation();
-    if (op != null)
-      op.paint();
+    op.paint();
 
     if (mInfoPanel.isOriginShowing()) {
       final float W = 80;
