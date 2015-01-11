@@ -170,12 +170,6 @@ public class DefaultMouseOper extends UserOperation {
     }
   }
 
-  @Override
-  public boolean mouseDown() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
   /**
    * Determine if there's an editable object which can construct an edit
    * operation for a particular location. If so, return that operation

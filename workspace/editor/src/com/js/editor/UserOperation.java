@@ -5,11 +5,9 @@ import static com.js.basic.Tools.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import com.js.geometry.IPoint;
-import com.js.geometry.Point;
-
 /**
- * Class representing a user operation, often involving the mouse (or
+ * Class representing a user operation, usually involving the mouse (or touch
+ * device)
  */
 public abstract class UserOperation implements UserEvent.Listener {
 
@@ -22,24 +20,6 @@ public abstract class UserOperation implements UserEvent.Listener {
    */
   public boolean allowEditableObject() {
     return true;
-  }
-
-  /**
-   * Determine if this operation should start in response to a mouse down event
-   * 
-   * @return true if event has started
-   */
-  public boolean mouseDown() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Update this operation in response to a mouse drag / move event
-   * 
-   * @param drag
-   *          true if drag; false if hover
-   */
-  public void mouseMove(boolean drag) {
   }
 
   /**
@@ -74,18 +54,5 @@ public abstract class UserOperation implements UserEvent.Listener {
       // editOper = null;
     }
   }
-
-  // event when operation started
-  public static MouseEvent startEv;
-  // current mouse event
-  public static MouseEvent ev;
-  // location of mouse when operation started (in world, and in view)
-  public static Point startPtF;
-  public static IPoint startPt;
-  public static IPoint startPtView;
-  // current location of mouse (in world, and in view)
-  public static Point currentPtF;
-  public static IPoint currentPt;
-  public static IPoint currentPtView;
 
 }

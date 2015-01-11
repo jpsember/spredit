@@ -3,7 +3,6 @@ package com.js.spredit;
 import static apputil.MyMenuBar.*;
 
 import com.js.editor.UserEvent;
-import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
@@ -770,7 +769,7 @@ public class SpriteEditor {
     return new IPoint(ev.getX(), ev.getY());
   }
 
-  /* private */static class MoveFocusOper extends UserOperation {
+  /* private */static class MoveFocusOper extends OldUserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -807,7 +806,7 @@ public class SpriteEditor {
     private Point startOrigin;
   }
 
-  /* private */static class MoveClipOper extends UserOperation {
+  /* private */static class MoveClipOper extends OldUserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -860,7 +859,7 @@ public class SpriteEditor {
     private IPoint origLoc;
   }
 
-  /* private */static class MoveCPOper extends UserOperation {
+  /* private */static class MoveCPOper extends OldUserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -910,7 +909,7 @@ public class SpriteEditor {
     private Point origLoc;
   }
 
-  /* private */static class EdgeOper extends UserOperation {
+  /* private */static class EdgeOper extends OldUserOperation {
 
     @Override
     public void processUserEvent(UserEvent event) {
@@ -1014,7 +1013,7 @@ public class SpriteEditor {
     private IRect origClip;
   };
 
-  /* private */static class CornerOper extends UserOperation {
+  /* private */static class CornerOper extends OldUserOperation {
     @Override
     public void processUserEvent(UserEvent event) {
       die("not implemented yet");

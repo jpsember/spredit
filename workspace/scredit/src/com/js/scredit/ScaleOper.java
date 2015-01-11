@@ -6,12 +6,11 @@ import com.js.myopengl.GLPanel;
 
 import com.js.editor.Command;
 import com.js.editor.UserEvent;
-import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
 
-public class ScaleOper extends UserOperation {
+public class ScaleOper extends OldUserOperation {
   private static final boolean db = false;
 
   private ScaleObjects oper;

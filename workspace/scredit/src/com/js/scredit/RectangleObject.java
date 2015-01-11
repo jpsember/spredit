@@ -371,8 +371,8 @@ public class RectangleObject extends EdObject {
       return oper;
     }
 
-    public static UserOperation buildEditExistingOper(UserEvent event, int slot,
-        int handle) {
+    public static UserOperation buildEditExistingOper(UserEvent event,
+        int slot, int handle) {
       EditOper oper = new EditOper();
       oper.init(event, slot, handle);
       return oper;
@@ -436,11 +436,6 @@ public class RectangleObject extends EdObject {
       }
         break;
       }
-    }
-
-    @Override
-    public boolean mouseDown() {
-      return false;
     }
 
     private Point grabOffset(Point location) {
