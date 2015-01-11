@@ -63,12 +63,6 @@ public class MouseOperMoveItems extends UserOperation {
   }
 
   @Override
-  public boolean mouseDown() {
-    // This operation is started only by MouseOperSelectItems
-    throw new IllegalStateException();
-  }
-
-  @Override
   public void mouseMove(boolean drag) {
     unimp("have the operation do the movement; encapsulate movement simply as new editor state");
     // mMoveCommand.update(currentPtF);
