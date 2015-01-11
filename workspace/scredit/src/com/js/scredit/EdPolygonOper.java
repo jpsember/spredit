@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import static com.js.basic.Tools.*;
 
 import com.js.editor.Command;
+import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
 public class EdPolygonOper extends UserOperation {
+
+  @Override
+  public void processUserEvent(UserEvent event) {
+    die("not implemented yet");
+  }
 
   /**
    * Get the polygon currently being edited, if such an operation is being

@@ -2,6 +2,7 @@ package com.js.spredit;
 
 import static apputil.MyMenuBar.*;
 
+import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
@@ -772,6 +773,11 @@ public class SpriteEditor {
   private static class MoveFocusOper extends UserOperation {
 
     @Override
+    public void processUserEvent(UserEvent event) {
+      die("not implemented yet");
+    }
+
+    @Override
     public boolean mouseDown() {
       boolean f = false;
       do {
@@ -802,6 +808,11 @@ public class SpriteEditor {
   }
 
   private static class MoveClipOper extends UserOperation {
+
+    @Override
+    public void processUserEvent(UserEvent event) {
+      die("not implemented yet");
+    }
 
     @Override
     public boolean mouseDown() {
@@ -852,6 +863,11 @@ public class SpriteEditor {
   private static class MoveCPOper extends UserOperation {
 
     @Override
+    public void processUserEvent(UserEvent event) {
+      die("not implemented yet");
+    }
+
+    @Override
     public boolean mouseDown() {
       boolean f = false;
       do {
@@ -895,6 +911,11 @@ public class SpriteEditor {
   }
 
   private static class EdgeOper extends UserOperation {
+
+    @Override
+    public void processUserEvent(UserEvent event) {
+      die("not implemented yet");
+    }
 
     public EdgeOper(int edgeNum) {
       this.num = edgeNum;
@@ -994,6 +1015,11 @@ public class SpriteEditor {
   };
 
   private static class CornerOper extends UserOperation {
+    @Override
+    public void processUserEvent(UserEvent event) {
+      die("not implemented yet");
+    }
+
     public CornerOper(int corner) {
       this.num = corner;
     }

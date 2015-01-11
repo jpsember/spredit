@@ -14,16 +14,16 @@ import com.js.geometry.Point;
 public abstract class UserOperation implements UserEvent.Listener {
 
   @Override
-  public void processUserEvent(UserEvent event) {
-    unimp("processUserEvent, " + nameOf(this));
-  }
+  public abstract void processUserEvent(UserEvent event);
 
   /**
    * Determine if this operation should start in response to a mouse down event
    * 
    * @return true if event has started
    */
-  public abstract boolean mouseDown();
+  public boolean mouseDown() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Update this operation in response to a mouse drag / move event

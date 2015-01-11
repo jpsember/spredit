@@ -3,6 +3,7 @@ package com.js.scredit;
 import java.awt.Color;
 
 import com.js.editor.Command;
+import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
@@ -10,6 +11,11 @@ import com.js.myopengl.GLPanel;
 import static com.js.basic.Tools.*;
 
 public class RotateOper extends UserOperation {
+
+  @Override
+  public void processUserEvent(UserEvent event) {
+    die("not implemented yet");
+  }
 
   public RotateOper() {
     oper = new RotateReversible();

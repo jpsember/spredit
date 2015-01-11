@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.*;
 
 import com.js.editor.Command;
+import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
@@ -11,6 +12,11 @@ import com.js.myopengl.GLPanel;
 import static com.js.basic.Tools.*;
 
 public class MouseOperSelectItems extends UserOperation {
+
+  @Override
+  public void processUserEvent(UserEvent event) {
+    die("not implemented yet");
+  }
 
   private static final int STATE_NONE = 0;
   private static final int STATE_WAITFORDRAG1 = 1;

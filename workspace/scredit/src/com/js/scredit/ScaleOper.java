@@ -5,6 +5,7 @@ import java.awt.Color;
 import com.js.myopengl.GLPanel;
 
 import com.js.editor.Command;
+import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
@@ -15,6 +16,11 @@ public class ScaleOper extends UserOperation {
 
   private ScaleObjects oper;
   private boolean reg;
+
+  @Override
+  public void processUserEvent(UserEvent event) {
+    die("not implemented yet");
+  }
 
   public ScaleOper() {
     oper = new ScaleObjects();

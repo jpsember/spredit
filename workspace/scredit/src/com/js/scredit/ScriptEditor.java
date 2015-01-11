@@ -1463,7 +1463,6 @@ public class ScriptEditor {
 
     // add mouse edit operations, in the order they
     // are to be tested for activation
-    UserOperation.add(new MoveFocusOper());
     UserOperation.add(new MouseOperSelectItems());
     repaint();
   }

@@ -139,7 +139,17 @@ public class DefaultMouseOper extends UserOperation {
      * 
      * [] Leave any existing selected set intact, and start a drag rectangle
      * operation, and add the enclosed items to the selected set.
+     * 
+     * If drag, right mouse button:
+     * 
+     * [] start move focus operation
      */
+
+    if (event.isRight()) {
+      MoveFocusOper.start(event);
+      return;
+    }
+
     if (!event.isShift()) {
       UserOperation oper = findOperationForEditableObject();
       if (oper != null) {

@@ -3,10 +3,16 @@ package com.js.scredit;
 import static com.js.basic.Tools.*;
 
 import com.js.editor.Command;
+import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 
 public class AddSpriteOper extends UserOperation {
   private static final boolean db = false;
+
+  @Override
+  public void processUserEvent(UserEvent event) {
+    die("not implemented yet");
+  }
 
   @Override
   public boolean mouseDown() {
@@ -54,5 +60,5 @@ public class AddSpriteOper extends UserOperation {
     //
     //    clearOperation();
   }
-  //private AddObjectsReversible oper;
+
 }
