@@ -855,7 +855,7 @@ public class ScriptEditor {
     m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new ActionHandler() {
 
       public void go() {
-        MouseOper.setOperation(new EdRectangleOper(null, -1, -1));
+        setPendingTouchOperation(RectangleObject.buildNewObjectOperation());
       }
     });
 
@@ -1874,7 +1874,11 @@ public class ScriptEditor {
 
     if (!modified())
       return true;
-
+    if (true) {
+      warning("never asking user if has name");
+      if (hasName())
+        askUser = false;
+    }
     if (askUser) {
       String prompt;
       if (!hasName())
@@ -1937,6 +1941,10 @@ public class ScriptEditor {
 
     // Request a refresh of the editor view after any event
     repaint();
+  }
+
+  public static void setPendingTouchOperation(MouseOper oper) {
+    sPendingAddObjectOperation = oper;
   }
 
   // private static MouseOper mCurrentOperation;

@@ -23,6 +23,18 @@ public class CommandForGeneralChanges extends Command.Adapter {
     mMergeKey = mergeKey;
   }
 
+  /**
+   * Set description of command; this shows up in the 'undo' and 'redo' menu
+   * items. If none is specified, uses generic 'last command' description
+   * 
+   * @param description
+   * @return this, for chaining
+   */
+  public CommandForGeneralChanges setDescription(String description) {
+    mCommandDescription = description;
+    return this;
+  }
+
   @Override
   public Command getReverse() {
     if (mReverse == null) {
@@ -64,6 +76,14 @@ public class CommandForGeneralChanges extends Command.Adapter {
     return merged;
   }
 
+  @Override
+  public String toString() {
+    if (mCommandDescription != null)
+      return mCommandDescription;
+    return "Last Command";
+  }
+
+  private String mCommandDescription;
   private ScriptEditorState mOriginalState;
   private ScriptEditorState mNewState;
   private String mMergeKey;

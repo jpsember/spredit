@@ -10,7 +10,9 @@ import org.json.JSONObject;
 
 import com.js.basic.Freezable;
 import com.js.basic.JSONTools;
+import com.js.editor.Command;
 import com.js.editor.MouseOper;
+import com.js.editor.UserEvent;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -354,6 +356,93 @@ public class RectangleObject extends EdObject {
         && mTopRightCorner.y > mBottomLeftCorner.y;
   }
 
+  public static MouseOper buildNewObjectOperation() {
+    return new EditOper(-1);
+  }
+
   private Point mBottomLeftCorner, mTopRightCorner;
   private Color mColor;
+
+  private static class EditOper extends MouseOper {
+
+    /**
+     * Constructor for adding or editing rectangles
+     * 
+     * @param editSlot
+     *          -1 to add; else, slot number of existing rectangle
+     */
+    public EditOper(int editSlot) {
+      mAddingNew = (editSlot < 0);
+      mEditSlot = editSlot;
+    }
+
+    @Override
+    public void processUserEvent(UserEvent event) {
+
+      switch (event.getCode()) {
+
+      case UserEvent.CODE_DOWN:
+        if (mAddingNew) {
+          mOriginalState = new ScriptEditorState();
+          mEditHandle = 0;
+          mGrabOffset = new Point();
+          // create a new rectangle at mouse position
+          mOriginalRect = new RectangleObject(null, ScriptEditor.color(),
+              event.getWorldLocation(), event.getWorldLocation());
+          mEditSlot = items().size();
+          ScriptEditor.items().add(mOriginalRect);
+          ScriptEditor.items().setSelected(SlotList.build(mEditSlot));
+          ScriptEditor.setInfo(mOriginalRect);
+        }
+        break;
+
+      case UserEvent.CODE_DRAG: {
+
+        Point adjMousePt = Point.sum(event.getWorldLocation(), mGrabOffset);
+        Point rectPt = adjMousePt;
+        Point pt = Grid.snapToGrid(rectPt, true);
+
+        RectangleObject r2 = mOriginalRect.setElementPosition(mEditHandle, pt);
+        ScriptEditor.items().set(mEditSlot, r2);
+
+        ScriptEditor.setInfo(r2);
+      }
+
+        break;
+
+      case UserEvent.CODE_UP: {
+        RectangleObject r = ScriptEditor.items().get(mEditSlot);
+        if (!r.isWellDefined()) {
+          ScriptEditor.editor().setState(mOriginalState);
+        } else {
+          Command command = new CommandForGeneralChanges(mOriginalState, null,
+              "add rect").setDescription((mAddingNew ? "Add" : "Edit")
+              + " Rectangle");
+          ScriptEditor.editor().registerPush(command);
+        }
+        MouseOper.clearOperation();
+      }
+        break;
+      }
+    }
+
+    @Override
+    public boolean mouseDown() {
+      return false;
+    }
+
+    // true if this is for adding a new rectangle, vs editing existing
+    private boolean mAddingNew;
+    // state of editor before operation began
+    private ScriptEditorState mOriginalState;
+    // slot containing edit rectangle
+    private int mEditSlot;
+    // Which part of the rectangle is being edited (e.g. side, corner)
+    private int mEditHandle;
+    // Rectangle before editing occurred (or, initial 'new' rectangle)
+    private RectangleObject mOriginalRect;
+    // offset of handle position to initial mouse press
+    private Point mGrabOffset;
+  }
+
 }
