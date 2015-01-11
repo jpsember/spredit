@@ -42,7 +42,7 @@ public class MouseEventGenerator {
       modifierFlags |= UserEvent.FLAG_SHIFT;
 
     UserEvent event = new UserEvent(type, mView, viewPoint, modifierFlags);
-    mView.getManager().processUserEvent(event);
+    event.getManager().processUserEvent(event);
   }
 
   private class OurMouseListener implements MouseListener, MouseMotionListener {
