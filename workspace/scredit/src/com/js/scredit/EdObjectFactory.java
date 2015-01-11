@@ -5,7 +5,7 @@ import java.io.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 
 public abstract class EdObjectFactory {
@@ -73,7 +73,7 @@ public abstract class EdObjectFactory {
    * @param obj
    * @return
    */
-  public MouseOper isEditingSelectedObject(int slot, EdObject obj,
+  public UserOperation isEditingSelectedObject(int slot, EdObject obj,
       UserEvent event) {
     return null;
   }

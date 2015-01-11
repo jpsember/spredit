@@ -2,13 +2,13 @@ package com.js.scredit;
 
 import java.util.List;
 
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import static com.js.basic.Tools.*;
 
 // TODO: look at calls to ScriptEditor and see if we can put some in an interface
 
-public class DefaultMouseOper extends MouseOper {
+public class DefaultMouseOper extends UserOperation {
 
   @Override
   public void processUserEvent(UserEvent event) {
@@ -141,7 +141,7 @@ public class DefaultMouseOper extends MouseOper {
      * operation, and add the enclosed items to the selected set.
      */
     if (!event.isShift()) {
-      MouseOper oper = findOperationForEditableObject();
+      UserOperation oper = findOperationForEditableObject();
       if (oper != null) {
         event.setOperation(oper);
         return;
@@ -170,12 +170,12 @@ public class DefaultMouseOper extends MouseOper {
    * Determine if there's an editable object which can construct an edit
    * operation for a particular location. If so, return that operation
    */
-  private MouseOper findOperationForEditableObject() {
+  private UserOperation findOperationForEditableObject() {
     int editableSlot = getEditableSlot();
     if (editableSlot < 0)
       return null;
     EdObject obj = ScriptEditor.items().get(editableSlot);
-    MouseOper operation = obj.getFactory().isEditingSelectedObject(
+    UserOperation operation = obj.getFactory().isEditingSelectedObject(
         editableSlot, obj, mInitialDownEvent);
     return operation;
   }

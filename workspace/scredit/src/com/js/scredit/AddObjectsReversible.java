@@ -1,7 +1,7 @@
 package com.js.scredit;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
@@ -42,8 +42,8 @@ class AddObjectsReversible extends Command.Adapter {
    */
   public void updateMove() {
 
-    Point delta = new Point(IPoint.difference(MouseOper.currentPt,
-        MouseOper.startPt));
+    Point delta = new Point(IPoint.difference(UserOperation.currentPt,
+        UserOperation.startPt));
 
     EdObjectArray items = ScriptEditor.items();
 

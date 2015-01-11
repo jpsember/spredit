@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import static com.js.basic.Tools.*;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
-public class EdPolygonOper extends MouseOper {
+public class EdPolygonOper extends UserOperation {
 
   /**
    * Get the polygon currently being edited, if such an operation is being

@@ -3,13 +3,13 @@ package com.js.scredit;
 import java.awt.Color;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
 import static com.js.basic.Tools.*;
 
-public class RotateOper extends MouseOper {
+public class RotateOper extends UserOperation {
 
   public RotateOper() {
     oper = new RotateReversible();
@@ -142,7 +142,7 @@ public class RotateOper extends MouseOper {
 
     @Override
     public void perform() {
-      MouseOper.clearOperation();
+      UserOperation.clearOperation();
       super.perform();
     }
 

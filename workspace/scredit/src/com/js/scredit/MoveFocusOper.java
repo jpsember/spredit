@@ -1,9 +1,9 @@
 package com.js.scredit;
 
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
-public class MoveFocusOper extends MouseOper {
+public class MoveFocusOper extends UserOperation {
 
   @Override
   public boolean mouseDown() {

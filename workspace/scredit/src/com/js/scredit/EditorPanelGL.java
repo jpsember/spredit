@@ -11,7 +11,7 @@ import tex.*;
 import com.js.basic.Files;
 import com.js.editor.UserEventManager;
 import com.js.editor.UserEventSource;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
 public class EditorPanelGL extends GLPanel implements UserEventSource {
@@ -115,7 +115,7 @@ public class EditorPanelGL extends GLPanel implements UserEventSource {
 
     ScriptEditor.editor().render(this, false);
 
-    MouseOper op = mUserEventManager.getOperation();
+    UserOperation op = mUserEventManager.getOperation();
     if (op != null)
       op.paint();
 

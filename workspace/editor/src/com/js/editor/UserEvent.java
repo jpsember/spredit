@@ -80,7 +80,7 @@ public class UserEvent {
   /**
    * Convenience method for getManager().setOperation()
    */
-  public void setOperation(MouseOper oper) {
+  public void setOperation(UserOperation oper) {
     getManager().setOperation(oper);
   }
 

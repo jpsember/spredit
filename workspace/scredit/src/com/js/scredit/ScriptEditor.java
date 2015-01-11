@@ -20,7 +20,7 @@ import apputil.*;
 import com.js.basic.*;
 import com.js.editor.Command;
 import com.js.editor.MouseEventGenerator;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.editor.UserEventManager;
 import com.js.geometry.*;
@@ -717,7 +717,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        MouseOper.setOperation(r);
+        UserOperation.setOperation(r);
       }
     });
     m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new ActionHandler() {
@@ -743,7 +743,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        MouseOper.setOperation(oper);
+        UserOperation.setOperation(oper);
       }
     });
     m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new ActionHandler() {
@@ -830,7 +830,7 @@ public class ScriptEditor {
       }
 
       public void go() {
-        MouseOper.setOperation(new AddSpriteOper());
+        UserOperation.setOperation(new AddSpriteOper());
       }
     });
     m.addItem("Select Atlas", KeyEvent.VK_T, CTRL, new ActionHandler() {
@@ -842,7 +842,7 @@ public class ScriptEditor {
     m.addSeparator();
     m.addItem("Add Polygon", KeyEvent.VK_P, 0, new ActionHandler() {
       public void go() {
-        MouseOper.setOperation(new EdPolygonOper(items().size(), 0, false));
+        UserOperation.setOperation(new EdPolygonOper(items().size(), 0, false));
       }
     });
     m.addItem("Delete Vertex", KeyEvent.VK_DELETE, 0,
@@ -857,7 +857,7 @@ public class ScriptEditor {
     m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new ActionHandler() {
 
       public void go() {
-        MouseOper.setOperation(RectangleObject.buildNewObjectOperation());
+        UserOperation.setOperation(RectangleObject.buildNewObjectOperation());
       }
     });
 
@@ -1018,7 +1018,7 @@ public class ScriptEditor {
         writeProjectDefaults();
         sProject.flush();
         sProject = null;
-        MouseOper.setEnabled(false);
+        UserOperation.setEnabled(false);
         sRecentScriptsMenuItem.setRecentFiles(null);
         sRecentScriptSetsMenuItem.setRecentFiles(null);
         unimp("update recent atlas list");
@@ -1351,7 +1351,7 @@ public class ScriptEditor {
       perform(r);
       repaint();
     } else {
-      MouseOper.setOperation(new AddSpriteOper());
+      UserOperation.setOperation(new AddSpriteOper());
     }
   }
 
@@ -1385,7 +1385,7 @@ public class ScriptEditor {
 
   public static void init(JComponent p) {
 
-    MouseOper.setEnabled(false);
+    UserOperation.setEnabled(false);
 
     JPanel ac = new JPanel(new BorderLayout());
     p.add(ac, BorderLayout.EAST);
@@ -1463,8 +1463,8 @@ public class ScriptEditor {
 
     // add mouse edit operations, in the order they
     // are to be tested for activation
-    MouseOper.add(new MoveFocusOper());
-    MouseOper.add(new MouseOperSelectItems());
+    UserOperation.add(new MoveFocusOper());
+    UserOperation.add(new MouseOperSelectItems());
     repaint();
   }
 
@@ -1559,7 +1559,7 @@ public class ScriptEditor {
           pr("ScrMain, openProject " + f + ":" + newProject);
 
         sProject = newProject;
-        MouseOper.setEnabled(true);
+        UserOperation.setEnabled(true);
         sRecentScriptsMenuItem.setRecentFiles(sProject.recentScripts());
         sRecentScriptSetsMenuItem.setRecentFiles(sProject.recentScriptSets());
         unimp("update recent atlas list");

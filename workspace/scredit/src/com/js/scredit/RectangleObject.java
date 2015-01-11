@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import com.js.basic.Freezable;
 import com.js.basic.JSONTools;
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
@@ -178,9 +178,9 @@ public class RectangleObject extends EdObject {
   private static class RectangleFactory extends EdObjectFactory {
 
     @Override
-    public MouseOper isEditingSelectedObject(int slot, EdObject obj,
+    public UserOperation isEditingSelectedObject(int slot, EdObject obj,
         UserEvent event) {
-      MouseOper ret = null;
+      UserOperation ret = null;
       RectangleObject p = (RectangleObject) obj;
       Point pt = event.getWorldLocation();
       float tolerance = 8 / zoomFactor();
@@ -356,14 +356,14 @@ public class RectangleObject extends EdObject {
         && mTopRightCorner.y > mBottomLeftCorner.y;
   }
 
-  public static MouseOper buildNewObjectOperation() {
+  public static UserOperation buildNewObjectOperation() {
     return EditOper.buildAddOper();
   }
 
   private Point mBottomLeftCorner, mTopRightCorner;
   private Color mColor;
 
-  private static class EditOper extends MouseOper {
+  private static class EditOper extends UserOperation {
 
     public static EditOper buildAddOper() {
       EditOper oper = new EditOper();
@@ -371,7 +371,7 @@ public class RectangleObject extends EdObject {
       return oper;
     }
 
-    public static MouseOper buildEditExistingOper(UserEvent event, int slot,
+    public static UserOperation buildEditExistingOper(UserEvent event, int slot,
         int handle) {
       EditOper oper = new EditOper();
       oper.init(event, slot, handle);

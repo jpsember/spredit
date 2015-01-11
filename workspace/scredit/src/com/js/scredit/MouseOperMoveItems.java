@@ -3,13 +3,13 @@ package com.js.scredit;
 import java.util.List;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
 
-public class MouseOperMoveItems extends MouseOper {
+public class MouseOperMoveItems extends UserOperation {
 
   public static MouseOperMoveItems build(UserEvent initialDownEvent) {
     return new MouseOperMoveItems(initialDownEvent);

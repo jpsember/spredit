@@ -9,14 +9,14 @@ public class UserEventManager implements UserEvent.Listener {
    *          the default MouseOper, which will be active if no other is
    *          specified
    */
-  public UserEventManager(MouseOper defaultOper) {
+  public UserEventManager(UserOperation defaultOper) {
     sDefaultOperation = defaultOper;
   }
 
   /**
    * Get current operation
    */
-  public MouseOper getOperation() {
+  public UserOperation getOperation() {
     if (sCurrentOperation == null)
       sCurrentOperation = sDefaultOperation;
     return sCurrentOperation;
@@ -25,7 +25,7 @@ public class UserEventManager implements UserEvent.Listener {
   /**
    * Set current operation
    */
-  public void setOperation(MouseOper oper) {
+  public void setOperation(UserOperation oper) {
     if (oper == null) {
       oper = sDefaultOperation;
     }
@@ -69,7 +69,7 @@ public class UserEventManager implements UserEvent.Listener {
   }
 
   private UserEvent.Listener mListener;
-  private MouseOper sDefaultOperation;
-  private MouseOper sCurrentOperation;
+  private UserOperation sDefaultOperation;
+  private UserOperation sCurrentOperation;
   private UserEvent mLastEventHandled;
 }

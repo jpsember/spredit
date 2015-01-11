@@ -9,9 +9,9 @@ import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
 /**
- * Class representing a mouse editing operation
+ * Class representing a user operation, often involving the mouse (or
  */
-public abstract class MouseOper implements UserEvent.Listener {
+public abstract class UserOperation implements UserEvent.Listener {
 
   @Override
   public void processUserEvent(UserEvent event) {
@@ -73,7 +73,7 @@ public abstract class MouseOper implements UserEvent.Listener {
     return SwingUtilities.isRightMouseButton(ev);
   }
 
-  public static void setOperation(MouseOper oper) {
+  public static void setOperation(UserOperation oper) {
     warning("setOperation is deprecated; " + stackTrace(1, 1));
   }
 
@@ -87,7 +87,7 @@ public abstract class MouseOper implements UserEvent.Listener {
    * @param oper
    *          --- make this deprecated
    */
-  public static void add(MouseOper oper) {
+  public static void add(UserOperation oper) {
     warning("MouseOper.add() is deprecated; " + stackTrace(1, 1));
   }
 

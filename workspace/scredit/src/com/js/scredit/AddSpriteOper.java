@@ -3,9 +3,9 @@ package com.js.scredit;
 import static com.js.basic.Tools.*;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 
-public class AddSpriteOper extends MouseOper {
+public class AddSpriteOper extends UserOperation {
   private static final boolean db = false;
 
   @Override
@@ -29,12 +29,12 @@ public class AddSpriteOper extends MouseOper {
 
       // change to move oper
 
-      MouseOper m = MouseOperSelectItems.startMovingSelectedItems();
+      UserOperation m = MouseOperSelectItems.startMovingSelectedItems();
       
       if (db)
         pr(" changing MouseOper to " + m);
 
-      MouseOper.setOperation(m);
+      UserOperation.setOperation(m);
       f = true;
     } while (false);
     return f;

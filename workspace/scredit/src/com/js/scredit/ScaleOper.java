@@ -5,12 +5,12 @@ import java.awt.Color;
 import com.js.myopengl.GLPanel;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
 
-public class ScaleOper extends MouseOper {
+public class ScaleOper extends UserOperation {
   private static final boolean db = false;
 
   private ScaleObjects oper;
@@ -94,7 +94,7 @@ public class ScaleOper extends MouseOper {
     // }
     @Override
     public void perform() {
-      MouseOper.clearOperation();
+      UserOperation.clearOperation();
       super.perform();
     }
 

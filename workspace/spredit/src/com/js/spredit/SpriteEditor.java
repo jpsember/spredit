@@ -2,7 +2,7 @@ package com.js.spredit;
 
 import static apputil.MyMenuBar.*;
 
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
@@ -27,13 +27,13 @@ public class SpriteEditor {
 
   public static void init(JComponent c) {
 
-    MouseOper.add(new MoveFocusOper());
+    UserOperation.add(new MoveFocusOper());
     for (int i = 0; i < 4; i++)
-      MouseOper.add(new CornerOper(i));
+      UserOperation.add(new CornerOper(i));
     for (int i = 0; i < 4; i++)
-      MouseOper.add(new EdgeOper(i));
-    MouseOper.add(new MoveClipOper());
-    MouseOper.add(new MoveCPOper());
+      UserOperation.add(new EdgeOper(i));
+    UserOperation.add(new MoveClipOper());
+    UserOperation.add(new MoveCPOper());
 
     JPanel pnl = new JPanel(new BorderLayout());
 
@@ -769,7 +769,7 @@ public class SpriteEditor {
     return new IPoint(ev.getX(), ev.getY());
   }
 
-  private static class MoveFocusOper extends MouseOper {
+  private static class MoveFocusOper extends UserOperation {
 
     @Override
     public boolean mouseDown() {
@@ -801,7 +801,7 @@ public class SpriteEditor {
     private Point startOrigin;
   }
 
-  private static class MoveClipOper extends MouseOper {
+  private static class MoveClipOper extends UserOperation {
 
     @Override
     public boolean mouseDown() {
@@ -829,7 +829,7 @@ public class SpriteEditor {
     @Override
     public void mouseUp() {
       spritePanel.setHighlightClip(false);
-      MouseOper.clearOperation();
+      UserOperation.clearOperation();
     }
 
     @Override
@@ -849,7 +849,7 @@ public class SpriteEditor {
     private IPoint origLoc;
   }
 
-  private static class MoveCPOper extends MouseOper {
+  private static class MoveCPOper extends UserOperation {
 
     @Override
     public boolean mouseDown() {
@@ -894,7 +894,7 @@ public class SpriteEditor {
     private Point origLoc;
   }
 
-  private static class EdgeOper extends MouseOper {
+  private static class EdgeOper extends UserOperation {
 
     public EdgeOper(int edgeNum) {
       this.num = edgeNum;
@@ -993,7 +993,7 @@ public class SpriteEditor {
     private IRect origClip;
   };
 
-  private static class CornerOper extends MouseOper {
+  private static class CornerOper extends UserOperation {
     public CornerOper(int corner) {
       this.num = corner;
     }

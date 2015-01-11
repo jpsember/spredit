@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import apputil.*;
 import com.js.basic.*;
-import com.js.editor.MouseOper;
+import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
@@ -399,7 +399,7 @@ public class PolygonObject extends EdObject {
   private static class PolygonFactory extends EdObjectFactory {
 
     @Override
-    public MouseOper isEditingSelectedObject(int slot, EdObject obj,
+    public UserOperation isEditingSelectedObject(int slot, EdObject obj,
         UserEvent event) {
       final boolean db = false;
 
