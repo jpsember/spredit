@@ -7,8 +7,6 @@ import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
 
-import static com.js.basic.Tools.*;
-
 public class MouseOperMoveItems extends UserOperation {
 
   public static MouseOperMoveItems build(UserEvent initialDownEvent) {
@@ -60,23 +58,6 @@ public class MouseOperMoveItems extends UserOperation {
   private MouseOperMoveItems(UserEvent initialDownEvent) {
     mInitialDownEvent = initialDownEvent;
     mInitialEditorState = new ScriptEditorState();
-  }
-
-  @Override
-  public void mouseMove(boolean drag) {
-    unimp("have the operation do the movement; encapsulate movement simply as new editor state");
-    // mMoveCommand.update(currentPtF);
-  }
-
-  @Override
-  public void mouseUp() {
-    unimp("do the actual comand, but only if movement occurred");
-    clearOperation();
-  }
-
-  @Override
-  public void stop() {
-    warning("what is distinction between mouseUp and stop?  is stop sort of like cancel or abort?");
   }
 
   private UserEvent mInitialDownEvent;

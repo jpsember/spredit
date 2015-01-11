@@ -837,11 +837,11 @@ public class SpriteEditor {
       return f;
     }
 
-    @Override
-    public void mouseUp() {
-      spritePanel.setHighlightClip(false);
-      UserOperation.clearOperation();
-    }
+    // @Override
+    // public void mouseUp() {
+    // spritePanel.setHighlightClip(false);
+    // UserOperation.clearOperation();
+    // }
 
     @Override
     public void mouseMove(boolean drag) {
@@ -892,11 +892,11 @@ public class SpriteEditor {
       return f;
     }
 
-    @Override
-    public void mouseUp() {
-      spritePanel.setHighlightCenterpoint(false);
-      clearOperation();
-    }
+    // @Override
+    // public void mouseUp() {
+    // spritePanel.setHighlightCenterpoint(false);
+    // clearOperation();
+    // }
 
     @Override
     public void mouseMove(boolean drag) {
@@ -1004,11 +1004,11 @@ public class SpriteEditor {
       spriteInfo.setCropRect(new IRect(x1, y1, x2 - x1, y2 - y1));
     }
 
-    @Override
-    public void mouseUp() {
-      spritePanel.setHighlightClip(false);
-      clearOperation();
-    }
+    // @Override
+    // public void mouseUp() {
+    // spritePanel.setHighlightClip(false);
+    // clearOperation();
+    // }
 
     // clip rectangle at start of operation
     private IRect origClip;
@@ -1101,11 +1101,11 @@ public class SpriteEditor {
       spriteInfo.setCropRect(new IRect(x1, y1, x2 - x1, y2 - y1));
     }
 
-    @Override
-    public void mouseUp() {
-      spritePanel.setHighlightClip(false);
-      clearOperation();
-    }
+    // @Override
+    // public void mouseUp() {
+    // spritePanel.setHighlightClip(false);
+    // clearOperation();
+    // }
 
     // clip rectangle at start of operation
     private IRect origClip;

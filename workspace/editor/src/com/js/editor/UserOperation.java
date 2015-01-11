@@ -17,6 +17,14 @@ public abstract class UserOperation implements UserEvent.Listener {
   public abstract void processUserEvent(UserEvent event);
 
   /**
+   * Determine if an object can be editable during this operation. Default is
+   * true; for some operations, e.g. rotation and scaling, this will be false
+   */
+  public boolean allowEditableObject() {
+    return true;
+  }
+
+  /**
    * Determine if this operation should start in response to a mouse down event
    * 
    * @return true if event has started
@@ -41,12 +49,6 @@ public abstract class UserOperation implements UserEvent.Listener {
   }
 
   /**
-   * End this operation in response to a mouse up event
-   */
-  public void mouseUp() {
-  }
-
-  /**
    * Called when operation is starting
    */
   public void start() {
@@ -56,14 +58,6 @@ public abstract class UserOperation implements UserEvent.Listener {
    * Called when operation is stopping
    */
   public void stop() {
-  }
-
-  /**
-   * Determine if an object can be editable during this operation. Default is
-   * true; for some operations, e.g. rotation and scaling, this will be false
-   */
-  public boolean allowEditableObject() {
-    return true;
   }
 
   /**
