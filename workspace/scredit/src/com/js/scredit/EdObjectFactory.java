@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.js.editor.MouseOper;
-import com.js.geometry.IPoint;
+import com.js.editor.UserEvent;
 
 public abstract class EdObjectFactory {
 
@@ -74,7 +74,7 @@ public abstract class EdObjectFactory {
    * @return
    */
   public MouseOper isEditingSelectedObject(int slot, EdObject obj,
-      IPoint mousePt) {
+      UserEvent event) {
     return null;
   }
 

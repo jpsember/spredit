@@ -126,8 +126,11 @@ public class DefaultMouseOper extends MouseOper {
      * 
      * If drag, no shift key:
      * 
-     * [] If pick set contains any selected objects, start a move operation with
-     * the selection;
+     * [] If an object is editable, see if press starts an editing operation
+     * with it;
+     * 
+     * [] else, if pick set contains any selected objects, start a move
+     * operation with the selection;
      * 
      * [] else, if pick set contains any objects, unselect and move just the
      * topmost;
@@ -141,6 +144,11 @@ public class DefaultMouseOper extends MouseOper {
      * operation, and add the enclosed items to the selected set.
      */
     if (!event.isShift()) {
+      MouseOper oper = findOperationForEditableObject();
+      if (oper != null) {
+        MouseOper.setOperation(oper);
+        return;
+      }
       if (!mPickSetSelected.isEmpty()) {
         MouseOper.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
       } else if (!mPickSet.isEmpty()) {
@@ -177,6 +185,37 @@ public class DefaultMouseOper extends MouseOper {
     MouseOper.getOperation().processUserEvent(event);
 
     return true;
+  }
+
+  /**
+   * Determine if there's an editable object which can construct an edit
+   * operation for a particular location. If so, return that operation
+   */
+  private MouseOper findOperationForEditableObject() {
+    int editableSlot = getEditableSlot();
+    if (editableSlot < 0)
+      return null;
+    EdObject obj = ScriptEditor.items().get(editableSlot);
+    MouseOper operation = obj.getFactory().isEditingSelectedObject(
+        editableSlot, obj, mInitialDownEvent);
+    return operation;
+  }
+
+  /**
+   * Determine which slot, if any, holds the (at most one) editable object
+   * 
+   * @return slot if found, or -1
+   */
+  private int getEditableSlot() {
+    EdObjectArray items = ScriptEditor.items();
+    List<Integer> selected = items.getSelectedSlots();
+    if (selected.size() != 1)
+      return -1;
+    int slot = selected.get(0);
+    EdObject src = items.get(slot);
+    if (!src.isEditable())
+      return -1;
+    return slot;
   }
 
   private UserEvent mInitialDownEvent;

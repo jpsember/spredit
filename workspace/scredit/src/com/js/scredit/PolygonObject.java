@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import apputil.*;
 import com.js.basic.*;
 import com.js.editor.MouseOper;
+import com.js.editor.UserEvent;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -399,18 +400,14 @@ public class PolygonObject extends EdObject {
 
     @Override
     public MouseOper isEditingSelectedObject(int slot, EdObject obj,
-        IPoint mousePt) {
+        UserEvent event) {
       final boolean db = false;
 
       EdPolygonOper ret = null;
 
-      if (db)
-        pr("isEditingSelectedObject (polygon) " + obj + "? mousePt=" + mousePt
-            + " slot=" + slot);
-
       // check if vertex of polygon is at mouse point
       PolygonObject p = (PolygonObject) obj;
-      Point mptf = new Point(mousePt);
+      Point mptf = event.getWorldLocation();
 
       int elem = p.findGrabbedElement(mptf);
       if (elem > 0) {

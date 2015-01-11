@@ -179,10 +179,10 @@ public class RectangleObject extends EdObject {
 
     @Override
     public MouseOper isEditingSelectedObject(int slot, EdObject obj,
-        IPoint mousePt) {
+        UserEvent event) {
       MouseOper ret = null;
       RectangleObject p = (RectangleObject) obj;
-      Point pt = new Point(mousePt);
+      Point pt = event.getWorldLocation();
       float tolerance = 8 / zoomFactor();
       int edElement = -1;
       for (int c = 0; c < 4; c++) {
@@ -204,7 +204,7 @@ public class RectangleObject extends EdObject {
           }
         }
       if (edElement >= 0) {
-        ret = new EdRectangleOper(mousePt, slot, edElement);
+        ret = EditOper.buildEditExistingOper(event, slot, edElement);
       }
       return ret;
     }
@@ -357,7 +357,7 @@ public class RectangleObject extends EdObject {
   }
 
   public static MouseOper buildNewObjectOperation() {
-    return new EditOper(-1);
+    return EditOper.buildAddOper();
   }
 
   private Point mBottomLeftCorner, mTopRightCorner;
@@ -365,15 +365,36 @@ public class RectangleObject extends EdObject {
 
   private static class EditOper extends MouseOper {
 
-    /**
-     * Constructor for adding or editing rectangles
-     * 
-     * @param editSlot
-     *          -1 to add; else, slot number of existing rectangle
-     */
-    public EditOper(int editSlot) {
-      mAddingNew = (editSlot < 0);
-      mEditSlot = editSlot;
+    public static EditOper buildAddOper() {
+      EditOper oper = new EditOper();
+      oper.mAddingNew = true;
+      return oper;
+    }
+
+    public static MouseOper buildEditExistingOper(UserEvent event, int slot,
+        int handle) {
+      EditOper oper = new EditOper();
+      oper.init(event, slot, handle);
+      return oper;
+    }
+
+    private void init(UserEvent event, int slot, int handle) {
+      mEditHandle = handle;
+      mOriginalState = new ScriptEditorState();
+      mStartEvent = event;
+      if (mAddingNew) {
+        slot = items().size();
+        // create a new rectangle at mouse position
+        RectangleObject obj = new RectangleObject(null, ScriptEditor.color(),
+            event.getWorldLocation(), event.getWorldLocation());
+        ScriptEditor.items().add(obj);
+        ScriptEditor.items().setSelected(SlotList.build(slot));
+      } else {
+
+      }
+      mEditSlot = slot;
+      mOriginalRect = ScriptEditor.items().get(mEditSlot);
+      ScriptEditor.setInfo(mOriginalRect);
     }
 
     @Override
@@ -382,23 +403,15 @@ public class RectangleObject extends EdObject {
       switch (event.getCode()) {
 
       case UserEvent.CODE_DOWN:
-        if (mAddingNew) {
-          mOriginalState = new ScriptEditorState();
-          mEditHandle = 0;
-          mGrabOffset = new Point();
-          // create a new rectangle at mouse position
-          mOriginalRect = new RectangleObject(null, ScriptEditor.color(),
-              event.getWorldLocation(), event.getWorldLocation());
-          mEditSlot = items().size();
-          ScriptEditor.items().add(mOriginalRect);
-          ScriptEditor.items().setSelected(SlotList.build(mEditSlot));
-          ScriptEditor.setInfo(mOriginalRect);
-        }
+        if (!mAddingNew)
+          throw new IllegalStateException();
+        init(event, -1, 0);
         break;
 
       case UserEvent.CODE_DRAG: {
 
-        Point adjMousePt = Point.sum(event.getWorldLocation(), mGrabOffset);
+        Point adjMousePt = Point.sum(event.getWorldLocation(),
+            grabOffset(event.getWorldLocation()));
         Point rectPt = adjMousePt;
         Point pt = Grid.snapToGrid(rectPt, true);
 
@@ -431,6 +444,14 @@ public class RectangleObject extends EdObject {
       return false;
     }
 
+    private Point grabOffset(Point location) {
+      if (mGrabOffset == null)
+        mGrabOffset = Point
+            .difference(location, mStartEvent.getWorldLocation());
+      return mGrabOffset;
+    }
+
+    private UserEvent mStartEvent;
     // true if this is for adding a new rectangle, vs editing existing
     private boolean mAddingNew;
     // state of editor before operation began

@@ -60,6 +60,14 @@ public abstract class MouseOper {
   }
 
   /**
+   * Determine if an object can be editable during this operation. Default is
+   * true; for some operations, e.g. rotation and scaling, this will be false
+   */
+  public boolean allowEditableObject() {
+    return true;
+  }
+
+  /**
    * Determine if mouse up/down was right button
    */
   public static boolean right(MouseEvent ev) {

@@ -171,6 +171,7 @@ public class ScriptEditor {
    * Repaint the current editor, and its associated components
    */
   public static void repaint() {
+    updateEditableObjectStatus();
     sInfoPanel
         .refresh(isProjectOpen() ? editor() : null, project(), sScriptSet);
     sEditorPanelComponent.repaint();
@@ -1461,7 +1462,6 @@ public class ScriptEditor {
     // add mouse edit operations, in the order they
     // are to be tested for activation
     MouseOper.add(new MoveFocusOper());
-    MouseOper.add(new EditSelectedItemOper());
     MouseOper.add(new MouseOperSelectItems());
     repaint();
   }
@@ -1625,6 +1625,19 @@ public class ScriptEditor {
   private static boolean currentScriptCloseable() {
     return sScriptSet.size() > 1 || editor().hasName()
         || !editor().getScript().items().isEmpty();
+  }
+
+  /**
+   * Make an object editable if it is the only selected object (and current
+   * operation allows editabler highlighting). We perform this operation with
+   * each refresh, since this is simpler than trying to maintain the editable
+   * state while the editor objects undergo various editing operations. Also,
+   * update the last editable object type to reflect the editable object (if one
+   * exists)
+   */
+  private static void updateEditableObjectStatus() {
+    items().updateEditableObjectStatus(
+        MouseOper.getOperation().allowEditableObject());
   }
 
   // ------------------- Instance methods -----------------------------
