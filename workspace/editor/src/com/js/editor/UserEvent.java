@@ -199,7 +199,7 @@ public class UserEvent {
   }
 
   public static interface Listener {
-    public void handleUserEvent(UserEvent event);
+    public void processUserEvent(UserEvent event);
   }
 
   private static UserEvent sPreviousPrintEvent = NONE;

@@ -1446,10 +1446,11 @@ public class ScriptEditor {
 
       MouseEventGenerator m = new MouseEventGenerator();
       m.setView(editorPanel, editorPanel.getComponent());
-      m.setListener(new UserEvent.Listener() {
+      sUserEventManager.setListener(new UserEvent.Listener() {
         @Override
-        public void handleUserEvent(UserEvent event) {
-          ScriptEditor.handleUserEvent(event);
+        public void processUserEvent(UserEvent event) {
+          // Request a refresh of the editor view after any event
+          repaint();
         }
       });
 
@@ -1949,22 +1950,6 @@ public class ScriptEditor {
   public Script getScript() {
     return mScript;
   }
-
-  // --- New MouseOper handling
-
-  private static void handleUserEvent(UserEvent event) {
-    // Save most recent event for rendering cursor
-    mLastMouseEvent = event;
-
-    unimp("refactor this somehow");
-    event.getManager().getOperation().processUserEvent(event);
-
-    // Request a refresh of the editor view after any event
-    repaint();
-  }
-
-  // private static MouseOper mCurrentOperation;
-  /* private */static UserEvent mLastMouseEvent;
 
   // --- Class fields
   private static Component sEditorPanelComponent;

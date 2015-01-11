@@ -25,14 +25,8 @@ public class MouseEventGenerator {
     c.addMouseMotionListener(ls);
   }
 
-  /**
-   * Specify the (single) listener for UserEvents
-   */
-  public void setListener(UserEvent.Listener listener) {
-    mListener = listener;
-  }
-
   private void generateMouseEvent(MouseEvent evt, int type) {
+
     IPoint viewPoint = new IPoint(evt.getX(), evt.getY());
 
     int modifierFlags = 0;
@@ -48,8 +42,7 @@ public class MouseEventGenerator {
       modifierFlags |= UserEvent.FLAG_SHIFT;
 
     UserEvent event = new UserEvent(type, mView, viewPoint, modifierFlags);
-    if (mListener != null)
-      mListener.handleUserEvent(event);
+    mView.getManager().processUserEvent(event);
   }
 
   private class OurMouseListener implements MouseListener, MouseMotionListener {
@@ -91,5 +84,4 @@ public class MouseEventGenerator {
   }
 
   private UserEventSource mView;
-  private UserEvent.Listener mListener;
 }

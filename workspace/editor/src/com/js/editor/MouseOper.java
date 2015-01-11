@@ -11,8 +11,9 @@ import com.js.geometry.Point;
 /**
  * Class representing a mouse editing operation
  */
-public abstract class MouseOper {
+public abstract class MouseOper implements UserEvent.Listener {
 
+  @Override
   public void processUserEvent(UserEvent event) {
     unimp("processUserEvent, " + nameOf(this));
   }

@@ -28,8 +28,7 @@ public class MouseOperMoveItems extends MouseOper {
       Command command = new CommandForGeneralChanges(mInitialEditorState, null,
           "move", "Move");
       ScriptEditor.editor().registerPush(command);
-      unimp("distinguish between finishing and aborting operation; if aborting, restore editor state to initial");
-      event.setOperation(null);
+      event.clearOperation();
       break;
 
     }
