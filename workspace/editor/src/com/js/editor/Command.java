@@ -1,7 +1,9 @@
 package com.js.editor;
 
 /**
- * Encapsulates an edit operation, to allow for undo/redo functionality
+ * Encapsulates a command that modifies the state of what is being edited.
+ * 
+ * Supports undo/redo functionality.
  */
 public interface Command {
 

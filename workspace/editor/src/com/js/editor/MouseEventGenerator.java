@@ -11,7 +11,8 @@ import com.js.geometry.*;
 import static com.js.basic.Tools.*;
 
 /**
- * Listens to mouse events within a view, and generates corresponding UserEvents
+ * Listens to mouse events within a AWT view, and generates corresponding
+ * UserEvents
  */
 public class MouseEventGenerator {
 

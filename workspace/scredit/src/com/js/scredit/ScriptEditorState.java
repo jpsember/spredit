@@ -2,10 +2,9 @@ package com.js.scredit;
 
 import java.util.List;
 
-import com.js.editor.EditorState;
 import static com.js.basic.Tools.*;
 
-public class ScriptEditorState extends EditorState {
+public class ScriptEditorState {
 
   public ScriptEditorState() {
     mObjects = frozen(ScriptEditor.items());
