@@ -9,14 +9,16 @@ import com.js.myopengl.*;
 import tex.*;
 
 import com.js.basic.Files;
+import com.js.editor.UserEventManager;
 import com.js.editor.UserEventSource;
 import com.js.editor.MouseOper;
 import com.js.geometry.*;
 
 public class EditorPanelGL extends GLPanel implements UserEventSource {
 
-  public EditorPanelGL(InfoPanel infoPanel) {
+  public EditorPanelGL(InfoPanel infoPanel, UserEventManager eventManager) {
     mInfoPanel = infoPanel;
+    mUserEventManager = eventManager;
   }
 
   private static Atlas sOurFont;
@@ -113,7 +115,7 @@ public class EditorPanelGL extends GLPanel implements UserEventSource {
 
     ScriptEditor.editor().render(this, false);
 
-    MouseOper op = MouseOper.getOperation();
+    MouseOper op = mUserEventManager.getOperation();
     if (op != null)
       op.paint();
 
@@ -133,7 +135,9 @@ public class EditorPanelGL extends GLPanel implements UserEventSource {
   }
 
   @Override
-  public MouseOper getDefaultOperation() {
-    return new DefaultMouseOper();
+  public UserEventManager getManager() {
+    return mUserEventManager;
   }
+
+  private UserEventManager mUserEventManager;
 }

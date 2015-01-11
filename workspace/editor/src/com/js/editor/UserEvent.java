@@ -73,6 +73,24 @@ public class UserEvent {
     return mSource;
   }
 
+  public UserEventManager getManager() {
+    return getSource().getManager();
+  }
+
+  /**
+   * Convenience method for getManager().setOperation()
+   */
+  public void setOperation(MouseOper oper) {
+    getManager().setOperation(oper);
+  }
+
+  /**
+   * Convenience method for getManager().clearOperation()
+   */
+  public void clearOperation() {
+    getManager().clearOperation();
+  }
+
   public boolean isDownVariant() {
     return mCode == CODE_DOWN;
   }

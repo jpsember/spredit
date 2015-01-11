@@ -29,7 +29,7 @@ public class MouseOperMoveItems extends MouseOper {
           "move", "Move");
       ScriptEditor.editor().registerPush(command);
       unimp("distinguish between finishing and aborting operation; if aborting, restore editor state to initial");
-      MouseOper.clearOperation();
+      event.setOperation(null);
       break;
 
     }

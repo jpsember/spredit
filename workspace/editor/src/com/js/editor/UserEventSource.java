@@ -23,6 +23,6 @@ public interface UserEventSource {
    */
   public float getZoom();
 
-  public MouseOper getDefaultOperation();
+  public UserEventManager getManager();
 
 }

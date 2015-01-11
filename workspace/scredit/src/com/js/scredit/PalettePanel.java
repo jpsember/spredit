@@ -12,7 +12,6 @@ import org.json.JSONObject;
 //import javax.swing.event.*;
 
 import com.js.editor.Command;
-import com.js.editor.MouseOper;
 import com.js.geometry.*;
 
 import tex.*;
@@ -178,21 +177,14 @@ public class PalettePanel extends JPanel {
    */
   public void setSelectedColor(Color c, boolean colorSelectedObjects) {
 
-    final boolean db = false;
-
     selectedColor = c;
 
     if (colorSelectedObjects) {
-      if (db)
-        pr(" current MouseOper=" + MouseOper.getOperation());
 
       {
         Command r = new ColorRev(c);
 
         if (r.valid()) {
-          if (db)
-            pr("  performing it");
-
           ScriptEditor.editor().registerPush(r);
           ScriptEditor.perform(r);
         }

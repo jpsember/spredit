@@ -3,7 +3,6 @@ package com.js.editor;
 import static com.js.basic.Tools.*;
 
 import java.awt.event.*;
-import java.util.*;
 import javax.swing.*;
 
 import com.js.geometry.IPoint;
@@ -73,43 +72,12 @@ public abstract class MouseOper {
     return SwingUtilities.isRightMouseButton(ev);
   }
 
-  // At some point, we may want to refactor to make the 'current' and 'default'
-  // operations belong to the UserEventSource, so that there can exist multiple
-  // views, each with their own independent operations
-
-  public static void setDefaultOperation(MouseOper defaultMouseOper) {
-    sDefaultMouseOper = defaultMouseOper;
-  }
-
-  /**
-   * Get current operation
-   */
-  public static MouseOper getOperation() {
-    if (editOper == null)
-      editOper = sDefaultMouseOper;
-    return editOper;
-  }
-
-  /**
-   * Set current operation
-   */
   public static void setOperation(MouseOper oper) {
-    if (oper == null) {
-      if (sDefaultMouseOper == null)
-        throw new IllegalStateException("no default mouse oper defined");
-      oper = sDefaultMouseOper;
-    }
-    if (editOper != oper) {
-      if (editOper != null)
-        editOper.stop();
-      editOper = oper;
-      if (editOper != null)
-        editOper.start();
-    }
+    warning("setOperation is deprecated; " + stackTrace(1, 1));
   }
 
   public static void clearOperation() {
-    setOperation(null);
+    warning("clearOperation is deprecated; " + stackTrace(1, 1));
   }
 
   /**
@@ -119,17 +87,16 @@ public abstract class MouseOper {
    *          --- make this deprecated
    */
   public static void add(MouseOper oper) {
-    opers.add(oper);
+    warning("MouseOper.add() is deprecated; " + stackTrace(1, 1));
   }
 
   public static void setEnabled(boolean enabled) {
+    warning("setEnabled is deprecated; " + stackTrace(1, 1));
     if (!enabled) {
       // Cancel any active operation
-      editOper = null;
+      // editOper = null;
     }
   }
-
-  private static ArrayList<MouseOper> opers = new ArrayList();
 
   // event when operation started
   public static MouseEvent startEv;
@@ -143,14 +110,5 @@ public abstract class MouseOper {
   public static Point currentPtF;
   public static IPoint currentPt;
   public static IPoint currentPtView;
-
-  // active operation, or null
-  private static MouseOper editOper;
-
-  private static MouseOper sDefaultMouseOper;
-
-  public static interface Listener {
-    public void operationChanged(MouseOper oper);
-  }
 
 }

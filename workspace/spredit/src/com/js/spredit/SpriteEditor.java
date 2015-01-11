@@ -829,7 +829,7 @@ public class SpriteEditor {
     @Override
     public void mouseUp() {
       spritePanel.setHighlightClip(false);
-      clearOperation();
+      MouseOper.clearOperation();
     }
 
     @Override

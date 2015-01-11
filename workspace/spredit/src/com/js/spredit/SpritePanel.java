@@ -7,7 +7,7 @@ import javax.swing.JCheckBox;
 
 import com.js.myopengl.GLPanel;
 
-import com.js.editor.MouseOper;
+import com.js.editor.UserEventManager;
 import com.js.editor.UserEventSource;
 import com.js.geometry.*;
 
@@ -111,9 +111,15 @@ public class SpritePanel extends GLPanel implements UserEventSource {
   }
 
   @Override
-  public MouseOper getDefaultOperation() {
-    throw new UnsupportedOperationException("finish refactoring");
+  public UserEventManager getManager() {
+    if (sManager == null) {
+      // sManager = new UserEventManager(null);
+      throw new UnsupportedOperationException("finish refactoring");
+    }
+    return sManager;
   }
+
+  private static UserEventManager sManager;
 
   private boolean sFocusValid;
   private Point sFocus;

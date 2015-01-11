@@ -22,6 +22,7 @@ import com.js.editor.Command;
 import com.js.editor.MouseEventGenerator;
 import com.js.editor.MouseOper;
 import com.js.editor.UserEvent;
+import com.js.editor.UserEventManager;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -1439,7 +1440,9 @@ public class ScriptEditor {
 
     {
       JPanel pnl = new JPanel(new BorderLayout());
-      EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel);
+      sUserEventManager = new UserEventManager(new DefaultMouseOper());
+      EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel,
+          sUserEventManager);
 
       MouseEventGenerator m = new MouseEventGenerator();
       m.setView(editorPanel, editorPanel.getComponent());
@@ -1456,8 +1459,6 @@ public class ScriptEditor {
       pnl.add(sInfoPanel, BorderLayout.SOUTH);
       p.add(pnl, BorderLayout.CENTER);
     }
-
-    MouseOper.setDefaultOperation(new DefaultMouseOper());
 
     // add mouse edit operations, in the order they
     // are to be tested for activation
@@ -1637,7 +1638,7 @@ public class ScriptEditor {
    */
   private static void updateEditableObjectStatus() {
     items().updateEditableObjectStatus(
-        MouseOper.getOperation().allowEditableObject());
+        sUserEventManager.getOperation().allowEditableObject());
   }
 
   // ------------------- Instance methods -----------------------------
@@ -1848,7 +1849,7 @@ public class ScriptEditor {
   private void doRedo() {
     final boolean db = DBUNDO;
 
-    MouseOper.clearOperation();
+    sUserEventManager.clearOperation();
     Command oper = editor().getRedoOper();
     if (oper != null) {
       if (db)
@@ -1865,7 +1866,7 @@ public class ScriptEditor {
     if (db && false)
       pr("doUndo, undoCursor " + mUndoCursor + " of total " + mUndoList.size());
 
-    MouseOper.clearOperation();
+    sUserEventManager.clearOperation();
 
     if (mUndoCursor > 0) {
       // unselectAll();
@@ -1952,12 +1953,11 @@ public class ScriptEditor {
   // --- New MouseOper handling
 
   private static void handleUserEvent(UserEvent event) {
-    // event.printProcessingMessage("ScriptEditor processing");
-
     // Save most recent event for rendering cursor
     mLastMouseEvent = event;
 
-    MouseOper.getOperation().processUserEvent(event);
+    unimp("refactor this somehow");
+    event.getManager().getOperation().processUserEvent(event);
 
     // Request a refresh of the editor view after any event
     repaint();
@@ -1987,6 +1987,7 @@ public class ScriptEditor {
       "Script project files", "set");
   private static MyFileFilter SCRIPT_FILEFILTER = new MyFileFilter(
       "Script files", "scr");
+  private static UserEventManager sUserEventManager;
 
   // --- Instance fields
 

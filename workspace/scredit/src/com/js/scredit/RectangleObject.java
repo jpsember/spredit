@@ -432,7 +432,7 @@ public class RectangleObject extends EdObject {
               "add rect", (mAddingNew ? "Add" : "Edit") + " Rectangle");
           ScriptEditor.editor().registerPush(command);
         }
-        MouseOper.clearOperation();
+        event.clearOperation();
       }
         break;
       }
