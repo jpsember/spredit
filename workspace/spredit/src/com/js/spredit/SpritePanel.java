@@ -7,10 +7,10 @@ import javax.swing.JCheckBox;
 
 import com.js.myopengl.GLPanel;
 
-import com.js.editor.IEditorView;
+import com.js.editor.UserEventSource;
 import com.js.geometry.*;
 
-public class SpritePanel extends GLPanel implements IEditorView {
+public class SpritePanel extends GLPanel implements UserEventSource {
 
   public SpritePanel() {
     getComponent().setBackground(Color.white.darker());

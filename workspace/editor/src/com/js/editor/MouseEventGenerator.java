@@ -18,7 +18,7 @@ public class MouseEventGenerator {
   /**
    * Specify view to listen to (Java) mouse events
    */
-  public void setView(IEditorView view, Component c) {
+  public void setView(UserEventSource view, Component c) {
     mView = view;
     OurMouseListener ls = new OurMouseListener();
     c.addMouseListener(ls);
@@ -90,6 +90,6 @@ public class MouseEventGenerator {
     }
   }
 
-  private IEditorView mView;
+  private UserEventSource mView;
   private UserEvent.Listener mListener;
 }

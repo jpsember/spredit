@@ -9,11 +9,11 @@ import com.js.myopengl.*;
 import tex.*;
 
 import com.js.basic.Files;
-import com.js.editor.IEditorView;
+import com.js.editor.UserEventSource;
 import com.js.editor.MouseOper;
 import com.js.geometry.*;
 
-public class EditorPanelGL extends GLPanel implements IEditorView {
+public class EditorPanelGL extends GLPanel implements UserEventSource {
 
   public EditorPanelGL(InfoPanel infoPanel) {
     mInfoPanel = infoPanel;

@@ -38,7 +38,7 @@ public class UserEvent {
   public static final int FLAG_ALT = (1 << 3);
   public static final int FLAG_META = (1 << 4);
 
-  public UserEvent(int code, IEditorView view, IPoint viewLocation,
+  public UserEvent(int code, UserEventSource view, IPoint viewLocation,
       int modifierFlags) {
     mCode = code;
     mView = view;
@@ -185,7 +185,7 @@ public class UserEvent {
   private static String sPreviousPrintMessage;
 
   private int mCode;
-  private IEditorView mView;
+  private UserEventSource mView;
   private IPoint mViewLocation;
   private Point mWorldLocation;
   private boolean mMultipleTouchFlag;
