@@ -9,8 +9,16 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 public class JSONTools {
+
+  /**
+   * Parse a JSON map from a string
+   */
+  public static JSONObject parseMap(String source) throws JSONException {
+    return (JSONObject) new JSONTokener(source).nextValue();
+  }
 
   /**
    * Get keys from JSONObject as an Iterable<String>

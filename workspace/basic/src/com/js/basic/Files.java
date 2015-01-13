@@ -144,10 +144,4 @@ public class Files {
     verifyAbsolute(file, false);
   }
 
-  public static boolean equal(File f1, File f2) {
-    if (f1 == null || f2 == null)
-      return f1 == f2;
-    return f1.equals(f2);
-  }
-
 }
