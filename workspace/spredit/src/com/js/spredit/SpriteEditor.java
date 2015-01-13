@@ -780,7 +780,8 @@ public class SpriteEditor {
     public boolean mouseDown() {
       boolean f = false;
       do {
-        if (!right(ev) || ev.isControlDown() || ev.isShiftDown())
+        if (// !ev.isRight() ||
+        ev.isControlDown() || ev.isShiftDown())
           break;
         startOrigin = new Point(spritePanel.getOrigin());
         f = true;
@@ -820,7 +821,8 @@ public class SpriteEditor {
       boolean f = false;
       do {
 
-        if (!defined() || !right(ev) || ev.isControlDown() || !ev.isShiftDown())
+        if (!defined() // || !ev.isRight()
+            || ev.isControlDown() || !ev.isShiftDown())
           break;
 
         IRect clip = spriteInfo.cropRect();
@@ -871,7 +873,7 @@ public class SpriteEditor {
       boolean f = false;
       do {
 
-        if (!defined() || right(ev) // || ev.isControlDown()
+        if (!defined() // || ev.isRight() // || ev.isControlDown()
         )
           break;
 
@@ -928,7 +930,8 @@ public class SpriteEditor {
       boolean f = false;
       do {
 
-        if (!defined() || right(ev) || ev.isControlDown() || ev.isShiftDown())
+        if (!defined() // || ev.isRight()
+            || ev.isControlDown() || ev.isShiftDown())
           break;
 
         if (db)
@@ -1031,7 +1034,8 @@ public class SpriteEditor {
       boolean f = false;
       do {
 
-        if (!defined() || right(ev) || ev.isControlDown() || ev.isShiftDown())
+        if (!defined() // || ev.isRight()
+            || ev.isControlDown() || ev.isShiftDown())
           break;
 
         if (db)

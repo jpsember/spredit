@@ -196,18 +196,13 @@ public class EdPolygonOper extends OldUserOperation {
 
   @Override
   public boolean mouseDown() {
-    final boolean db = false;
-
-    if (db)
-      pr("mouseDown, right=" + right(ev));
-
-    if (!right(ev)) {
-      if (poly.nPoints() < PolygonObject.MAX_VERTICES)
-        insertPt(Grid.snapToGrid(currentPtF, true));
-      // we must return true, otherwise the operation will be cleared
-      return true;
-    } else
-      return false;
+    // if (!ev.isRight()) {
+    // if (poly.nPoints() < PolygonObject.MAX_VERTICES)
+    // insertPt(Grid.snapToGrid(currentPtF, true));
+    // // we must return true, otherwise the operation will be cleared
+    // return true;
+    // } else
+    return false;
   }
 
   @Override
@@ -348,7 +343,7 @@ public class EdPolygonOper extends OldUserOperation {
 
   }
 
-  private void insertPt(Point pt) {
+  /* private */void insertPt(Point pt) {
     final boolean db = false;
     if (db)
       pr("insertPt target=" + target + " reversed=" + reversed);

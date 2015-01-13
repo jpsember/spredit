@@ -34,7 +34,8 @@ public class ScaleOper extends OldUserOperation {
   public boolean mouseDown() {
     boolean f = false;
     do {
-      if (right(ev) || ev.isControlDown() || ev.isShiftDown())
+      if ( // ev.isRight() ||
+      ev.isControlDown() || ev.isShiftDown())
         break;
 
       if (!oper.withinCircle(currentPtF))

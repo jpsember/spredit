@@ -1,8 +1,5 @@
 package com.js.editor;
 
-import java.awt.event.*;
-import javax.swing.*;
-
 /**
  * Class representing a user operation, usually involving the mouse (or touch
  * device)
@@ -36,13 +33,6 @@ public abstract class UserOperation implements UserEvent.Listener {
    * Called when operation is stopping
    */
   public void stop() {
-  }
-
-  /**
-   * Determine if mouse up/down was right button
-   */
-  public static boolean right(MouseEvent ev) {
-    return SwingUtilities.isRightMouseButton(ev);
   }
 
 }

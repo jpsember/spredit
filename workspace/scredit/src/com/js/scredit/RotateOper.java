@@ -31,7 +31,8 @@ public class RotateOper extends OldUserOperation {
 
     boolean f = false;
     do {
-      if (right(ev) || ev.isControlDown() || ev.isShiftDown())
+      if (// right(ev) ||
+      ev.isControlDown() || ev.isShiftDown())
         break;
 
       if (!oper.withinCircle(currentPtF))

@@ -1,4 +1,4 @@
-package com.js.editor;
+package apputil;
 
 import java.awt.Component;
 import java.awt.event.MouseEvent;
@@ -7,6 +7,8 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.SwingUtilities;
 
+import com.js.editor.UserEvent;
+import com.js.editor.UserEventSource;
 import com.js.geometry.*;
 import static com.js.basic.Tools.*;
 
