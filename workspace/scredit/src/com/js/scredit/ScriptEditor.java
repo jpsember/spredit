@@ -276,6 +276,7 @@ public class ScriptEditor {
 
     private int dir;
 
+    @Override
     public boolean shouldBeEnabled() {
       return items().getSelected().length != 0;
     }
@@ -323,14 +324,16 @@ public class ScriptEditor {
 
     // -----------------------------------
     m.addMenu("File", projectMustBeOpenHandler);
-    m.addItem("New", KeyEvent.VK_N, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("New", KeyEvent.VK_N, CTRL, new UserOperation() {
+      @Override
+      public void start() {
         doNewScript();
         repaint();
       }
     });
-    m.addItem("Open Script...", KeyEvent.VK_O, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Open Script...", KeyEvent.VK_O, CTRL, new UserOperation() {
+      @Override
+      public void start() {
         openScript(null);
         repaint();
       }
@@ -345,8 +348,9 @@ public class ScriptEditor {
         });
     m.addItem(sRecentScriptsMenuItem);
 
-    m.addItem("Open Layer...", KeyEvent.VK_O, META, new ActionHandler() {
-      public void go() {
+    m.addItem("Open Layer...", KeyEvent.VK_O, META, new UserOperation() {
+      @Override
+      public void start() {
         // If current editor is anonymous, and unmodified, don't insert a new
         // one
         if (editor().hasName() || editor().modified()) {
@@ -357,12 +361,14 @@ public class ScriptEditor {
       }
     });
     m.addItem("Open Next File...", KeyEvent.VK_O, CTRL | SHIFT,
-        new ActionHandler() {
+        new UserOperation() {
+          @Override
           public boolean shouldBeEnabled() {
             return editor().hasName();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             openNextFile();
             repaint();
           }
@@ -370,14 +376,14 @@ public class ScriptEditor {
 
     m.addSeparator();
 
-    m.addItem("Close", KeyEvent.VK_W, CTRL, new ActionHandler() {
+    m.addItem("Close", KeyEvent.VK_W, CTRL, new UserOperation() {
       @Override
       public boolean shouldBeEnabled() {
         return currentScriptCloseable();
       }
 
       @Override
-      public void go() {
+      public void start() {
         do {
           if (!flush(true))
             break;
@@ -389,14 +395,14 @@ public class ScriptEditor {
         repaint();
       }
     });
-    m.addItem("Close All", KeyEvent.VK_W, CTRL | SHIFT, new ActionHandler() {
+    m.addItem("Close All", KeyEvent.VK_W, CTRL | SHIFT, new UserOperation() {
       @Override
       public boolean shouldBeEnabled() {
         return currentScriptCloseable();
       }
 
       @Override
-      public void go() {
+      public void start() {
         sScriptSet.setCursor(sScriptSet.size() - 1);
         do {
           repaint();
@@ -412,24 +418,28 @@ public class ScriptEditor {
       }
     });
 
-    m.addItem("Save", KeyEvent.VK_S, CTRL, new ActionHandler() {
+    m.addItem("Save", KeyEvent.VK_S, CTRL, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return !editor().hasName() || editor().modified();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().doSave(null, false, false);
         repaint();
       }
     });
 
-    m.addItem("Save As...", KeyEvent.VK_A, CTRL | SHIFT, new ActionHandler() {
-      public void go() {
+    m.addItem("Save As...", KeyEvent.VK_A, CTRL | SHIFT, new UserOperation() {
+      @Override
+      public void start() {
         editor().doSave(null, true, false);
         repaint();
       }
     });
-    m.addItem("Save All", KeyEvent.VK_S, CTRL | SHIFT, new ActionHandler() {
+    m.addItem("Save All", KeyEvent.VK_S, CTRL | SHIFT, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         boolean ret = false;
         for (int i = 0; i < sScriptSet.size(); i++) {
@@ -440,7 +450,8 @@ public class ScriptEditor {
         return ret;
       }
 
-      public void go() {
+      @Override
+      public void start() {
         int previousSlot = sScriptSet.getCursor();
         for (int i = 0; i < sScriptSet.size(); i++) {
           ScriptEditor ed = sScriptSet.get(i);
@@ -453,12 +464,14 @@ public class ScriptEditor {
         repaint();
       }
     });
-    m.addItem("Save As Next", KeyEvent.VK_S, META | SHIFT, new ActionHandler() {
+    m.addItem("Save As Next", KeyEvent.VK_S, META | SHIFT, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return editor().hasName();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         File f = AppTools.incrementFile(editor().getFile());
         editor().doSave(f, false, true);
         repaint();
@@ -467,23 +480,27 @@ public class ScriptEditor {
 
     // -----------------------------------
     m.addMenu("Edit", projectMustBeOpenHandler);
-    sUndoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new ActionHandler() {
+    sUndoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return editor().mUndoCursor > 0;
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().doUndo();
         repaint();
       }
     });
 
-    sRedoMenuItem = m.addItem("Redo", KeyEvent.VK_Y, CTRL, new ActionHandler() {
+    sRedoMenuItem = m.addItem("Redo", KeyEvent.VK_Y, CTRL, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return editor().getRedoOper() != null;
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().doRedo();
         repaint();
       }
@@ -556,19 +573,21 @@ public class ScriptEditor {
     });
 
     m.addSeparator();
-    m.addItem("Select All", KeyEvent.VK_A, CTRL, new ActionHandler() {
+    m.addItem("Select All", KeyEvent.VK_A, CTRL, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return !items().isEmpty();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         EdObjectArray a = items();
         for (EdObject obj : a)
           obj.setSelected(true);
         repaint();
       }
     });
-    m.addItem("Select None", KeyEvent.VK_ESCAPE, 0, new ActionHandler() {
+    m.addItem("Select None", KeyEvent.VK_ESCAPE, 0, new UserOperation() {
       private SelectNoneOper r;
 
       public boolean shouldBeEnabled() {
@@ -576,7 +595,8 @@ public class ScriptEditor {
         return r.valid();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         r.perform();
         repaint();
       }
@@ -585,7 +605,7 @@ public class ScriptEditor {
     m.addSeparator();
 
     m.addItem("Move Backward", KeyEvent.VK_OPEN_BRACKET, 0,
-        new ActionHandler() {
+        new UserOperation() {
           private Command r;
 
           public boolean shouldBeEnabled() {
@@ -593,13 +613,14 @@ public class ScriptEditor {
             return r.valid();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             editor().registerPush(r);
             perform(r);
           }
         });
     m.addItem("Move Forward", KeyEvent.VK_CLOSE_BRACKET, 0,
-        new ActionHandler() {
+        new UserOperation() {
           private Command r;
 
           public boolean shouldBeEnabled() {
@@ -607,13 +628,14 @@ public class ScriptEditor {
             return r.valid();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             editor().registerPush(r);
             perform(r);
           }
         });
     m.addItem("Move to Rear", KeyEvent.VK_OPEN_BRACKET, CTRL,
-        new ActionHandler() {
+        new UserOperation() {
           private Command r;
 
           public boolean shouldBeEnabled() {
@@ -621,13 +643,14 @@ public class ScriptEditor {
             return r.valid();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             editor().registerPush(r);
             perform(r);
           }
         });
     m.addItem("Move to Front", KeyEvent.VK_CLOSE_BRACKET, CTRL,
-        new ActionHandler() {
+        new UserOperation() {
           private Command r;
 
           public boolean shouldBeEnabled() {
@@ -635,7 +658,8 @@ public class ScriptEditor {
             return r.valid();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             editor().registerPush(r);
             perform(r);
           }
@@ -643,7 +667,7 @@ public class ScriptEditor {
 
     m.addSeparator();
 
-    m.addItem("Group", KeyEvent.VK_G, CTRL, new ActionHandler() {
+    m.addItem("Group", KeyEvent.VK_G, CTRL, new UserOperation() {
       private Command r;
 
       public boolean shouldBeEnabled() {
@@ -651,12 +675,13 @@ public class ScriptEditor {
         return r.valid();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().registerPush(r);
         perform(r);
       }
     });
-    m.addItem("Ungroup", KeyEvent.VK_U, CTRL, new ActionHandler() {
+    m.addItem("Ungroup", KeyEvent.VK_U, CTRL, new UserOperation() {
       private Command r;
 
       public boolean shouldBeEnabled() {
@@ -664,7 +689,8 @@ public class ScriptEditor {
         return r.valid();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().registerPush(r);
         perform(r);
       }
@@ -677,7 +703,7 @@ public class ScriptEditor {
     m.addItem("Move Down", KeyEvent.VK_DOWN, 0, new CursorMoveHandler(3));
     m.addSeparator();
     m.addItem("Flip Horizontally", KeyEvent.VK_H, SHIFT | CTRL,
-        new ActionHandler() {
+        new UserOperation() {
           private Command r;
 
           public boolean shouldBeEnabled() {
@@ -685,13 +711,14 @@ public class ScriptEditor {
             return r.valid();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             editor().registerPush(r);
             perform(r);
           }
         });
     m.addItem("Flip Vertically", KeyEvent.VK_V, SHIFT | CTRL,
-        new ActionHandler() {
+        new UserOperation() {
           private Command r;
 
           public boolean shouldBeEnabled() {
@@ -699,13 +726,14 @@ public class ScriptEditor {
             return r.valid();
           }
 
-          public void go() {
+          @Override
+          public void start() {
             editor().registerPush(r);
             perform(r);
           }
         });
 
-    m.addItem("Rotate", KeyEvent.VK_R, CTRL, new ActionHandler() {
+    m.addItem("Rotate", KeyEvent.VK_R, CTRL, new UserOperation() {
       private RotateOper r;
 
       public boolean shouldBeEnabled() {
@@ -713,11 +741,12 @@ public class ScriptEditor {
         return r.shouldBeEnabled();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         sUserEventManager.setOperation(r);
       }
     });
-    m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new ActionHandler() {
+    m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new UserOperation() {
       private Command r;
 
       public boolean shouldBeEnabled() {
@@ -725,13 +754,14 @@ public class ScriptEditor {
         return r.valid();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().registerPush(r);
         perform(r);
         repaint();
       }
     });
-    m.addItem("Scale", KeyEvent.VK_E, CTRL, new ActionHandler() {
+    m.addItem("Scale", KeyEvent.VK_E, CTRL, new UserOperation() {
       private ScaleOper oper;
 
       public boolean shouldBeEnabled() {
@@ -739,11 +769,12 @@ public class ScriptEditor {
         return oper.shouldBeEnabled();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         sUserEventManager.setOperation(oper);
       }
     });
-    m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new ActionHandler() {
+    m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new UserOperation() {
       private Command r;
 
       public boolean shouldBeEnabled() {
@@ -751,7 +782,8 @@ public class ScriptEditor {
         return r.valid();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().registerPush(r);
         perform(r);
         repaint();
@@ -760,45 +792,53 @@ public class ScriptEditor {
 
     // -----------------------------------
     m.addMenu("View", projectMustBeOpenHandler);
-    m.addItem("Zoom In", KeyEvent.VK_EQUALS, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Zoom In", KeyEvent.VK_EQUALS, CTRL, new UserOperation() {
+      @Override
+      public void start() {
         doAdjustZoom(-1);
       }
 
+      @Override
       public boolean shouldBeEnabled() {
         return sZoomFactor < 20;
       }
     });
 
-    m.addItem("Zoom Out", KeyEvent.VK_MINUS, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Zoom Out", KeyEvent.VK_MINUS, CTRL, new UserOperation() {
+      @Override
+      public void start() {
         doAdjustZoom(1);
       }
 
+      @Override
       public boolean shouldBeEnabled() {
         return sZoomFactor > .1f;
       }
     });
-    m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new ActionHandler() {
+    m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return sZoomFactor != 1;
       }
 
-      public void go() {
+      @Override
+      public void start() {
         doAdjustZoom(0);
       }
     });
     m.addSeparator();
-    m.addItem("Snap to Grid", KeyEvent.VK_G, CTRL | SHIFT, new ActionHandler() {
+    m.addItem("Snap to Grid", KeyEvent.VK_G, CTRL | SHIFT, new UserOperation() {
       private Command r;
 
+      @Override
       public boolean shouldBeEnabled() {
         r = Grid.getOper();
         return r.valid();
 
       }
 
-      public void go() {
+      @Override
+      public void start() {
         editor().registerPush(r);
         perform(r);
       }
@@ -812,8 +852,9 @@ public class ScriptEditor {
 
     m.addSeparator();
     m.addItem("Polygon Vertices", KeyEvent.VK_P, CTRL | SHIFT,
-        new ActionHandler() {
-          public void go() {
+        new UserOperation() {
+          @Override
+          public void start() {
             PolygonObject.showVertices ^= true;
             repaint();
           }
@@ -822,16 +863,19 @@ public class ScriptEditor {
     // -----------------------------------
     m.addMenu("Objects", projectMustBeOpenHandler);
     m.addItem("Add Sprite", KeyEvent.VK_S, 0, new ActionHandler() {
+      @Override
       public boolean shouldBeEnabled() {
         return sSelectedSprite != null;
       }
 
+      @Override
       public void go() {
         sUserEventManager.setOperation(new AddSpriteOper());
       }
     });
-    m.addItem("Select Atlas", KeyEvent.VK_T, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Select Atlas", KeyEvent.VK_T, CTRL, new UserOperation() {
+      @Override
+      public void start() {
         doSelectAtlas(null);
       }
     });
@@ -919,31 +963,36 @@ public class ScriptEditor {
     //
     // -----------------------------------
     m.addMenu("Layer", projectMustBeOpenHandler);
-    m.addItem("Next", KeyEvent.VK_EQUALS, 0, new ActionHandler() {
+    m.addItem("Next", KeyEvent.VK_EQUALS, 0, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return sScriptSet.size() > 1;
       }
 
-      public void go() {
+      @Override
+      public void start() {
         sScriptSet.setCursor(MyMath.myMod(sScriptSet.getCursor() + 1,
             sScriptSet.size()));
         repaint();
       }
     });
-    m.addItem("Previous", KeyEvent.VK_MINUS, 0, new ActionHandler() {
+    m.addItem("Previous", KeyEvent.VK_MINUS, 0, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return sScriptSet.size() > 1;
       }
 
-      public void go() {
+      @Override
+      public void start() {
         sScriptSet.setCursor(MyMath.myMod(sScriptSet.getCursor() - 1,
             sScriptSet.size()));
         repaint();
       }
     });
     m.addSeparator();
-    m.addItem("Open Set", KeyEvent.VK_O, CTRL | SHIFT, new ActionHandler() {
-      public void go() {
+    m.addItem("Open Set", KeyEvent.VK_O, CTRL | SHIFT, new UserOperation() {
+      @Override
+      public void start() {
         doOpenSet(null);
         repaint();
       }
@@ -951,6 +1000,7 @@ public class ScriptEditor {
 
     sRecentScriptSetsMenuItem = new RecentFiles.Menu("Open Recent Set", null,
         new ActionHandler() {
+          @Override
           public void go() {
             doOpenSet(project().recentScriptSets().getCurrentFile());
             repaint();
@@ -958,8 +1008,9 @@ public class ScriptEditor {
         });
     m.addItem(sRecentScriptSetsMenuItem);
     m.addItem("Save Set As...", KeyEvent.VK_S, CTRL | SHIFT,
-        new ActionHandler() {
-          public void go() {
+        new UserOperation() {
+          @Override
+          public void start() {
             doSaveSet();
             repaint();
           }
@@ -969,14 +1020,16 @@ public class ScriptEditor {
     // -----------------------------------
 
     m.addMenu("Project");
-    m.addItem("New Project", 0, 0, new ActionHandler() {
-      public void go() {
+    m.addItem("New Project", 0, 0, new UserOperation() {
+      @Override
+      public void start() {
         doNewProject();
         ScriptEditor.repaint();
       }
     });
-    m.addItem("Open Project", 0, 0, new ActionHandler() {
-      public void go() {
+    m.addItem("Open Project", 0, 0, new UserOperation() {
+      @Override
+      public void start() {
         File f = AppTools.chooseFileToOpen("Open Project", ScriptProject.FILES,
             null);
         if (f != null) {
@@ -994,12 +1047,14 @@ public class ScriptEditor {
           }
         }));
 
-    m.addItem("Close Project", 0, 0, new ActionHandler() {
+    m.addItem("Close Project", 0, 0, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return isProjectOpen();
       }
 
-      public void go() {
+      @Override
+      public void start() {
         doCloseProject();
         ScriptEditor.repaint();
       }
