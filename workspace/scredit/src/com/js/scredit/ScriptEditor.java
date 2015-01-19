@@ -489,7 +489,7 @@ public class ScriptEditor {
       }
     });
     m.addSeparator();
-    m.addItem("Cut", KeyEvent.VK_X, CTRL, new UserOperation.InstantOperation() {
+    m.addItem("Cut", KeyEvent.VK_X, CTRL, new UserOperation() {
 
       @Override
       public boolean shouldBeEnabled() {
@@ -505,58 +505,55 @@ public class ScriptEditor {
 
       private Command r;
     });
-    m.addItem("Copy", KeyEvent.VK_C, CTRL,
-        new UserOperation.InstantOperation() {
+    m.addItem("Copy", KeyEvent.VK_C, CTRL, new UserOperation() {
 
-          @Override
-          public boolean shouldBeEnabled() {
-            r = new CopyReversible();
-            return r.valid();
-          }
+      @Override
+      public boolean shouldBeEnabled() {
+        r = new CopyReversible();
+        return r.valid();
+      }
 
-          @Override
-          public void start() {
-            editor().registerPush(r);
-            perform(r);
-          }
+      @Override
+      public void start() {
+        editor().registerPush(r);
+        perform(r);
+      }
 
-          private Command r;
-        });
+      private Command r;
+    });
 
-    m.addItem("Paste", KeyEvent.VK_V, CTRL,
-        new UserOperation.InstantOperation() {
-          @Override
-          public boolean shouldBeEnabled() {
-            r = new PasteReversible();
-            return r.valid();
-          }
+    m.addItem("Paste", KeyEvent.VK_V, CTRL, new UserOperation() {
+      @Override
+      public boolean shouldBeEnabled() {
+        r = new PasteReversible();
+        return r.valid();
+      }
 
-          @Override
-          public void start() {
-            editor().registerPush(r);
-            perform(r);
-          }
+      @Override
+      public void start() {
+        editor().registerPush(r);
+        perform(r);
+      }
 
-          private Command r;
-        });
+      private Command r;
+    });
 
-    m.addItem("Duplicate", KeyEvent.VK_D, CTRL,
-        new UserOperation.InstantOperation() {
-          @Override
-          public boolean shouldBeEnabled() {
-            r = new DuplicateReversible();
-            return r.valid();
-          }
+    m.addItem("Duplicate", KeyEvent.VK_D, CTRL, new UserOperation() {
+      @Override
+      public boolean shouldBeEnabled() {
+        r = new DuplicateReversible();
+        return r.valid();
+      }
 
-          @Override
-          public void start() {
-            editor().registerPush(r);
-            perform(r);
-          }
+      @Override
+      public void start() {
+        editor().registerPush(r);
+        perform(r);
+      }
 
-          private Command r;
+      private Command r;
 
-        });
+    });
 
     m.addSeparator();
     m.addItem("Select All", KeyEvent.VK_A, CTRL, new ActionHandler() {

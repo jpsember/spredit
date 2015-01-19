@@ -140,7 +140,7 @@ public class MyMenuBar {
    * Add an item to the current menu, optionally with a keyboard accelerator
    */
   public JMenuItem addItem(String name, int accelKey, int accelFlags,
-      UserOperation.InstantOperation operation) {
+      UserOperation operation) {
     ASSERT(mEventManager != null, "no event manager defined");
     MenuItem m = new MenuItem(name, operation, mMenu);
     if (accelKey != 0) {
@@ -260,8 +260,7 @@ public class MyMenuBar {
    */
   private static class MenuItem extends JMenuItem implements Enableable {
 
-    public MenuItem(String name, UserOperation.InstantOperation operation,
-        Menu containingMenu) {
+    public MenuItem(String name, UserOperation operation, Menu containingMenu) {
       super(name);
       ASSERT(containingMenu != null);
       mContainingMenu = containingMenu;
@@ -326,7 +325,7 @@ public class MyMenuBar {
 
     private ActionHandler mItemHandler;
     private Menu mContainingMenu;
-    private UserOperation.InstantOperation mOperation;
+    private UserOperation mOperation;
   }
 
   private static boolean menusAreDisabled() {

@@ -6,8 +6,13 @@ package com.js.editor;
  */
 public abstract class UserOperation implements UserEvent.Listener, Enableable {
 
+  /**
+   * Default implementation throws UnsupportedOperationException
+   */
   @Override
-  public abstract void processUserEvent(UserEvent event);
+  public void processUserEvent(UserEvent event) {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Enableable interface; by default, always returns true
@@ -41,17 +46,5 @@ public abstract class UserOperation implements UserEvent.Listener, Enableable {
    * Called when operation is stopping
    */
   public void stop() {
-  }
-
-  /**
-   * Concrete subclass of UserOperation suitable for operations that don't
-   * persist over a series of user interactions, such as cut/copy/paste
-   */
-  public static class InstantOperation extends UserOperation {
-    @Override
-    public final void processUserEvent(UserEvent event) {
-      throw new UnsupportedOperationException();
-    }
-
   }
 }
