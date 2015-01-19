@@ -6,6 +6,12 @@ import com.js.editor.UserOperation;
 
 public class AddSpriteOper extends UserOperation {
 
+
+  @Override
+  public boolean shouldBeEnabled() {
+    return ScriptEditor.lastSprite() != null;
+  }
+
   @Override
   public void processUserEvent(UserEvent event) {
 

@@ -863,17 +863,7 @@ public class ScriptEditor {
 
     // -----------------------------------
     m.addMenu("Objects", projectMustBeOpenHandler);
-    m.addItem("Add Sprite", KeyEvent.VK_S, 0, new ActionHandler() {
-      @Override
-      public boolean shouldBeEnabled() {
-        return sSelectedSprite != null;
-      }
-
-      @Override
-      public void go() {
-        sUserEventManager.setOperation(new AddSpriteOper());
-      }
-    });
+    m.addItem("Add Sprite", KeyEvent.VK_S, 0, new AddSpriteOper());
     m.addItem("Select Atlas", KeyEvent.VK_T, CTRL, new UserOperation() {
       @Override
       public void start() {
