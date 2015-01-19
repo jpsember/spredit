@@ -872,8 +872,9 @@ public class ScriptEditor {
     });
 
     m.addSeparator();
-    m.addItem("Add Polygon", KeyEvent.VK_P, 0, new ActionHandler() {
-      public void go() {
+    m.addItem("Add Polygon", KeyEvent.VK_P, 0, new UserOperation() {
+      @Override
+      public void start() {
         sUserEventManager.setOperation(new EdPolygonOper(items().size(), 0,
             false));
       }

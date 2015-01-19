@@ -89,13 +89,17 @@ public class UserEventManager implements UserEvent.Listener {
 
   /**
    * Perform an operation, if possible. Checks if operation is enableable; if
-   * so, starts it and clears it
+   * so, starts it, and (if it hasn't been changed to some other operation)
+   * clears it
    */
   public void perform(UserOperation operation) {
     if (!operation.shouldBeEnabled())
       return;
     setOperation(operation);
-    clearOperation();
+    // Unless the operation has been subsequently changed to something else,
+    // clear this operation
+    if (mCurrentOperation == operation)
+      clearOperation();
   }
 
   private boolean mEnabled;
