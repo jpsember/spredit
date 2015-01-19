@@ -8,7 +8,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import apputil.*;
 import com.js.basic.*;
 import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
@@ -151,7 +150,7 @@ public class PolygonObject extends EdObject {
     return ptInds;
   }
 
-  public static ActionHandler DELETE_VERTEX = new ActionHandler() {
+  public static UserOperation DELETE_VERTEX = new UserOperation() {
     @Override
     public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null
@@ -159,12 +158,12 @@ public class PolygonObject extends EdObject {
     }
 
     @Override
-    public void go() {
+    public void start() {
       EdPolygonOper.activeEditor().deleteTarget();
       ScriptEditor.repaint();
     }
   };
-  public static ActionHandler PREV_VERTEX = new ActionHandler() {
+  public static UserOperation PREV_VERTEX = new UserOperation() {
     @Override
     public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null
@@ -172,13 +171,13 @@ public class PolygonObject extends EdObject {
     }
 
     @Override
-    public void go() {
+    public void start() {
       EdPolygonOper.activeEditor().adjustTarget(-1);
       ScriptEditor.repaint();
 
     }
   };
-  public static ActionHandler NEXT_VERTEX = new ActionHandler() {
+  public static UserOperation NEXT_VERTEX = new UserOperation() {
     @Override
     public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null
@@ -186,19 +185,19 @@ public class PolygonObject extends EdObject {
     }
 
     @Override
-    public void go() {
+    public void start() {
       EdPolygonOper.activeEditor().adjustTarget(1);
       ScriptEditor.repaint();
     }
   };
-  public static ActionHandler TOGGLE_VERTEX_DIR = new ActionHandler() {
+  public static UserOperation TOGGLE_VERTEX_DIR = new UserOperation() {
     @Override
     public boolean shouldBeEnabled() {
       return EdPolygonOper.activePoly() != null;
     }
 
     @Override
-    public void go() {
+    public void start() {
       EdPolygonOper.toggleDir();
       ScriptEditor.repaint();
     }

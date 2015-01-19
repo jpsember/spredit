@@ -888,9 +888,8 @@ public class ScriptEditor {
         PolygonObject.TOGGLE_VERTEX_DIR);
 
     // ---------------------------------
-    m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new ActionHandler() {
-
-      public void go() {
+    m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new UserOperation() {
+      public void start() {
         sUserEventManager.setOperation(RectangleObject
             .buildNewObjectOperation());
       }
