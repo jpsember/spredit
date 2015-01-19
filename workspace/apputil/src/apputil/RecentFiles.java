@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.js.basic.Files;
+import com.js.editor.Enableable;
 
 import static com.js.basic.Tools.*;
 

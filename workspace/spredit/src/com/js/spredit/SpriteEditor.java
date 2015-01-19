@@ -2,6 +2,7 @@ package com.js.spredit;
 
 import static apputil.MyMenuBar.*;
 
+import com.js.editor.Enableable;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
 

@@ -19,6 +19,7 @@ import apputil.*;
 
 import com.js.basic.*;
 import com.js.editor.Command;
+import com.js.editor.Enableable;
 import com.js.editor.UserEvent;
 import com.js.editor.UserEventManager;
 import com.js.geometry.*;

@@ -6,6 +6,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import com.js.editor.Enableable;
+
 import static com.js.basic.Tools.*;
 
 public class MyMenuBar {
