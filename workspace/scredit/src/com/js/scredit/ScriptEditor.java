@@ -217,9 +217,9 @@ public class ScriptEditor {
    * Template for operation that modifies selected items only. Performs undo by
    * restoring original items.
    */
-  private abstract static class EditSelectedOper extends Command.Adapter {
+  private abstract static class EditSelectedCommand extends Command.Adapter {
 
-    public EditSelectedOper() {
+    public EditSelectedCommand() {
 
       // determine selected items, and save for undoing
       EdObjectArray items = ScriptEditor.items();
@@ -235,7 +235,7 @@ public class ScriptEditor {
 
         @Override
         public Command getReverse() {
-          return EditSelectedOper.this;
+          return EditSelectedCommand.this;
         }
 
         @Override
@@ -266,8 +266,8 @@ public class ScriptEditor {
     // private Reversible fwdOper;
   }
 
-  private static class CursorMoveHandler extends ActionHandler {
-    public CursorMoveHandler(int dir) {
+  private static class CursorMoveOperation extends UserOperation {
+    public CursorMoveOperation(int dir) {
       this.dir = dir;
     }
 
@@ -281,8 +281,9 @@ public class ScriptEditor {
       return items().getSelected().length != 0;
     }
 
-    public void go() {
-      EditSelectedOper r = new EditSelectedOper() {
+    @Override
+    public void start() {
+      EditSelectedCommand r = new EditSelectedCommand() {
         @Override
         public void perform() {
           for (int i = 0; i < nSelected(); i++) {
@@ -697,10 +698,10 @@ public class ScriptEditor {
     });
 
     m.addSeparator();
-    m.addItem("Move Left", KeyEvent.VK_LEFT, 0, new CursorMoveHandler(0));
-    m.addItem("Move Right", KeyEvent.VK_RIGHT, 0, new CursorMoveHandler(1));
-    m.addItem("Move Up", KeyEvent.VK_UP, 0, new CursorMoveHandler(2));
-    m.addItem("Move Down", KeyEvent.VK_DOWN, 0, new CursorMoveHandler(3));
+    m.addItem("Move Left", KeyEvent.VK_LEFT, 0, new CursorMoveOperation(0));
+    m.addItem("Move Right", KeyEvent.VK_RIGHT, 0, new CursorMoveOperation(1));
+    m.addItem("Move Up", KeyEvent.VK_UP, 0, new CursorMoveOperation(2));
+    m.addItem("Move Down", KeyEvent.VK_DOWN, 0, new CursorMoveOperation(3));
     m.addSeparator();
     m.addItem("Flip Horizontally", KeyEvent.VK_H, SHIFT | CTRL,
         new UserOperation() {
@@ -1381,7 +1382,7 @@ public class ScriptEditor {
 
     final SpriteObject si2 = si;
     // final SpriteObject spriteInfo = si;
-    EditSelectedOper r = new EditSelectedOper() {
+    EditSelectedCommand r = new EditSelectedCommand() {
 
       @Override
       public void perform() {
