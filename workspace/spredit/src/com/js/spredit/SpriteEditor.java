@@ -284,7 +284,8 @@ public class SpriteEditor {
       }
     };
 
-    MyMenuBar m = new MyMenuBar(AppTools.frame());
+    die("no userEventManager implemented yet!");
+    MyMenuBar m = new MyMenuBar(AppTools.frame(),null);
 
     m.addAppMenu();
     //

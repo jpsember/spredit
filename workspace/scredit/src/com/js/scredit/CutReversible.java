@@ -19,6 +19,7 @@ public class CutReversible extends Command.Adapter {
     if (si.length > 0) {
       this.slots = si;
       origClipboard = ScriptEditor.clipboard();
+      setDescription("Cut");
     }
   }
 

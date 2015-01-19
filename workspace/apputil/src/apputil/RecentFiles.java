@@ -220,7 +220,7 @@ public class RecentFiles {
       ActionListener, RecentFiles.Listener, Enableable {
 
     public Menu(String title, RecentFiles recentFiles, ActionHandler evtHandler) {
-      super(title);
+      super(title, null);
       setEnableableDelegate(this);
       setRecentFiles(recentFiles);
       mItemHandler = evtHandler;

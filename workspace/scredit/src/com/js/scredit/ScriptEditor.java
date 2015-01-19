@@ -22,6 +22,7 @@ import com.js.editor.Command;
 import com.js.editor.Enableable;
 import com.js.editor.UserEvent;
 import com.js.editor.UserEventManager;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 import com.js.myopengl.GLPanel;
 
@@ -172,7 +173,7 @@ public class ScriptEditor {
    */
   public static void repaint() {
     if (isProjectOpen())
-    updateEditableObjectStatus();
+      updateEditableObjectStatus();
     sInfoPanel
         .refresh(isProjectOpen() ? editor() : null, project(), sScriptSet);
     sEditorPanelComponent.repaint();
@@ -315,7 +316,8 @@ public class ScriptEditor {
       }
     };
 
-    MyMenuBar m = new MyMenuBar(AppTools.frame());
+    ASSERT(sUserEventManager != null);
+    MyMenuBar m = new MyMenuBar(AppTools.frame(), sUserEventManager);
 
     m.addAppMenu();
 
@@ -487,76 +489,74 @@ public class ScriptEditor {
       }
     });
     m.addSeparator();
-    m.addItem("Cut", KeyEvent.VK_X, CTRL, new ActionHandler() {
-      private Command r;
+    m.addItem("Cut", KeyEvent.VK_X, CTRL, new UserOperation.InstantOperation() {
 
+      @Override
       public boolean shouldBeEnabled() {
         r = new CutReversible();
         return r.valid();
       }
 
-      public void go() {
-        // private void doCut() {
-        // final boolean db = false;
-        //
-        // int[] si = items.getSelected();
-        // if (db)
-        // pr("doCut " + f(si));
-        // if (si.length > 0) {
-        // Reversible r = new CutOper(si);
-        // if (db)
-        // pr(" performing " + r);
-
+      @Override
+      public void start() {
         editor().registerPush(r);
         perform(r);
-        // }
-        // }
-
-        // editor.doCut();
       }
-    });
-    m.addItem("Copy", KeyEvent.VK_C, CTRL, new ActionHandler() {
+
       private Command r;
-
-      public boolean shouldBeEnabled() {
-        r = new CopyReversible();
-        return r.valid();
-      }
-
-      public void go() {
-        editor().registerPush(r);
-        perform(r);
-      }
     });
+    m.addItem("Copy", KeyEvent.VK_C, CTRL,
+        new UserOperation.InstantOperation() {
 
-    m.addItem("Paste", KeyEvent.VK_V, CTRL, new ActionHandler() {
-      private Command r;
+          @Override
+          public boolean shouldBeEnabled() {
+            r = new CopyReversible();
+            return r.valid();
+          }
 
-      public boolean shouldBeEnabled() {
-        r = new PasteReversible();
-        return r.valid();
-      }
+          @Override
+          public void start() {
+            editor().registerPush(r);
+            perform(r);
+          }
 
-      public void go() {
-        editor().registerPush(r);
-        perform(r);
-        // editor.doPaste();
-      }
-    });
+          private Command r;
+        });
 
-    m.addItem("Duplicate", KeyEvent.VK_D, CTRL, new ActionHandler() {
-      private Command r;
+    m.addItem("Paste", KeyEvent.VK_V, CTRL,
+        new UserOperation.InstantOperation() {
+          @Override
+          public boolean shouldBeEnabled() {
+            r = new PasteReversible();
+            return r.valid();
+          }
 
-      public boolean shouldBeEnabled() {
-        r = new DuplicateReversible();
-        return r.valid();
-      }
+          @Override
+          public void start() {
+            editor().registerPush(r);
+            perform(r);
+          }
 
-      public void go() {
-        editor().registerPush(r);
-        perform(r);
-      }
-    });
+          private Command r;
+        });
+
+    m.addItem("Duplicate", KeyEvent.VK_D, CTRL,
+        new UserOperation.InstantOperation() {
+          @Override
+          public boolean shouldBeEnabled() {
+            r = new DuplicateReversible();
+            return r.valid();
+          }
+
+          @Override
+          public void start() {
+            editor().registerPush(r);
+            perform(r);
+          }
+
+          private Command r;
+
+        });
 
     m.addSeparator();
     m.addItem("Select All", KeyEvent.VK_A, CTRL, new ActionHandler() {
@@ -1427,9 +1427,9 @@ public class ScriptEditor {
       ac.add(pnl, BorderLayout.NORTH);
     }
 
-    addMenus();
-
     sUserEventManager = new UserEventManager(new DefaultMouseOper());
+
+    addMenus();
 
     {
       File base = sRecentProjects.getMostRecentFile();

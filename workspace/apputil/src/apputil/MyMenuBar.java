@@ -7,6 +7,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import com.js.editor.Enableable;
+import com.js.editor.UserEventManager;
+import com.js.editor.UserOperation;
 
 import static com.js.basic.Tools.*;
 
@@ -24,9 +26,22 @@ public class MyMenuBar {
    * 
    * @param frame
    *          frame associated with menu bar
+   * @deprecated
    */
   public MyMenuBar(JFrame frame) {
     mMenuBar = new JMenuBar();
+    frame.setJMenuBar(mMenuBar);
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param frame
+   *          frame associated with menu bar
+   */
+  public MyMenuBar(JFrame frame, UserEventManager eventManager) {
+    mMenuBar = new JMenuBar();
+    mEventManager = eventManager;
     frame.setJMenuBar(mMenuBar);
   }
 
@@ -40,7 +55,7 @@ public class MyMenuBar {
    */
   public void addMenu(String title, Enableable handler) {
 
-    mMenu = new Menu(title);
+    mMenu = new Menu(title, mEventManager);
     mMenu.setEnableableDelegate(handler);
     mSeparatorPending = false;
     mMenuBar.add(mMenu);
@@ -103,10 +118,31 @@ public class MyMenuBar {
 
   /**
    * Add an item to the current menu, optionally with a keyboard accelerator
+   * 
+   * @deprecated refactor to use UserOperation instead
    */
   public JMenuItem addItem(String name, int accelKey, int accelFlags,
       ActionHandler evtHandler) {
     MenuItem m = new MenuItem(name, evtHandler, mMenu);
+    if (accelKey != 0) {
+      int k = 0;
+      for (int i = 0; i < TOTAL_MODIFIER_KEY_FLAGS; i++) {
+        if (0 != (accelFlags & (1 << i)))
+          k |= modifierKeyMasks()[i];
+      }
+      m.setAccelerator(KeyStroke.getKeyStroke(accelKey, k));
+    }
+    addItem(m);
+    return m;
+  }
+
+  /**
+   * Add an item to the current menu, optionally with a keyboard accelerator
+   */
+  public JMenuItem addItem(String name, int accelKey, int accelFlags,
+      UserOperation.InstantOperation operation) {
+    ASSERT(mEventManager != null, "no event manager defined");
+    MenuItem m = new MenuItem(name, operation, mMenu);
     if (accelKey != 0) {
       int k = 0;
       for (int i = 0; i < TOTAL_MODIFIER_KEY_FLAGS; i++) {
@@ -174,6 +210,7 @@ public class MyMenuBar {
 
   private Menu mMenu;
   private JMenuBar mMenuBar;
+  private UserEventManager mEventManager;
   private boolean mSeparatorPending;
 
   /**
@@ -182,8 +219,9 @@ public class MyMenuBar {
    */
   public static class Menu extends JMenu {
 
-    public Menu(String name) {
+    public Menu(String name, UserEventManager eventManager) {
       super(name);
+      mEventManager = eventManager;
     }
 
     /**
@@ -200,6 +238,12 @@ public class MyMenuBar {
       return mEnableableDelegate;
     }
 
+    public UserEventManager getEventManager() {
+      if (mEventManager == null)
+        throw new UnsupportedOperationException();
+      return mEventManager;
+    }
+
     private static Enableable ALWAYS_ENABLED_HANDLER = new Enableable() {
       @Override
       public boolean shouldBeEnabled() {
@@ -208,6 +252,7 @@ public class MyMenuBar {
     };
 
     private Enableable mEnableableDelegate;
+    private UserEventManager mEventManager;
   }
 
   /**
@@ -215,6 +260,34 @@ public class MyMenuBar {
    */
   private static class MenuItem extends JMenuItem implements Enableable {
 
+    public MenuItem(String name, UserOperation.InstantOperation operation,
+        Menu containingMenu) {
+      super(name);
+      ASSERT(containingMenu != null);
+      mContainingMenu = containingMenu;
+      mOperation = operation;
+
+      // In case user selects menu item using its shortcut key,
+      // we need to have the ActionListener verify that the
+      // item (and its containing menu) are both enabled before
+      // acting upon it.
+
+      addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+          pr("actionPerformed for item " + getText() + "; shouldBeEnabled "
+              + shouldBeEnabled());
+          if (shouldBeEnabled() && !menusAreDisabled()) {
+            pr(" performing " + nameOf(mOperation));
+            mContainingMenu.getEventManager().perform(mOperation);
+          }
+        }
+      });
+    }
+
+    /**
+     * @deprecated refactor to use UserHandler instead
+     */
     public MenuItem(String name, ActionHandler itemHandler, Menu containingMenu) {
       super(name);
       ASSERT(containingMenu != null);
@@ -235,7 +308,7 @@ public class MyMenuBar {
       });
     }
 
-    public ActionHandler handler() {
+    private ActionHandler handler() {
       return mItemHandler;
     }
 
@@ -243,13 +316,17 @@ public class MyMenuBar {
     public boolean shouldBeEnabled() {
       // examine both the containing menu's enabled state and the item handler
       // interface
-      boolean enabled = mContainingMenu.enableableDelegate().shouldBeEnabled()
-          && mItemHandler.shouldBeEnabled();
-      return enabled;
+      boolean enabled = mContainingMenu.enableableDelegate().shouldBeEnabled();
+      if (!enabled)
+        return false;
+      if (mItemHandler != null)
+        return mItemHandler.shouldBeEnabled();
+      return mOperation.shouldBeEnabled();
     }
 
     private ActionHandler mItemHandler;
     private Menu mContainingMenu;
+    private UserOperation.InstantOperation mOperation;
   }
 
   private static boolean menusAreDisabled() {

@@ -7,6 +7,8 @@ import com.js.editor.Enableable;
 /**
  * Abstract class that implements ActionListener and Enableable, and only
  * performs the action after determining if it ought to be enabled
+ * 
+ * @deprecated refactor by using UserOperation instead
  */
 public abstract class ActionHandler implements Enableable, ActionListener {
 
