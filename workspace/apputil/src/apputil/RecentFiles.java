@@ -230,15 +230,6 @@ public class RecentFiles {
       addMenuListener(this);
     }
 
-    @Deprecated
-    public Menu(String title, RecentFiles recentFiles, ActionHandler evtHandler) {
-      super(title, null);
-      setEnableableDelegate(this);
-      setRecentFiles(recentFiles);
-      mItemHandler = evtHandler;
-      addMenuListener(this);
-    }
-
     public void setRecentFiles(RecentFiles recentFiles) {
       mRecentFiles = recentFiles;
       if (mRecentFiles == null)
@@ -258,11 +249,6 @@ public class RecentFiles {
     public void actionPerformed(ActionEvent arg) {
       MenuItem item = (MenuItem) arg.getSource();
       mRecentFiles.setCurrentFile(item.file());
-      if (mItemHandler != null) {
-        mItemHandler.go();
-        return;
-      }
-
       getEventManager().perform(mUserOperation);
     }
 
@@ -313,7 +299,6 @@ public class RecentFiles {
       private File mFile;
     }
 
-    private ActionHandler mItemHandler;
     private UserOperation mUserOperation;
     private RecentFiles mRecentFiles;
   }

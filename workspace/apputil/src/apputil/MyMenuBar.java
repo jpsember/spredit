@@ -86,8 +86,8 @@ public class MyMenuBar {
       MacUtils.setQuitHandler();
     } else {
       addMenu(AppTools.app().getName());
-      addItem("Quit", KeyEvent.VK_Q, CTRL, new ActionHandler() {
-        public void go() {
+      addItem("Quit", KeyEvent.VK_Q, CTRL, new UserOperation() {
+        public void start() {
           if (AppTools.app().exitProgram())
             System.exit(0);
         }
@@ -114,26 +114,6 @@ public class MyMenuBar {
       mSeparatorPending = false;
     }
     mMenu.add(item);
-  }
-
-  /**
-   * Add an item to the current menu, optionally with a keyboard accelerator
-   * 
-   * @deprecated refactor to use UserOperation instead
-   */
-  public JMenuItem addItem(String name, int accelKey, int accelFlags,
-      ActionHandler evtHandler) {
-    MenuItem m = new MenuItem(name, evtHandler, mMenu);
-    if (accelKey != 0) {
-      int k = 0;
-      for (int i = 0; i < TOTAL_MODIFIER_KEY_FLAGS; i++) {
-        if (0 != (accelFlags & (1 << i)))
-          k |= modifierKeyMasks()[i];
-      }
-      m.setAccelerator(KeyStroke.getKeyStroke(accelKey, k));
-    }
-    addItem(m);
-    return m;
   }
 
   /**
@@ -274,41 +254,11 @@ public class MyMenuBar {
       addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent event) {
-          pr("actionPerformed for item " + getText() + "; shouldBeEnabled "
-              + shouldBeEnabled());
           if (shouldBeEnabled() && !menusAreDisabled()) {
-            pr(" performing " + nameOf(mOperation));
             mContainingMenu.getEventManager().perform(mOperation);
           }
         }
       });
-    }
-
-    /**
-     * @deprecated refactor to use UserHandler instead
-     */
-    public MenuItem(String name, ActionHandler itemHandler, Menu containingMenu) {
-      super(name);
-      ASSERT(containingMenu != null);
-      mContainingMenu = containingMenu;
-      mItemHandler = itemHandler;
-
-      // In case user selects menu item using its shortcut key,
-      // we need to have the ActionListener verify that the
-      // item (and its containing menu) are both enabled before
-      // acting upon it.
-
-      addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent event) {
-          if (shouldBeEnabled() && !menusAreDisabled())
-            handler().actionPerformed(event);
-        }
-      });
-    }
-
-    private ActionHandler handler() {
-      return mItemHandler;
     }
 
     @Override
@@ -318,12 +268,9 @@ public class MyMenuBar {
       boolean enabled = mContainingMenu.enableableDelegate().shouldBeEnabled();
       if (!enabled)
         return false;
-      if (mItemHandler != null)
-        return mItemHandler.shouldBeEnabled();
       return mOperation.shouldBeEnabled();
     }
 
-    private ActionHandler mItemHandler;
     private Menu mContainingMenu;
     private UserOperation mOperation;
   }
