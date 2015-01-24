@@ -769,8 +769,6 @@ public class SpriteEditor {
     }
   }
 
-  private static final int HOT_DIST = 15;
-
   /**
    * Construct IPoint from MouseEvent
    * 
@@ -818,56 +816,6 @@ public class SpriteEditor {
     }
 
     private Point startOrigin;
-  }
-
-  /* private */static class MoveCPOper extends OldUserOperation {
-
-    @Override
-    public void processUserEvent(UserEvent event) {
-      die("not implemented yet");
-    }
-
-    @Override
-    public boolean mouseDown() {
-      boolean f = false;
-      do {
-
-        if (!defined() // || ev.isRight() // || ev.isControlDown()
-        )
-          break;
-
-        if (ev.isShiftDown())
-          spriteInfo.setCenterpoint(startPtF);
-
-        origLoc = new Point(spriteInfo.centerpoint());
-        float dist = MyMath.distanceBetween(origLoc, startPtF)
-            * spritePanel.getZoom();
-        if (dist > HOT_DIST * 3)
-          break;
-
-        // startOperPt = worldLoc;
-        spritePanel.setHighlightCenterpoint(true);
-        f = true;
-      } while (false);
-      return f;
-    }
-
-    // @Override
-    // public void mouseUp() {
-    // spritePanel.setHighlightCenterpoint(false);
-    // clearOperation();
-    // }
-
-    @Override
-    public void mouseMove(boolean drag) {
-      if (!drag)
-        return;
-      Point loc = Point.difference(currentPtF, startPtF);
-      spriteInfo.setCenterpoint(Point.sum(origLoc, loc));
-    }
-
-    // location of centerpoint at start of operation
-    private Point origLoc;
   }
 
   public static SpritePanel getSpritePanel() {
