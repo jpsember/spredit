@@ -29,10 +29,6 @@ public class SpriteEditor {
   public static void init(JComponent c) {
 
     // UserOperation.add(new MoveFocusOper());
-    // for (int i = 0; i < 4; i++)
-    // UserOperation.add(new CornerOper(i));
-    // for (int i = 0; i < 4; i++)
-    // UserOperation.add(new EdgeOper(i));
     // UserOperation.add(new MoveClipOper());
     // UserOperation.add(new MoveCPOper());
 
@@ -933,104 +929,6 @@ public class SpriteEditor {
     // location of centerpoint at start of operation
     private Point origLoc;
   }
-
-  /* private */static class CornerOper extends OldUserOperation {
-    @Override
-    public void processUserEvent(UserEvent event) {
-      die("not implemented yet");
-    }
-
-    public CornerOper(int corner) {
-      this.num = corner;
-    }
-
-    private int num;
-
-    @Override
-    public boolean mouseDown() {
-      final boolean db = false;
-      boolean f = false;
-      do {
-
-        if (!defined() // || ev.isRight()
-            || ev.isControlDown() || ev.isShiftDown())
-          break;
-
-        if (db)
-          pr("start, world=" + startPt);
-
-        IPoint pt1;
-        {
-          IRect clip = spriteInfo.cropRect();
-          switch (num) {
-          default:
-            pt1 = clip.bottomLeft();
-            break;
-          case 1:
-            pt1 = clip.bottomRight();
-            break;
-          case 2:
-            pt1 = clip.topRight();
-            break;
-          case 3:
-            pt1 = clip.topLeft();
-            break;
-          }
-        }
-
-        float dist = MyMath.distanceBetween(startPtF, new Point(pt1))
-            * spritePanel.getZoom();
-        if (dist > HOT_DIST)
-          break;
-
-        origClip = new IRect(spriteInfo.cropRect());
-        spritePanel.setHighlightClip(true);
-        f = true;
-      } while (false);
-      return f;
-    }
-
-    @Override
-    public void mouseMove(boolean drag) {
-      IPoint loc = new IPoint(Point.difference(currentPtF, startPtF));
-      IPoint bounds = spriteInfo.workImageSize();
-
-      IRect clip = spriteInfo.cropRect();
-      int x1 = clip.x;
-      int y1 = clip.y;
-      int x2 = clip.endX();
-      int y2 = clip.endY();
-
-      switch (num) {
-      case 0:
-        x1 = (int) snapclamp(origClip.x + loc.x, 0, x2 - 1);
-        y1 = (int) snapclamp(origClip.y + loc.y, 0, y2 - 1);
-        break;
-      case 1:
-        x2 = (int) snapclamp(origClip.endX() + loc.x, x1 + 1, bounds.x);
-        y1 = (int) snapclamp(origClip.y + loc.y, 0, y2 - 1);
-        break;
-      case 2:
-        x2 = (int) snapclamp(origClip.endX() + loc.x, x1 + 1, bounds.x);
-        y2 = (int) snapclamp(origClip.endY() + loc.y, y1 + 1, bounds.y);
-        break;
-      case 3:
-        y2 = (int) snapclamp(origClip.endY() + loc.y, y1 + 1, bounds.y);
-        x1 = (int) snapclamp(origClip.x + loc.x, 0, x2 - 1);
-        break;
-      }
-      spriteInfo.setCropRect(new IRect(x1, y1, x2 - x1, y2 - y1));
-    }
-
-    // @Override
-    // public void mouseUp() {
-    // spritePanel.setHighlightClip(false);
-    // clearOperation();
-    // }
-
-    // clip rectangle at start of operation
-    private IRect origClip;
-  };
 
   public static SpritePanel getSpritePanel() {
     return spritePanel;
