@@ -4,6 +4,8 @@ import static apputil.MyMenuBar.*;
 
 import com.js.editor.Enableable;
 import com.js.editor.UserEvent;
+import com.js.editor.UserEventManager;
+import com.js.editor.UserOperation;
 import com.js.geometry.*;
 
 import static com.js.basic.Tools.*;
@@ -50,6 +52,8 @@ public class SpriteEditor {
     spritePanel.setCenterPointCheckBox(cpt);
     spritePanel.setShowClipCheckBox(showClip);
     c.add(pnl, BorderLayout.CENTER);
+
+    sUserEventManager = new UserEventManager(new DefaultMouseOper());
 
     addMenus();
 
@@ -284,8 +288,7 @@ public class SpriteEditor {
       }
     };
 
-    die("no userEventManager implemented yet!");
-    MyMenuBar m = new MyMenuBar(AppTools.frame(),null);
+    MyMenuBar m = new MyMenuBar(AppTools.frame(), sUserEventManager);
 
     m.addAppMenu();
     //
@@ -303,18 +306,20 @@ public class SpriteEditor {
 
     // -----------------------------------
     m.addMenu("View", projectMustBeOpenHandler);
-    m.addItem("Zoom In", KeyEvent.VK_EQUALS, CTRL, new ActionHandler() {
-      public void go() {
-        doAdjustZoom(-1);
-      }
-
+    m.addItem("Zoom In", KeyEvent.VK_EQUALS, CTRL, new UserOperation() {
+      @Override
       public boolean shouldBeEnabled() {
         return spritePanel.getZoom() < 20;
       }
+
+      @Override
+      public void start() {
+        doAdjustZoom(-1);
+      }
     });
 
-    m.addItem("Zoom Out", KeyEvent.VK_MINUS, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Zoom Out", KeyEvent.VK_MINUS, CTRL, new UserOperation() {
+      public void start() {
         doAdjustZoom(1);
       }
 
@@ -322,12 +327,12 @@ public class SpriteEditor {
         return spritePanel.getZoom() > .1f;
       }
     });
-    m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new ActionHandler() {
+    m.addItem("Zoom Reset", KeyEvent.VK_0, CTRL, new UserOperation() {
       public boolean shouldBeEnabled() {
         return spritePanel.getZoom() != 1;
       }
 
-      public void go() {
+      public void start() {
         doAdjustZoom(0);
       }
     });
@@ -367,8 +372,8 @@ public class SpriteEditor {
     // });
     // m.addSeparator();
 
-    m.addItem("Reset Clip", KeyEvent.VK_R, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Reset Clip", KeyEvent.VK_R, CTRL, new UserOperation() {
+      public void start() {
         doResetClip();
       }
 
@@ -380,8 +385,8 @@ public class SpriteEditor {
 
     // temporary items for helping to edit fonts
     if (true) {
-      m.addItem("Left", KeyEvent.VK_LEFT, CTRL, new ActionHandler() {
-        public void go() {
+      m.addItem("Left", KeyEvent.VK_LEFT, CTRL, new UserOperation() {
+        public void start() {
           move(-XMOVE, 0);
         }
 
@@ -389,8 +394,8 @@ public class SpriteEditor {
           return defined();
         }
       });
-      m.addItem("Right", KeyEvent.VK_RIGHT, CTRL, new ActionHandler() {
-        public void go() {
+      m.addItem("Right", KeyEvent.VK_RIGHT, CTRL, new UserOperation() {
+        public void start() {
           move(XMOVE, 0);
         }
 
@@ -398,8 +403,8 @@ public class SpriteEditor {
           return defined();
         }
       });
-      m.addItem("Up", KeyEvent.VK_UP, CTRL, new ActionHandler() {
-        public void go() {
+      m.addItem("Up", KeyEvent.VK_UP, CTRL, new UserOperation() {
+        public void start() {
           move(0, YMOVE);
         }
 
@@ -407,8 +412,8 @@ public class SpriteEditor {
           return defined();
         }
       });
-      m.addItem("Down", KeyEvent.VK_DOWN, CTRL, new ActionHandler() {
-        public void go() {
+      m.addItem("Down", KeyEvent.VK_DOWN, CTRL, new UserOperation() {
+        public void start() {
           move(0, -YMOVE);
 
         }
@@ -420,35 +425,35 @@ public class SpriteEditor {
       m.addSeparator();
     }
 
-    m.addItem("Create Alias", KeyEvent.VK_A, SHIFT, new ActionHandler() {
+    m.addItem("Create Alias", KeyEvent.VK_A, SHIFT, new UserOperation() {
       public boolean shouldBeEnabled() {
         return defined();
       }
 
-      public void go() {
+      public void start() {
         doCreateAlias();
       }
     });
-    m.addItem("Delete Alias", KeyEvent.VK_D, SHIFT | CTRL, new ActionHandler() {
+    m.addItem("Delete Alias", KeyEvent.VK_D, SHIFT | CTRL, new UserOperation() {
       public boolean shouldBeEnabled() {
         return defined() && spriteInfo.isAlias();
       }
 
-      public void go() {
+      public void start() {
         doDeleteAlias();
       }
     });
 
     // -----------------------------------
     m.addMenu("Project");
-    m.addItem("New", KeyEvent.VK_N, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("New", KeyEvent.VK_N, CTRL, new UserOperation() {
+      public void start() {
         newProject();
         repaint();
       }
     });
-    m.addItem("Open", KeyEvent.VK_O, CTRL, new ActionHandler() {
-      public void go() {
+    m.addItem("Open", KeyEvent.VK_O, CTRL, new UserOperation() {
+      public void start() {
         openProject(null);
         repaint();
       }
@@ -463,12 +468,12 @@ public class SpriteEditor {
           }
         }));
 
-    m.addItem("Close", KeyEvent.VK_W, CTRL, new ActionHandler() {
+    m.addItem("Close", KeyEvent.VK_W, CTRL, new UserOperation() {
       public boolean shouldBeEnabled() {
         return SpriteEditor.isProjectOpen();
       };
 
-      public void go() {
+      public void start() {
         setProjectTo(null);
         // closeProject();
         repaint();
@@ -476,23 +481,23 @@ public class SpriteEditor {
     });
     m.addSeparator();
 
-    m.addItem("Build", KeyEvent.VK_B, CTRL, new ActionHandler() {
+    m.addItem("Build", KeyEvent.VK_B, CTRL, new UserOperation() {
       public boolean shouldBeEnabled() {
         return SpriteEditor.isProjectOpen();
       };
 
-      public void go() {
+      public void start() {
         doBuild();
         repaint();
       }
     });
     m.addItem("Build Parameters", KeyEvent.VK_B, SHIFT | CTRL,
-        new ActionHandler() {
+        new UserOperation() {
           public boolean shouldBeEnabled() {
             return SpriteEditor.isProjectOpen();
           }
 
-          public void go() {
+          public void start() {
             BuildParms.showDialog();
           }
         });
@@ -1119,5 +1124,6 @@ public class SpriteEditor {
   private static RecentFiles sRecentProjects = new RecentFiles(null);
   private static JCheckBox cpt = new JCheckBox();
   private static JCheckBox showClip = new JCheckBox();
+  private static UserEventManager sUserEventManager;
 
 }
