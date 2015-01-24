@@ -40,8 +40,21 @@ public class SpriteEditor {
 
     JPanel pnl = new JPanel(new BorderLayout());
 
+    sUserEventManager = new UserEventManager(new DefaultMouseOper());
+
     imgDir = new ImgDirectory();
-    spritePanel = new SpritePanel();
+    spritePanel = new SpritePanel(sUserEventManager);
+
+    MouseEventGenerator m = new MouseEventGenerator();
+    m.setView(spritePanel, spritePanel.getComponent());
+    sUserEventManager.setListener(new UserEvent.Listener() {
+      @Override
+      public void processUserEvent(UserEvent event) {
+        // Request a refresh of the editor view after any event
+        repaint();
+      }
+    });
+
     pnl.add(spritePanel.getComponent(), BorderLayout.CENTER);
 
     c.add(imgDir, BorderLayout.EAST);
@@ -52,8 +65,6 @@ public class SpriteEditor {
     spritePanel.setCenterPointCheckBox(cpt);
     spritePanel.setShowClipCheckBox(showClip);
     c.add(pnl, BorderLayout.CENTER);
-
-    sUserEventManager = new UserEventManager(new DefaultMouseOper());
 
     addMenus();
 
@@ -262,6 +273,7 @@ public class SpriteEditor {
         TexProject tp = new TexProject(projFile);
         if (tp != null)
           setProjectTo(tp);
+        sUserEventManager.setEnabled(true);
       } catch (IOException e) {
         AppTools.showError("opening project", e);
       }
@@ -736,6 +748,12 @@ public class SpriteEditor {
     return spriteInfo != null;
   }
 
+  public static SpriteInfo getSpriteInfo() {
+    if (!defined())
+      throw new IllegalStateException();
+    return spriteInfo;
+  }
+
   public static void setSprite(SpriteInfo sp) {
 
     final boolean db = false;
@@ -1120,6 +1138,10 @@ public class SpriteEditor {
     // clip rectangle at start of operation
     private IRect origClip;
   };
+
+  public static SpritePanel getSpritePanel() {
+    return spritePanel;
+  }
 
   private static RecentFiles sRecentProjects = new RecentFiles(null);
   private static JCheckBox cpt = new JCheckBox();

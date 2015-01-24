@@ -2,15 +2,11 @@ package com.js.spredit;
 
 import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
-import static com.js.basic.Tools.*;
 
 public class DefaultMouseOper extends UserOperation {
 
   @Override
   public void processUserEvent(UserEvent event) {
-    final boolean db = true;
-    if (db)
-      pr("DefaultMouseOper.processUserEvent " + event);
 
     switch (event.getCode()) {
     case UserEvent.CODE_DOWN:
@@ -44,8 +40,22 @@ public class DefaultMouseOper extends UserOperation {
   }
 
   private void doStartDrag(UserEvent event) {
+    // Determine which operation to start
+    UserOperation oper = null;
+    do {
+      if (!SpriteEditor.defined())
+        break;
+      oper = EdgeOper.buildFor(mInitialDownEvent);
+      if (oper != null)
+        break;
+    } while (false);
+    if (oper != null) {
+      event.setOperation(oper);
+      oper.processUserEvent(mInitialDownEvent);
+      oper.processUserEvent(event);
+    }
   }
 
-  /* private */UserEvent mInitialDownEvent;
+  private UserEvent mInitialDownEvent;
   private boolean mIsDrag;
 }

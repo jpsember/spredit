@@ -13,8 +13,9 @@ import com.js.geometry.*;
 
 public class SpritePanel extends GLPanel implements UserEventSource {
 
-  public SpritePanel() {
+  public SpritePanel(UserEventManager eventManager) {
     getComponent().setBackground(Color.white.darker());
+    mUserEventManager = eventManager;
   }
 
   @Override
@@ -112,14 +113,10 @@ public class SpritePanel extends GLPanel implements UserEventSource {
 
   @Override
   public UserEventManager getManager() {
-    if (sManager == null) {
-      // sManager = new UserEventManager(null);
-      throw new UnsupportedOperationException("finish refactoring");
-    }
-    return sManager;
+    return mUserEventManager;
   }
 
-  private static UserEventManager sManager;
+  private UserEventManager mUserEventManager;
 
   private boolean sFocusValid;
   private Point sFocus;
