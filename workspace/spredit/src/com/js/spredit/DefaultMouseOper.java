@@ -45,6 +45,9 @@ public class DefaultMouseOper extends UserOperation {
     do {
       if (!SpriteEditor.defined())
         break;
+      oper = MoveClipOper.buildFor(mInitialDownEvent);
+      if (oper != null)
+        break;
       oper = CornerOper.buildFor(mInitialDownEvent);
       if (oper != null)
         break;

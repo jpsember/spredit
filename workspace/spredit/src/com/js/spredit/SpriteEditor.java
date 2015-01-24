@@ -29,7 +29,6 @@ public class SpriteEditor {
   public static void init(JComponent c) {
 
     // UserOperation.add(new MoveFocusOper());
-    // UserOperation.add(new MoveClipOper());
     // UserOperation.add(new MoveCPOper());
 
     JPanel pnl = new JPanel(new BorderLayout());
@@ -770,11 +769,6 @@ public class SpriteEditor {
     }
   }
 
-  private static int snapclamp(int v, int min, int max) {
-    v = (int) MyMath.snapToGrid(v, 1);
-    return MyMath.clamp(v, min, max);
-  }
-
   private static final int HOT_DIST = 15;
 
   /**
@@ -824,60 +818,6 @@ public class SpriteEditor {
     }
 
     private Point startOrigin;
-  }
-
-  /* private */static class MoveClipOper extends OldUserOperation {
-
-    @Override
-    public void processUserEvent(UserEvent event) {
-      die("not implemented yet");
-    }
-
-    @Override
-    public boolean mouseDown() {
-      warning("snap to pixel boundaries");
-
-      boolean f = false;
-      do {
-
-        if (!defined() // || !ev.isRight()
-            || ev.isControlDown() || !ev.isShiftDown())
-          break;
-
-        IRect clip = spriteInfo.cropRect();
-        float dist = clip.distanceFrom(startPt) * spritePanel.getZoom();
-
-        if (dist > HOT_DIST)
-          break;
-        origLoc = clip.bottomLeft();
-        spritePanel.setHighlightClip(true);
-
-        f = true;
-      } while (false);
-      return f;
-    }
-
-    // @Override
-    // public void mouseUp() {
-    // spritePanel.setHighlightClip(false);
-    // UserOperation.clearOperation();
-    // }
-
-    @Override
-    public void mouseMove(boolean drag) {
-      ASSERT(drag);
-      IPoint loc = new IPoint(Point.difference(currentPtF, startPtF));
-      IRect clip = spriteInfo.cropRect();
-      clip.x = origLoc.x + loc.x;
-      clip.y = origLoc.y + loc.y;
-
-      // don't let the clip region move outside of the original bounds
-      clip.x = snapclamp(clip.x, 0, spriteInfo.workImageSize().x - clip.width);
-      clip.y = snapclamp(clip.y, 0, spriteInfo.workImageSize().y - clip.height);
-    }
-
-    // bottom left of clip rectangle at start of operation
-    private IPoint origLoc;
   }
 
   /* private */static class MoveCPOper extends OldUserOperation {
