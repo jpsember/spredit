@@ -769,55 +769,6 @@ public class SpriteEditor {
     }
   }
 
-  /**
-   * Construct IPoint from MouseEvent
-   * 
-   * @param ev
-   *          mouse event
-   * @return IPoint containing mouse (view) coordinates
-   */
-  private static IPoint viewLoc(MouseEvent ev) {
-    return new IPoint(ev.getX(), ev.getY());
-  }
-
-  /* private */static class MoveFocusOper extends OldUserOperation {
-
-    @Override
-    public void processUserEvent(UserEvent event) {
-      die("not implemented yet");
-    }
-
-    @Override
-    public boolean mouseDown() {
-      boolean f = false;
-      do {
-        if (// !ev.isRight() ||
-        ev.isControlDown() || ev.isShiftDown())
-          break;
-        startOrigin = new Point(spritePanel.getOrigin());
-        f = true;
-      } while (false);
-      return f;
-    }
-
-    @Override
-    public void mouseMove(boolean drag) {
-      if (!drag)
-        return;
-
-      Point trans = new Point(IPoint.difference(startPtView, viewLoc(ev)));
-      // compensate for view and world having flipped y axes
-      trans.y = -trans.y;
-
-      trans.applyScale(1 / spritePanel.getZoom());
-      trans.add(startOrigin);
-      spritePanel.setOrigin(trans);
-      repaint();
-    }
-
-    private Point startOrigin;
-  }
-
   public static SpritePanel getSpritePanel() {
     return spritePanel;
   }
