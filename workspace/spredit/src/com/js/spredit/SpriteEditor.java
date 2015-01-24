@@ -464,10 +464,10 @@ public class SpriteEditor {
       }
     });
 
-    m.addItem(new RecentFiles.Menu("Open Recent Project", sRecentProjects,
-        new ActionHandler() {
+    m.addItem(new RecentFiles.Menu("Open Recent Project", sUserEventManager,
+        sRecentProjects, new UserOperation() {
           @Override
-          public void go() {
+          public void start() {
             openProject(sRecentProjects.getCurrentFile());
             repaint();
           }

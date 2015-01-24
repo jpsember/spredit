@@ -18,6 +18,8 @@ import org.json.JSONObject;
 
 import com.js.basic.Files;
 import com.js.editor.Enableable;
+import com.js.editor.UserEventManager;
+import com.js.editor.UserOperation;
 
 import static com.js.basic.Tools.*;
 
@@ -219,6 +221,16 @@ public class RecentFiles {
   public static class Menu extends MyMenuBar.Menu implements MenuListener,
       ActionListener, RecentFiles.Listener, Enableable {
 
+    public Menu(String title, UserEventManager eventManager,
+        RecentFiles recentFiles, UserOperation userOperation) {
+      super(title, eventManager);
+      setEnableableDelegate(this);
+      setRecentFiles(recentFiles);
+      mUserOperation = userOperation;
+      addMenuListener(this);
+    }
+
+    @Deprecated
     public Menu(String title, RecentFiles recentFiles, ActionHandler evtHandler) {
       super(title, null);
       setEnableableDelegate(this);
@@ -246,7 +258,12 @@ public class RecentFiles {
     public void actionPerformed(ActionEvent arg) {
       MenuItem item = (MenuItem) arg.getSource();
       mRecentFiles.setCurrentFile(item.file());
-      mItemHandler.go();
+      if (mItemHandler != null) {
+        mItemHandler.go();
+        return;
+      }
+
+      getEventManager().perform(mUserOperation);
     }
 
     @Override
@@ -297,6 +314,7 @@ public class RecentFiles {
     }
 
     private ActionHandler mItemHandler;
+    private UserOperation mUserOperation;
     private RecentFiles mRecentFiles;
   }
 

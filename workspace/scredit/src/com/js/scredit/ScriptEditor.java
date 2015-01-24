@@ -340,9 +340,9 @@ public class ScriptEditor {
       }
     });
 
-    sRecentScriptsMenuItem = new RecentFiles.Menu("Open Recent Script", null,
-        new ActionHandler() {
-          public void go() {
+    sRecentScriptsMenuItem = new RecentFiles.Menu("Open Recent Script",
+        sUserEventManager, null, new UserOperation() {
+          public void start() {
             openScript(sProject.recentScripts().getCurrentFile());
             repaint();
           }
@@ -989,10 +989,9 @@ public class ScriptEditor {
       }
     });
 
-    sRecentScriptSetsMenuItem = new RecentFiles.Menu("Open Recent Set", null,
-        new ActionHandler() {
-          @Override
-          public void go() {
+    sRecentScriptSetsMenuItem = new RecentFiles.Menu("Open Recent Set",
+        sUserEventManager, null, new UserOperation() {
+          public void start() {
             doOpenSet(project().recentScriptSets().getCurrentFile());
             repaint();
           }
@@ -1029,10 +1028,9 @@ public class ScriptEditor {
         }
       }
     });
-    m.addItem(new RecentFiles.Menu("Open Recent Project", sRecentProjects,
-        new ActionHandler() {
-          @Override
-          public void go() {
+    m.addItem(new RecentFiles.Menu("Open Recent Project", sUserEventManager,
+        sRecentProjects, new UserOperation() {
+          public void start() {
             openProject(sRecentProjects.getCurrentFile());
             repaint();
           }
