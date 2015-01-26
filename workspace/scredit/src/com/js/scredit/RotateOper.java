@@ -2,7 +2,6 @@ package com.js.scredit;
 
 import java.awt.Color;
 
-import com.js.editor.Command;
 import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
 import com.js.geometry.*;

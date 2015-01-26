@@ -1,7 +1,5 @@
 package com.js.scredit;
 
-import java.util.List;
-
 import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import static com.js.basic.Tools.*;
@@ -41,8 +39,8 @@ public class DefaultMouseOper extends UserOperation {
 
   private void constructPickSet(UserEvent event) {
     EdObjectArray items = ScriptEditor.items();
-    mPickSet = SlotList.build();
-    mPickSetSelected = SlotList.build();
+    mPickSet = new SlotList();
+    mPickSetSelected = new SlotList();
     for (int i = 0; i < items.size(); i++) {
       EdObject obj = items.get(i);
       if (!obj.contains(event.getWorldLocation()))
@@ -80,7 +78,7 @@ public class DefaultMouseOper extends UserOperation {
       }
     } else {
       if (!mPickSet.isEmpty()) {
-        EdObject frontmostItem = ScriptEditor.items().get(last(mPickSet));
+        EdObject frontmostItem = ScriptEditor.items().get(mPickSet.last());
         frontmostItem.setSelected(!frontmostItem.isSelected());
       }
     }
@@ -111,8 +109,8 @@ public class DefaultMouseOper extends UserOperation {
       }
     }
     if (outputSlot < 0)
-      outputSlot = last(mPickSet);
-    items.setSelected(SlotList.build(outputSlot));
+      outputSlot = mPickSet.last();
+    items.setSelected(new SlotList(outputSlot));
   }
 
   private void doContinueDrag(UserEvent event) {
@@ -160,7 +158,7 @@ public class DefaultMouseOper extends UserOperation {
         event.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
       } else if (!mPickSet.isEmpty()) {
         unimp("consider doing selection changes as commands");
-        ScriptEditor.items().setSelected(SlotList.build(last(mPickSet)));
+        ScriptEditor.items().setSelected(new SlotList(mPickSet.last()));
         event.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
       } else {
         ScriptEditor.items().unselectAll();
@@ -192,7 +190,7 @@ public class DefaultMouseOper extends UserOperation {
    */
   private int getEditableSlot() {
     EdObjectArray items = ScriptEditor.items();
-    List<Integer> selected = items.getSelectedSlots();
+    SlotList selected = items.getSelectedSlots();
     if (selected.size() != 1)
       return -1;
     int slot = selected.get(0);
@@ -204,6 +202,6 @@ public class DefaultMouseOper extends UserOperation {
 
   private UserEvent mInitialDownEvent;
   private boolean mIsDrag;
-  private List<Integer> mPickSet;
-  private List<Integer> mPickSetSelected;
+  private SlotList mPickSet;
+  private SlotList mPickSetSelected;
 }

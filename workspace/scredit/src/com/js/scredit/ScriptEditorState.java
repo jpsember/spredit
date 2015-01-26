@@ -1,7 +1,5 @@
 package com.js.scredit;
 
-import java.util.List;
-
 import static com.js.basic.Tools.*;
 
 public class ScriptEditorState {
@@ -21,7 +19,7 @@ public class ScriptEditorState {
     return mClipboard;
   }
 
-  public List<Integer> getSelectedSlots() {
+  public SlotList getSelectedSlots() {
     return mSelectedSlots;
   }
 
@@ -30,7 +28,7 @@ public class ScriptEditorState {
   // }
 
   private EdObjectArray mObjects;
-  private List<Integer> mSelectedSlots;
+  private SlotList mSelectedSlots;
   private EdObjectArray mClipboard;
   // private Point mDupAccumulator;
 }

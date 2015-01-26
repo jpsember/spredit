@@ -138,10 +138,10 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
   /**
    * Get slots of selected items
    */
-  public List<Integer> getSelectedSlots() {
+  public SlotList getSelectedSlots() {
     if (isFrozen())
       return mSelectedSlots;
-    List<Integer> slots = SlotList.build();
+    SlotList slots = new SlotList();
     for (int i = 0; i < mList.size(); i++) {
       if (mList.get(i).isSelected()) {
         slots.add(i);
@@ -153,7 +153,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
   /**
    * Make specific slots selected, and others unselected
    */
-  public void setSelected(List<Integer> slots) {
+  public void setSelected(SlotList slots) {
     mutate();
     int j = 0;
     for (int i = 0; i < mList.size(); i++) {
@@ -166,7 +166,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
 
   public void removeSelected() {
     mutate();
-    List<Integer> slots = getSelectedSlots();
+    SlotList slots = getSelectedSlots();
     List<EdObject> newList = new ArrayList();
     int j = 0;
     for (int i = 0; i < mList.size(); i++) {
@@ -184,7 +184,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
    */
   public void replaceSelectedObjectsWithCopies() {
     mutate();
-    List<Integer> selectedSlots = getSelectedSlots();
+    SlotList selectedSlots = getSelectedSlots();
     for (int slot : selectedSlots) {
       EdObject obj = get(slot);
       set(slot, copyOf(obj));
@@ -193,7 +193,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
 
   public void unselectAll() {
     mutate();
-    setSelected(SlotList.build());
+    setSelected(new SlotList());
   }
 
   public void selectAll() {
@@ -206,7 +206,7 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
     int currentEditable = -1;
     int newEditable = -1;
     EdObject editableObject = null;
-    List<Integer> list = getSelectedSlots();
+    SlotList list = getSelectedSlots();
     for (int slot : list) {
       EdObject obj = get(slot);
       if (obj.isEditable())
@@ -261,5 +261,5 @@ class EdObjectArray extends Freezable.Mutable implements Iterable<EdObject> {
   }
 
   private List<EdObject> mList = new ArrayList();
-  private List<Integer> mSelectedSlots;
+  private SlotList mSelectedSlots = new SlotList();
 }

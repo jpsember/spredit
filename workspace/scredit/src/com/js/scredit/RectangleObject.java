@@ -388,7 +388,7 @@ public class RectangleObject extends EdObject {
         RectangleObject obj = new RectangleObject(null, ScriptEditor.color(),
             event.getWorldLocation(), event.getWorldLocation());
         ScriptEditor.items().add(obj);
-        ScriptEditor.items().setSelected(SlotList.build(slot));
+        ScriptEditor.items().setSelected(new SlotList(slot));
       } else {
 
       }

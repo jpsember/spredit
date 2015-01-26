@@ -1,7 +1,5 @@
 package com.js.scredit;
 
-import java.util.List;
-
 import com.js.editor.Command;
 import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
@@ -38,7 +36,7 @@ public class MouseOperMoveItems extends UserOperation {
 
     String msg = null;
 
-    List<Integer> slots = mInitialEditorState.getSelectedSlots();
+    SlotList slots = mInitialEditorState.getSelectedSlots();
     for (int slot : slots) {
       EdObject object = mInitialEditorState.getObjects().get(slot);
 
