@@ -163,10 +163,11 @@ public class DefaultMouseOper extends UserOperation {
         ScriptEditor.items().setSelected(SlotList.build(last(mPickSet)));
         event.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
       } else {
-        unimp("unselect all, start drag rectangle");
+        ScriptEditor.items().unselectAll();
+        event.setOperation(RectangleSelectOper.build(mInitialDownEvent));
       }
     } else {
-      unimp("start drag, add selected items to existing");
+      event.setOperation(RectangleSelectOper.build(mInitialDownEvent));
     }
   }
 

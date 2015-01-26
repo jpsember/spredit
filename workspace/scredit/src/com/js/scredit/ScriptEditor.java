@@ -179,6 +179,11 @@ public class ScriptEditor {
     sEditorPanelComponent.repaint();
   }
 
+  public static GLPanel getEditorPanel() {
+    warning("refactor this, perhaps as method in event or event manager");
+    return sEditorPanel;
+  }
+
   /**
    * Adjust zoom factor
    * 
@@ -735,33 +740,33 @@ public class ScriptEditor {
         });
 
     m.addItem("Rotate", KeyEvent.VK_R, CTRL, new UserOperation() {
-      private RotateOper r;
-
       public boolean shouldBeEnabled() {
-        r = new RotateOper();
-        return r.shouldBeEnabled();
+        return new RotateOper().shouldBeEnabled();
       }
 
       @Override
       public void start() {
-        sUserEventManager.setOperation(r);
-      }
-    });
-    m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new UserOperation() {
-      private Command r;
-
-      public boolean shouldBeEnabled() {
-        r = RotateOper.getResetOper();
-        return r.valid();
-      }
-
-      @Override
-      public void start() {
-        editor().registerPush(r);
-        perform(r);
+        sUserEventManager.setOperation(new RotateOper());
         repaint();
       }
     });
+
+    // m.addItem("Reset Rotate", KeyEvent.VK_R, CTRL | SHIFT, new
+    // UserOperation() {
+    // private Command r;
+    //
+    // public boolean shouldBeEnabled() {
+    // r = RotateOper.getResetOper();
+    // return r.valid();
+    // }
+    //
+    // @Override
+    // public void start() {
+    // editor().registerPush(r);
+    // perform(r);
+    // repaint();
+    // }
+    // });
     m.addItem("Scale", KeyEvent.VK_E, CTRL, new UserOperation() {
       private ScaleOper oper;
 
@@ -1485,7 +1490,8 @@ public class ScriptEditor {
       JPanel pnl = new JPanel(new BorderLayout());
       EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel,
           sUserEventManager);
-
+      sEditorPanel = editorPanel;
+      
       MouseEventGenerator m = new MouseEventGenerator();
       m.setView(editorPanel, editorPanel.getComponent());
       sUserEventManager.setListener(new UserEvent.Listener() {
@@ -1991,6 +1997,7 @@ public class ScriptEditor {
 
   // --- Class fields
   private static Component sEditorPanelComponent;
+  private static GLPanel sEditorPanel;
   private static float sZoomFactor = 1.0f;
   private static SpriteObject sSelectedSprite;
   private static IPoint sFocus = new IPoint();
