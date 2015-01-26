@@ -6,7 +6,6 @@ public class ScriptEditorState {
 
   public ScriptEditorState() {
     mObjects = frozen(ScriptEditor.items());
-    mSelectedSlots = mObjects.getSelectedSlots();
     mClipboard = ScriptEditor.clipboard();
     // mDupAccumulator = e.getDupAccumulator();
   }
@@ -19,8 +18,11 @@ public class ScriptEditorState {
     return mClipboard;
   }
 
+  /**
+   * Convenience method to get list of selected items from objects
+   */
   public SlotList getSelectedSlots() {
-    return mSelectedSlots;
+    return mObjects.getSelectedSlots();
   }
 
   // public Point getDupAccumulator() {
@@ -28,7 +30,6 @@ public class ScriptEditorState {
   // }
 
   private EdObjectArray mObjects;
-  private SlotList mSelectedSlots;
   private EdObjectArray mClipboard;
   // private Point mDupAccumulator;
 }
