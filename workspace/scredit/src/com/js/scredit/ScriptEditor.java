@@ -1491,7 +1491,7 @@ public class ScriptEditor {
       EditorPanelGL editorPanel = new EditorPanelGL(sInfoPanel,
           sUserEventManager);
       sEditorPanel = editorPanel;
-      
+
       MouseEventGenerator m = new MouseEventGenerator();
       m.setView(editorPanel, editorPanel.getComponent());
       sUserEventManager.setListener(new UserEvent.Listener() {
@@ -1779,8 +1779,9 @@ public class ScriptEditor {
 
   public void setState(ScriptEditorState state) {
     Script script = getScript();
-    script.setItems(state.getObjects().getMutableCopy());
-    script.items().setSelected(state.getSelectedSlots());
+    EdObjectArray items = mutableCopyOf(state.getObjects());
+    script.setItems(items);
+    // script.items().setSelected(state.getSelectedSlots());
     setClipboard(state.getClipboard());
   }
 

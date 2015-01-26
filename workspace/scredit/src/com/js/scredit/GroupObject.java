@@ -160,7 +160,8 @@ public class GroupObject extends EdObject {
           if (db)
             pr(" storing ScriptEditor items in origObj");
 
-          origObj = new EdObjectArray(ScriptEditor.items());
+          die("unsupported");
+          // origObj = new EdObjectArray(ScriptEditor.items());
         }
 
         UnGroupReversible gr = new UnGroupReversible(true);
