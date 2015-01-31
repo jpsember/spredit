@@ -5,20 +5,43 @@ import com.js.editor.Command;
 public class CommandForGeneralChanges extends Command.Adapter {
 
   /**
-   * Constructor
+   * Construct a command in preparation for changes. Saves current editor state.
+   * Client should modify the state, and call finish() to mark the completion of
+   * the command
    * 
-   * @param originalState
-   * @param newState
-   *          editor state after change; if null, constructs from current
-   *          editor's state
+   * @param editor
    * @param mergeKey
-   *          optional merge key
+   * @param description
    */
-  public CommandForGeneralChanges(ScriptEditorState originalState,
-      ScriptEditorState newState, String mergeKey, String description) {
-    if (newState == null)
-      newState = new ScriptEditorState();
-    mOriginalState = originalState;
+  public CommandForGeneralChanges(String mergeKey, String description) {
+    mEditor = ScriptEditor.editor();
+    setOriginalState(mEditor.getStateSnapshot());
+    mMergeKey = mergeKey;
+    setDescription(description);
+  }
+
+  public void finish() {
+    if (finished())
+      throw new IllegalStateException();
+    mEditor.disposeOfStateSnapshot();
+    mNewState = mEditor.getStateSnapshot();
+    // Push command onto editor stack
+    mEditor.recordCommand(this);
+  }
+
+  public ScriptEditorState getOriginalState() {
+    return mOriginalState;
+  }
+
+  private boolean finished() {
+    return mNewState != null;
+  }
+
+  private CommandForGeneralChanges(ScriptEditor editor,
+      ScriptEditorState originalState, ScriptEditorState newState,
+      String mergeKey, String description) {
+    mEditor = editor;
+    setOriginalState(originalState);
     mNewState = newState;
     mMergeKey = mergeKey;
     setDescription(description);
@@ -27,15 +50,15 @@ public class CommandForGeneralChanges extends Command.Adapter {
   @Override
   public Command getReverse() {
     if (mReverse == null) {
-      mReverse = new CommandForGeneralChanges(mNewState, mOriginalState, null,
-          null);
+      mReverse = new CommandForGeneralChanges(mEditor, mNewState,
+          mOriginalState, null, null);
     }
     return mReverse;
   }
 
   @Override
   public void perform() {
-    ScriptEditor.editor().setState(mNewState);
+    mEditor.setState(mNewState);
   }
 
   @Override
@@ -63,8 +86,8 @@ public class CommandForGeneralChanges extends Command.Adapter {
         mergedDescription = follower.getDescription();
 
       // Merging is possible, so construct merged command
-      merged = new CommandForGeneralChanges(mOriginalState, f.mNewState,
-          mMergeKey, mergedDescription);
+      merged = new CommandForGeneralChanges(mEditor, mOriginalState,
+          f.mNewState, mMergeKey, mergedDescription);
 
     } while (false);
     return merged;
@@ -77,6 +100,13 @@ public class CommandForGeneralChanges extends Command.Adapter {
     return "Last Command";
   }
 
+  private void setOriginalState(ScriptEditorState s) {
+    if (s.isMutable())
+      throw new IllegalArgumentException();
+    mOriginalState = s;
+  }
+
+  private ScriptEditor mEditor;
   private String mCommandDescription;
   private ScriptEditorState mOriginalState;
   private ScriptEditorState mNewState;

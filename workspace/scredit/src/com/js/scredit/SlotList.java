@@ -124,6 +124,29 @@ public class SlotList extends Freezable.Mutable implements Iterable<Integer> {
     return outputList;
   }
 
+  public static SlotList union(SlotList a, SlotList b) {
+    SlotList outputList = new SlotList();
+    int cursor1 = 0;
+    int cursor2 = 0;
+    while (true) {
+      int s1 = Integer.MAX_VALUE;
+      int s2 = Integer.MAX_VALUE;
+      if (cursor1 < a.size())
+        s1 = a.get(cursor1);
+      if (cursor2 < b.size())
+        s2 = b.get(cursor2);
+      int nextSlot = Math.min(s1, s2);
+      if (nextSlot == Integer.MAX_VALUE)
+        break;
+      outputList.add(nextSlot);
+      if (s1 == nextSlot)
+        cursor1++;
+      if (s2 == nextSlot)
+        cursor2++;
+    }
+    return outputList;
+  }
+
   private SlotList(SlotList source) {
     if (source == null)
       return;
@@ -137,4 +160,3 @@ public class SlotList extends Freezable.Mutable implements Iterable<Integer> {
   private ArrayList<Integer> mList = new ArrayList();
 
 }
-

@@ -17,7 +17,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
    * Constructor; uses selected items as originals
    */
   public ModifyObjectsReversible() {
-    construct(ScriptEditor.items().getSelected());
+    construct(ScriptEditor.items().getSelectedSlots());
   }
 
   /**
@@ -27,15 +27,13 @@ public class ModifyObjectsReversible extends Command.Adapter {
    *          slot of the single item about to be changed
    */
   public ModifyObjectsReversible(int slot) {
-    int[] s = new int[1];
-    s[0] = slot;
-    construct(s);
+    construct(new SlotList(slot));
   }
 
   private EdObject[] currentSlotContents() {
-    EdObject[] a = new EdObject[slots.length];
-    for (int i = 0; i < slots.length; i++)
-      a[i] = ScriptEditor.items().get(slots[i]);
+    EdObject[] a = new EdObject[slots.size()];
+    for (int i = 0; i < slots.size(); i++)
+      a[i] = ScriptEditor.items().get(slots.get(i));
     return a;
   }
 
@@ -46,14 +44,14 @@ public class ModifyObjectsReversible extends Command.Adapter {
     modObjects = getArray(a, slots);
   }
 
-  private static EdObject[] getArray(EdObjectArray objects, int[] slots) {
-    EdObject[] a = new EdObject[slots.length];
-    for (int i = 0; i < slots.length; i++)
-      a[i] = objects.get(slots[i]);
+  private static EdObject[] getArray(EdObjectArray objects, SlotList slots) {
+    EdObject[] a = new EdObject[slots.size()];
+    for (int i = 0; i < slots.size(); i++)
+      a[i] = objects.get(slots.get(i));
     return a;
   }
 
-  private void construct(int[] slots) {
+  private void construct(SlotList slots) {
     this.slots = slots;
     this.origObjects = currentSlotContents();
     if (db) {
@@ -72,14 +70,14 @@ public class ModifyObjectsReversible extends Command.Adapter {
     StringBuilder sb = new StringBuilder();
     sb.append(operName);
     sb.append(' ');
-    if (slots.length == 1)
+    if (slots.size() == 1)
       sb.append(origObjects[0]);
     else
-      sb.append(slots.length + " items");
+      sb.append(slots.size() + " items");
     if (db) {
       sb.append("\n");
-      for (int i = 0; i < slots.length; i++) {
-        sb.append("slot #" + slots[i] + " " + origObjects[i]);
+      for (int i = 0; i < slots.size(); i++) {
+        sb.append("slot #" + slots.get(i) + " " + origObjects[i]);
       }
     }
     return sb.toString();
@@ -95,8 +93,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
 
         EdObjectArray a = ScriptEditor.items();
         set(a, slots, origObjects);
-        a.clearAllSelected();
-        a.setSelected(slots, true);
+        a.setSelected(slots);
       }
 
       @Override
@@ -106,9 +103,10 @@ public class ModifyObjectsReversible extends Command.Adapter {
     };
   }
 
-  private static void set(EdObjectArray objects, int[] slots, EdObject[] items) {
-    for (int i = 0; i < slots.length; i++)
-      objects.set(slots[i], items[i]);
+  private static void set(EdObjectArray objects, SlotList slots,
+      EdObject[] items) {
+    for (int i = 0; i < slots.size(); i++)
+      objects.set(slots.get(i), items[i]);
   }
 
   private void constructModifiedVersions() {
@@ -147,8 +145,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
     if (modObjects != null) {
       EdObjectArray a = ScriptEditor.items();
       set(a, slots, modObjects);
-      a.clearAllSelected();
-      a.setSelected(slots, true);
+      a.setSelected(slots);
     } else {
       // otherwise, call user method with fresh copy of item
       EdObjectArray items = ScriptEditor.items();
@@ -156,7 +153,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
         EdObject origObj = origObjects[i];
         EdObject modObj = perform(origObj);
         if (modObj != origObj) {
-          items.set(slots[i], modObj);
+          items.set(slots.get(i), modObj);
         }
       }
     }
@@ -181,7 +178,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
   }
 
   public int nSlots() {
-    return slots.length;
+    return slots.size();
   }
 
   /**
@@ -191,7 +188,7 @@ public class ModifyObjectsReversible extends Command.Adapter {
     return origObjects;
   }
 
-  private int[] slots;
+  private SlotList slots;
   private EdObject[] origObjects;
   // saved copy of modified objects, stored just prior to performing reverse
   private EdObject[] modObjects;

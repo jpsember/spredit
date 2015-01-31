@@ -11,7 +11,7 @@ import static com.js.basic.Tools.*;
 
 public class RotateOper extends UserOperation {
 
-  private int[] mSelectedItems;
+  private SlotList mSelectedItems;
   private UserEvent mInitialEvent;
   // rotation factor at mouse down
   private float mouseDownRotation;
@@ -23,7 +23,7 @@ public class RotateOper extends UserOperation {
   private GLPanel mPanel;
 
   public RotateOper() {
-    mSelectedItems = ScriptEditor.items().getSelected();
+    mSelectedItems = ScriptEditor.items().getSelectedSlots();
     if (!shouldBeEnabled())
       return;
 
@@ -35,7 +35,7 @@ public class RotateOper extends UserOperation {
 
   @Override
   public boolean shouldBeEnabled() {
-    return mSelectedItems.length != 0;
+    return mSelectedItems.size() != 0;
   }
 
   @Override

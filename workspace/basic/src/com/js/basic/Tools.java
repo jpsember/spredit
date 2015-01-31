@@ -843,9 +843,9 @@ public final class Tools {
     String s = obj.getClass().getSimpleName() + ":" + identifier;
     if (obj instanceof Freezable) {
       if (((Freezable) obj).isFrozen())
-        s += " FROZEN ";
+        s += " (frozen) ";
       else
-        s += " MUTABLE";
+        s += " (mutable)";
     }
     return s;
   }
@@ -1222,6 +1222,18 @@ public final class Tools {
    */
   public static <T extends Freezable> T frozen(T orig) {
     return (T) orig.getFrozenCopy();
+  }
+
+  /**
+   * If item is frozen, construct a mutable copy; otherwise, return original
+   */
+  public static <T extends Freezable> T mutable(T orig) {
+    T out;
+    if (!orig.isFrozen())
+      out = orig;
+    else
+      out = (T) orig.getMutableCopy();
+    return (T) out;
   }
 
   /**

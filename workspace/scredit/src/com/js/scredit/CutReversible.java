@@ -15,9 +15,8 @@ public class CutReversible extends Command.Adapter {
    * Bwd: undoOper
    */
   public CutReversible() {
-    int[] si = ScriptEditor.items().getSelected();
-    if (si.length > 0) {
-      this.slots = si;
+    slots = ScriptEditor.items().getSelectedSlots();
+    if (!slots.isEmpty()) {
       origClipboard = ScriptEditor.clipboard();
       setDescription("Cut");
     }
@@ -25,7 +24,7 @@ public class CutReversible extends Command.Adapter {
 
   @Override
   public String toString() {
-    return "Cut " + EdTools.itemsStr(slots.length);
+    return "Cut " + EdTools.itemsStr(slots.size());
   }
 
   @Override
@@ -35,14 +34,13 @@ public class CutReversible extends Command.Adapter {
       @Override
       public void perform() {
         EdObjectArray clip = ScriptEditor.clipboard();
-        ASSERT(clip.size() == slots.length);
+        ASSERT(clip.size() == slots.size());
         EdObjectArray items = ScriptEditor.items();
 
-        for (int i = 0; i < slots.length; i++) {
-          items.add(slots[i], clip.get(i));
+        for (int i = 0; i < slots.size(); i++) {
+          items.add(slots.get(i), clip.get(i));
         }
-        items.clearAllSelected();
-        items.setSelected(slots, true);
+        items.setSelected(slots);
 
         ScriptEditor.setClipboard(origClipboard);
       }
@@ -61,13 +59,13 @@ public class CutReversible extends Command.Adapter {
     removeObjects(items, slots);
   }
 
-  private static void removeObjects(EdObjectArray objects, int[] slots) {
-    for (int i = slots.length - 1; i >= 0; i--) {
-      objects.remove(slots[i]);
+  private static void removeObjects(EdObjectArray objects, SlotList slots) {
+    for (int i = slots.size() - 1; i >= 0; i--) {
+      objects.remove(slots.get(i));
     }
   }
 
-  private int[] slots;
+  private SlotList slots;
   private EdObjectArray origClipboard;
 
   @Override

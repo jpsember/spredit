@@ -9,6 +9,7 @@ import org.json.*;
 import com.js.basic.*;
 
 import tex.*;
+import static com.js.basic.Tools.*;
 
 public class Script {
 
@@ -81,7 +82,7 @@ public class Script {
   }
 
   public void setItems(EdObjectArray items) {
-    this.mObjects = items;
+    mObjects = frozen(items);
   }
 
   /**

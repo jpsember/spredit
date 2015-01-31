@@ -264,7 +264,7 @@ public class PolygonObject extends EdObject {
   }
 
   @Override
-  public void render(GLPanel panel) {
+  public void render(GLPanel panel, boolean isSelected, boolean isEditable) {
     final boolean DETAILS = false;
 
     int[] tri = null;
@@ -348,10 +348,10 @@ public class PolygonObject extends EdObject {
     //
     // }
 
-    if (mColor == null || isSelected()) {
-      panel.setRenderColor(isSelected() ? Color.YELLOW : Color.DARK_GRAY);
+    if (mColor == null || isSelected) {
+      panel.setRenderColor(isSelected ? Color.YELLOW : Color.DARK_GRAY);
 
-      panel.lineWidth((isSelected() ? 2 : 1) / panel.getZoom());
+      panel.lineWidth((isSelected ? 2 : 1) / panel.getZoom());
       if (nPoints() > 1) {
         for (int i = 0; i < nPoints(); i++) {
           Point p0 = getPoint(i - 1);

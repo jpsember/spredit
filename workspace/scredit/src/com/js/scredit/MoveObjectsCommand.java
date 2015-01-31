@@ -1,7 +1,5 @@
 package com.js.scredit;
 
-import java.util.*;
-
 import com.js.editor.Command;
 import com.js.geometry.*;
 
@@ -17,12 +15,12 @@ public class MoveObjectsCommand extends Command.Adapter {
     this.startLoc = new Point(startLoc);
 
     EdObjectArray itm = ScriptEditor.items();
-    slots = itm.getSelected();
-    origLocs = new Point[slots.length];
+    slots = itm.getSelectedSlots();
+    origLocs = new Point[slots.size()];
     translate = new Point();
 
-    for (int i = 0; i < slots.length; i++)
-      origLocs[i] = itm.get(slots[i]).location();
+    for (int i = 0; i < slots.size(); i++)
+      origLocs[i] = itm.get(slots.get(i)).location();
     origDupAccum = Dup.getAccum(false);
     origDupClipAdjust = Dup.getClipboardAdjust();
   }
@@ -46,14 +44,9 @@ public class MoveObjectsCommand extends Command.Adapter {
     return translate;
   }
 
-  // private int id = baseId++;
-  // private static int baseId = 500;
   @Override
   public String toString() {
-    return "Move " + slots.length + " item" + (slots.length > 1 ? "s" : "");// +
-                                                                            // " "
-                                                                            // +
-                                                                            // id;
+    return "Move " + slots.size() + " item" + (slots.size() > 1 ? "s" : "");
   }
 
   // Reversible interface
@@ -64,8 +57,8 @@ public class MoveObjectsCommand extends Command.Adapter {
 
     String msg = null;
 
-    for (int i = 0; i < slots.length; i++) {
-      int slot = slots[i];
+    for (int i = 0; i < slots.size(); i++) {
+      int slot = slots.get(i);
       EdObject objCurr = ScriptEditor.items().get(slot);
 
       Point newLoc = Point.sum(origLocs[i], translate);
@@ -88,7 +81,7 @@ public class MoveObjectsCommand extends Command.Adapter {
 
   @Override
   public boolean valid() {
-    return slots != null && slots.length > 0;
+    return slots != null && slots.size() > 0;
   }
 
   @Override
@@ -98,8 +91,8 @@ public class MoveObjectsCommand extends Command.Adapter {
       @Override
       public void perform() {
         EdObjectArray items = ScriptEditor.items();
-        for (int i = 0; i < slots.length; i++) {
-          EdObject obj = items.get(slots[i]);
+        for (int i = 0; i < slots.size(); i++) {
+          EdObject obj = items.get(slots.get(i));
           obj.setLocation(origLocs[i]);
         }
       }
@@ -107,16 +100,10 @@ public class MoveObjectsCommand extends Command.Adapter {
   }
 
   public boolean sameItemsAs(MoveObjectsCommand oper) {
-    boolean same = false;
-    do {
-      if (!Arrays.equals(slots, oper.slots))
-        break;
-      same = true;
-    } while (false);
-    return same;
+    return SlotList.equal(slots, oper.slots);
   }
 
-  private int[] slots;
+  private SlotList slots;
   private Point[] origLocs;
   private Point translate;
   private Point startLoc;

@@ -1,9 +1,6 @@
 package com.js.scredit;
 
-import static com.js.basic.Tools.*;
-
 import java.awt.Color;
-import java.util.ArrayList;
 
 import com.js.editor.UserEvent;
 import com.js.editor.UserOperation;
@@ -49,7 +46,7 @@ public class RectangleSelectOper extends UserOperation {
       return;
     EdObjectArray items = ScriptEditor.items();
 
-    ArrayList<Integer> slots = new ArrayList();
+    SlotList slots = new SlotList();
 
     for (int i = 0; i < items.size(); i++) {
       EdObject obj = items.get(i);
@@ -57,7 +54,14 @@ public class RectangleSelectOper extends UserOperation {
         continue;
       slots.add(i);
     }
-    unimp("refactor slot list as in geometry");
+    if (mInitialEvent.isShift())
+      slots = SlotList.union(slots, items.getSelectedSlots());
+
+    items.setSelected(slots);
+    CommandForGeneralChanges c = new CommandForGeneralChanges("select",
+        "Select");
+    c.finish();
+    ScriptEditor.editor().recordCommand(c);
   }
 
   private Rect getRect() {

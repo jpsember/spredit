@@ -138,7 +138,7 @@ public class SpriteObject extends EdObject {
   }
 
   @Override
-  public void render(GLPanel panel) {
+  public void render(GLPanel panel, boolean isSelected, boolean isEditable) {
     int si = spriteIndex();
 
     if (si >= 0) {
@@ -149,7 +149,7 @@ public class SpriteObject extends EdObject {
       panel.plotSprite(atlas, si, tfm.matrix());
     }
 
-    if (isSelected() || missingId != null) {
+    if (isSelected || missingId != null) {
       Rect b = boundingRect();
 
       String id = missingId; // "???";
@@ -176,7 +176,7 @@ public class SpriteObject extends EdObject {
       panel.plotString(id, 0, 0);
       gl.glPopMatrix();
 
-      panel.setRenderColor(isSelected() ? Color.YELLOW : Color.BLUE);
+      panel.setRenderColor(isSelected ? Color.YELLOW : Color.BLUE);
       panel.lineWidth(1 / ScriptEditor.zoomFactor());
       if (corners != null && corners.size() > 1) {
         for (int i = 0; i < corners.size(); i++) {

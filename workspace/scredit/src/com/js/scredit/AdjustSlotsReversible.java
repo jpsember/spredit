@@ -3,8 +3,8 @@ package com.js.scredit;
 import static com.js.basic.Tools.*;
 
 import com.js.editor.Command;
-import com.js.geometry.*;
 
+@Deprecated
 public class AdjustSlotsReversible extends Command.Adapter {
   private static final boolean db = false;
 
@@ -16,30 +16,30 @@ public class AdjustSlotsReversible extends Command.Adapter {
    * @param toLimit
    *          true to move maximum amount
    */
-  public AdjustSlotsReversible(int direction, boolean toLimit) {
-    this.dir = direction;
-    this.toLimit = toLimit;
-
-    EdObjectArray a = ScriptEditor.items();
-
-    srcSlots = a.getSelected();
-    int len = srcSlots.length;
-
-    destSlots = new int[len];
-    if (srcSlots.length > 0) {
-      int d;
-      if (direction < 0)
-        d = toLimit ? a.size() - (len - 1) : srcSlots[len - 1] + 1 - (len - 1);
-      else
-        d = toLimit ? 0 : srcSlots[0] - 1;
-
-      d = MyMath.clamp(d, 0, a.size() - len);
-      for (int i = 0; i < len; i++)
-        destSlots[i] = d + i; // - (len - i);
-    }
-
-    if (db)
-      pr("constructed: " + this);
+  private AdjustSlotsReversible(int direction, boolean toLimit) {
+    // this.dir = direction;
+    // this.toLimit = toLimit;
+    //
+    // EdObjectArray a = ScriptEditor.items();
+    //
+    // srcSlots = a.getSelected();
+    // int len = srcSlots.length;
+    //
+    // destSlots = new int[len];
+    // if (srcSlots.length > 0) {
+    // int d;
+    // if (direction < 0)
+    // d = toLimit ? a.size() - (len - 1) : srcSlots[len - 1] + 1 - (len - 1);
+    // else
+    // d = toLimit ? 0 : srcSlots[0] - 1;
+    //
+    // d = MyMath.clamp(d, 0, a.size() - len);
+    // for (int i = 0; i < len; i++)
+    // destSlots[i] = d + i; // - (len - i);
+    // }
+    //
+    // if (db)
+    // pr("constructed: " + this);
 
   }
 

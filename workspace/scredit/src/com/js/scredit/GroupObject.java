@@ -31,7 +31,7 @@ public class GroupObject extends EdObject {
 
       this.undoFlag = undoFlag;
       if (!undoFlag) {
-        slots = ScriptEditor.items().getSelected();
+        slots = ScriptEditor.items().getSelectedSlots();
       }
       if (db)
         pr("Constructed " + this);
@@ -66,38 +66,40 @@ public class GroupObject extends EdObject {
 
       if (undoFlag) {
         ScriptEditor.setItems(origObj);
-        origObj.setSelected(slots, true);
+        origObj.setSelected(slots);
       } else {
+        int groupSlot = -1;
         getReverse(); // make sure we've constructed origObj
-        origObj.setSelected(slots, false);
         EdObjectArray a = new EdObjectArray();
         GroupObject group = new GroupObject(null);
         group.setSelected(true);
         int slot = 0;
         for (int i = 0; i < origObj.size(); i++) {
           EdObject obj = origObj.get(i);
-          if (slot < slots.length && slots[slot] == i) {
+          if (slot < slots.size() && slots.get(slot) == i) {
             group.addParsedObject(obj);
             if (slot == 0)
-              a.add(group);
+              groupSlot = a.add(group);
             slot++;
           } else
             a.add(obj);
         }
+        origObj.setSelected(new SlotList(groupSlot));
+
         ScriptEditor.setItems(a);
       }
     }
 
     @Override
     public boolean valid() {
-      return undoFlag || slots.length >= 2;
+      return undoFlag || slots.size() >= 2;
     }
 
     public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append("Group ");
       if (slots != null)
-        sb.append(EdTools.itemsStr(slots.length));
+        sb.append(EdTools.itemsStr(slots.size()));
       if (db) {
         // sb.append("\n id=" + id);
         sb.append("\n undoFlag=" + d(undoFlag));
@@ -106,7 +108,7 @@ public class GroupObject extends EdObject {
       return sb.toString();
     }
 
-    private int[] slots;
+    private SlotList slots;
     private EdObjectArray origObj;
 
     // true if this object is actually the reversal of the original Group
@@ -127,12 +129,12 @@ public class GroupObject extends EdObject {
     public UnGroupReversible() {
       this(false);
       EdObjectArray a = ScriptEditor.items();
-      int[] slots = a.getSelected();
-      if (slots.length == 1) {
-        EdObject obj = a.get(slots[0]);
+      SlotList slots = a.getSelectedSlots();
+      if (slots.size() == 1) {
+        EdObject obj = a.get(slots.get(0));
         if (obj instanceof GroupObject) {
           group = (GroupObject) obj;
-          slot = slots[0];
+          slot = slots.get(0);
         }
       }
     }
@@ -369,16 +371,16 @@ public class GroupObject extends EdObject {
   }
 
   @Override
-  public void render(GLPanel panel) {
+  public void render(GLPanel panel, boolean isSelected, boolean isEditable) {
 
-    if (isSelected()) {
+    if (isSelected) {
       panel.setRenderColor(Color.YELLOW);
       panel.drawFrame(boundingRect());
     }
 
     for (int i = 0; i < size(); i++) {
       EdObject ob = obj(i);
-      ob.render(panel);
+      ob.render(panel, false, false);
     }
   }
 

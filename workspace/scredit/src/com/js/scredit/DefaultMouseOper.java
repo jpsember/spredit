@@ -46,7 +46,7 @@ public class DefaultMouseOper extends UserOperation {
       if (!obj.contains(event.getWorldLocation()))
         continue;
       mPickSet.add(i);
-      if (obj.isSelected())
+      if (items.isSlotSelected(i))
         mPickSetSelected.add(i);
     }
   }
@@ -70,16 +70,24 @@ public class DefaultMouseOper extends UserOperation {
    * 
    */
   private void doClick(UserEvent event) {
+    EdObjectArray items = ScriptEditor.items();
     if (!event.isShift()) {
       if (!mPickSet.isEmpty()) {
         walkThroughPickSet();
       } else {
-        ScriptEditor.items().unselectAll();
+        items.unselectAll();
       }
     } else {
       if (!mPickSet.isEmpty()) {
-        EdObject frontmostItem = ScriptEditor.items().get(mPickSet.last());
-        frontmostItem.setSelected(!frontmostItem.isSelected());
+        int index = mPickSet.last();
+        SlotList single = new SlotList(index);
+        SlotList current = items.getSelectedSlots();
+        if (current.contains(index))
+          current = current.minus(single);
+        else
+          current = SlotList.union(current, single);
+        items.setSelected(current);
+        unimp("should this be done as a command?");
       }
     }
 
@@ -91,6 +99,7 @@ public class DefaultMouseOper extends UserOperation {
    * first item.
    */
   private void walkThroughPickSet() {
+
     if (mPickSet.isEmpty())
       throw new IllegalArgumentException();
     // Look through pick set to find item following last selected item
@@ -100,8 +109,7 @@ public class DefaultMouseOper extends UserOperation {
     // Walk from highest to lowest, since frontmost are highest
     for (int cursor = mPickSet.size() - 1; cursor >= 0; cursor--) {
       int slot = mPickSet.get(cursor);
-      EdObject obj = items.get(slot);
-      if (obj.isSelected()) {
+      if (items.getSelectedSlots().contains(slot)) {
         outputSlot = -1;
       } else {
         if (outputSlot < 0)
@@ -155,11 +163,16 @@ public class DefaultMouseOper extends UserOperation {
         return;
       }
       if (!mPickSetSelected.isEmpty()) {
-        event.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
+        oper = MouseOperMoveItems.build(mInitialDownEvent);
+        event.setOperation(oper);
+        oper.processUserEvent(mInitialDownEvent);
+        oper.processUserEvent(event);
       } else if (!mPickSet.isEmpty()) {
         unimp("consider doing selection changes as commands");
         ScriptEditor.items().setSelected(new SlotList(mPickSet.last()));
-        event.setOperation(MouseOperMoveItems.build(mInitialDownEvent));
+        oper = MouseOperMoveItems.build(mInitialDownEvent);
+        event.setOperation(oper);
+        oper.processUserEvent(mInitialDownEvent);
       } else {
         ScriptEditor.items().unselectAll();
         event.setOperation(RectangleSelectOper.build(mInitialDownEvent));

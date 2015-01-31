@@ -8,16 +8,16 @@ import com.js.geometry.*;
 public class DuplicateReversible extends Command.Adapter {
   @Override
   public String toString() {
-    return "Duplicate " + EdTools.itemsStr(slots.length);
+    return "Duplicate " + EdTools.itemsStr(slots.size());
   }
 
   public DuplicateReversible() {
-    slots = ScriptEditor.items().getSelected();
+    slots = ScriptEditor.items().getSelectedSlots();
   }
 
   @Override
   public boolean valid() {
-    return slots.length > 0;
+    return slots.size() > 0;
   }
 
   @Override
@@ -37,8 +37,8 @@ public class DuplicateReversible extends Command.Adapter {
 
     Point ds = Dup.getAccum(true); // )getFilteredDupAccum();
 
-    for (int i = 0; i < slots.length; i++) {
-      EdObject newInstance = items.get(slots[i]);
+    for (int i = 0; i < slots.size(); i++) {
+      EdObject newInstance = items.get(slots.get(i));
       if (db)
         pr("adding dupAmount " + ds + "  to duplicated object #" + i + ": "
             + newInstance);
@@ -56,7 +56,7 @@ public class DuplicateReversible extends Command.Adapter {
       public void perform() {
         EdObjectArray items = ScriptEditor.items();
         // remove(items, items.size() - slots.length, slots.length);
-        items.remove(items.size() - slots.length, slots.length);
+        items.remove(items.size() - slots.size(), slots.size());
       }
 
       @Override
@@ -66,6 +66,6 @@ public class DuplicateReversible extends Command.Adapter {
     };
   }
 
-  private int[] slots;
+  private SlotList slots;
 
 }

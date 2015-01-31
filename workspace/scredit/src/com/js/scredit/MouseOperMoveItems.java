@@ -1,9 +1,9 @@
 package com.js.scredit;
 
-import com.js.editor.Command;
 import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
+import static com.js.basic.Tools.*;
 
 public class MouseOperMoveItems extends UserOperation {
 
@@ -16,14 +16,19 @@ public class MouseOperMoveItems extends UserOperation {
 
     switch (event.getCode()) {
 
+    case UserEvent.CODE_DOWN:
+      mCommand = new CommandForGeneralChanges("move", null);
+      break;
+
     case UserEvent.CODE_DRAG:
       updateMove(event);
       break;
 
     case UserEvent.CODE_UP:
-      Command command = new CommandForGeneralChanges(mInitialEditorState, null,
-          "move", "Move");
-      ScriptEditor.editor().registerPush(command);
+      CommandForGeneralChanges command = new CommandForGeneralChanges("move",
+          "Move");
+      command.finish();
+      ScriptEditor.editor().recordCommand(command);
       event.clearOperation();
       break;
 
@@ -33,6 +38,19 @@ public class MouseOperMoveItems extends UserOperation {
   private void updateMove(UserEvent event) {
     Point translate = Point.difference(event.getWorldLocation(),
         mInitialDownEvent.getWorldLocation());
+
+    EdObjectArray items = mutableCopyOf(ScriptEditor.items());
+    for (int slot : items.getSelectedSlots()) {
+      EdObject orig = mCommand.getOriginalState().getObjects().get(slot);
+      EdObject object = mutableCopyOf(orig);
+
+      Point newLoc = Point.sum(object.location(), translate);
+      newLoc = Grid.snapToGrid(newLoc, true);
+
+      object.setLocation(newLoc);
+      items.set(slot, object);
+    }
+    ScriptEditor.setItems(items);
 
     String msg = null;
 
@@ -60,4 +78,5 @@ public class MouseOperMoveItems extends UserOperation {
 
   private UserEvent mInitialDownEvent;
   private ScriptEditorState mInitialEditorState;
+  private CommandForGeneralChanges mCommand;
 }

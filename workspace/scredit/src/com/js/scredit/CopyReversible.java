@@ -10,16 +10,15 @@ public class CopyReversible extends Command.Adapter {
    */
 
   public CopyReversible() {
-    int[] s = ScriptEditor.items().getSelected();
-    if (s.length > 0) {
-      this.slots = s;
+    mSlots = ScriptEditor.items().getSelectedSlots();
+    if (!mSlots.isEmpty()) {
       oldClipboard = ScriptEditor.clipboard();
     }
   }
 
   @Override
   public String toString() {
-    return "Copy " + EdTools.itemsStr(slots.length);
+    return "Copy " + EdTools.itemsStr(mSlots.size());
   }
 
   @Override
@@ -42,17 +41,17 @@ public class CopyReversible extends Command.Adapter {
 
   @Override
   public void perform() {
-    ScriptEditor.setClipboard(new EdObjectArray(ScriptEditor.items(), slots));
+    ScriptEditor.setClipboard(new EdObjectArray(ScriptEditor.items(), mSlots));
     // ScriptEditor.items().get(slots));
     Dup.reset();
   }
 
   @Override
   public boolean valid() {
-    return slots != null;
+    return !mSlots.isEmpty();
   }
 
-  private int[] slots;
+  private SlotList mSlots;
   private EdObjectArray oldClipboard;
 
 }

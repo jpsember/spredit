@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TreeSet;
 
 import javax.swing.*;
@@ -66,9 +67,13 @@ public class ScriptEditor {
     sScriptSet.setCursorFile(null);
   }
 
-  private static void readScriptForCurrentEditor() throws IOException,
-      JSONException {
-    editor().getScript().read();
+  private void readScriptForCurrentEditor() throws IOException, JSONException {
+    // read items into script
+    getScript().read();
+    // copy items from script to editor state
+    unimp("refactor so we can replace existing items with non-undoable command");
+    mState.setObjects(getScript().items());
+    clearCommandHistory();
   }
 
   /**
@@ -106,7 +111,7 @@ public class ScriptEditor {
         }
 
         sScriptSet.setCursorFile(f);
-        readScriptForCurrentEditor();
+        editor().readScriptForCurrentEditor();
 
         success = true;
         sProject.setLastScriptPath(f);
@@ -132,7 +137,7 @@ public class ScriptEditor {
       if (!editor().hasName())
         continue;
       try {
-        readScriptForCurrentEditor();
+        editor().readScriptForCurrentEditor();
       } catch (Exception e) {
         AppTools.showMsg("Problem reading " + editor().getFile() + ": " + e);
         // Since an error occurred, throw out any following editors
@@ -150,14 +155,14 @@ public class ScriptEditor {
    * Get the ObjArray manipulated by the current editor
    */
   public static EdObjectArray items() {
-    return editor().mScript.items();
+    return editor().mState.getObjects();
   }
 
   /**
    * Replace ObjArray for current editor
    */
   public static void setItems(EdObjectArray items) {
-    editor().mScript.setItems(items);
+    editor().mState.setObjects(items);
   }
 
   /**
@@ -172,8 +177,8 @@ public class ScriptEditor {
    * Repaint the current editor, and its associated components
    */
   public static void repaint() {
-    if (isProjectOpen())
-      updateEditableObjectStatus();
+    // if (isProjectOpen())
+    // updateEditableObjectStatus();
     sInfoPanel
         .refresh(isProjectOpen() ? editor() : null, project(), sScriptSet);
     sEditorPanelComponent.repaint();
@@ -228,10 +233,10 @@ public class ScriptEditor {
 
       // determine selected items, and save for undoing
       EdObjectArray items = ScriptEditor.items();
-      slots = items.getSelected();
-      origItems = new EdObject[slots.length];
-      for (int i = 0; i < slots.length; i++)
-        origItems[i] = items.get(slots[i]);
+      slots = items.getSelectedSlots();
+      origItems = new EdObject[slots.size()];
+      for (int i = 0; i < slots.size(); i++)
+        origItems[i] = items.get(slots.get(i));
     }
 
     @Override
@@ -246,8 +251,8 @@ public class ScriptEditor {
         @Override
         public void perform() {
           EdObjectArray items = ScriptEditor.items();
-          for (int i = 0; i < slots.length; i++)
-            items.set(slots[i], origItems[i]);
+          for (int i = 0; i < slots.size(); i++)
+            items.set(slots.get(i), origItems[i]);
         }
       };
     }
@@ -259,14 +264,14 @@ public class ScriptEditor {
     // items.set(slots[i], origItems[i]);
     // }
     public int slot(int i) {
-      return slots[i];
+      return slots.get(i);
     }
 
     public int nSelected() {
-      return slots.length;
+      return slots.size();
     }
 
-    private int[] slots;
+    private SlotList slots;
     private EdObject[] origItems;
     // private Reversible fwdOper;
   }
@@ -283,7 +288,7 @@ public class ScriptEditor {
 
     @Override
     public boolean shouldBeEnabled() {
-      return items().getSelected().length != 0;
+      return items().getSelectedSlots().size() != 0;
     }
 
     @Override
@@ -615,8 +620,10 @@ public class ScriptEditor {
           private Command r;
 
           public boolean shouldBeEnabled() {
-            r = new AdjustSlotsReversible(1, false);
-            return r.valid();
+            warning("refactor");
+            return false;
+            // r = new AdjustSlotsReversible(1, false);
+            // return r.valid();
           }
 
           @Override
@@ -630,8 +637,10 @@ public class ScriptEditor {
           private Command r;
 
           public boolean shouldBeEnabled() {
-            r = new AdjustSlotsReversible(-1, false);
-            return r.valid();
+            warning("refactor");
+            return false;
+            // r = new AdjustSlotsReversible(-1, false);
+            // return r.valid();
           }
 
           @Override
@@ -645,8 +654,10 @@ public class ScriptEditor {
           private Command r;
 
           public boolean shouldBeEnabled() {
-            r = new AdjustSlotsReversible(1, true);
-            return r.valid();
+            warning("refactor");
+            return false;
+            // r = new AdjustSlotsReversible(1, true);
+            // return r.valid();
           }
 
           @Override
@@ -660,8 +671,10 @@ public class ScriptEditor {
           private Command r;
 
           public boolean shouldBeEnabled() {
-            r = new AdjustSlotsReversible(-1, true);
-            return r.valid();
+            warning("refactor");
+            return false;
+            // r = new AdjustSlotsReversible(-1, true);
+            // return r.valid();
           }
 
           @Override
@@ -1088,7 +1101,7 @@ public class ScriptEditor {
 
   private static class SelectNoneOper {
     public SelectNoneOper() {
-      slots = items().getSelected();
+      slots = items().getSelectedSlots();
     }
 
     public void perform() {
@@ -1097,10 +1110,10 @@ public class ScriptEditor {
     }
 
     public boolean valid() {
-      return slots.length > 0;
+      return slots.size() > 0;
     }
 
-    private int[] slots;
+    private SlotList slots;
   }
 
   // private static class ColorItemHandler extends ItemHandler {
@@ -1669,28 +1682,37 @@ public class ScriptEditor {
    * script open, it has no name, and is empty
    */
   private static boolean currentScriptCloseable() {
-    return sScriptSet.size() > 1 || editor().hasName()
-        || !editor().getScript().items().isEmpty();
+    return sScriptSet.size() > 1 || editor().hasName() || !items().isEmpty();
   }
 
-  /**
-   * Make an object editable if it is the only selected object (and current
-   * operation allows editabler highlighting). We perform this operation with
-   * each refresh, since this is simpler than trying to maintain the editable
-   * state while the editor objects undergo various editing operations. Also,
-   * update the last editable object type to reflect the editable object (if one
-   * exists)
-   */
-  private static void updateEditableObjectStatus() {
-    items().updateEditableObjectStatus(
-        sUserEventManager.getOperation().allowEditableObject());
-  }
+  // /**
+  // * Make an object editable if it is the only selected object (and current
+  // * operation allows editabler highlighting). We perform this operation with
+  // * each refresh, since this is simpler than trying to maintain the editable
+  // * state while the editor objects undergo various editing operations. Also,
+  // * update the last editable object type to reflect the editable object (if
+  // one
+  // * exists)
+  // */
+  // private static void updateEditableObjectStatus() {
+  // boolean allowEditableObject = sUserEventManager.getOperation()
+  // .allowEditableObject();
+  // EdObject editableObject = null;
+  //
+  // EdObjectArray items = items();
+  // SlotList list = items.getSelectedSlots();
+  // if (list.size() == 1 && allowEditableObject) {
+  // int newEditable = list.get(0);
+  // editableObject = items.get(newEditable);
+  // }
+  // }
 
   // ------------------- Instance methods -----------------------------
 
   public ScriptEditor() {
     assertProjectOpen();
     mScript = new Script(project(), null);
+    mState = new ScriptEditorState();
     resetUndo();
   }
 
@@ -1703,16 +1725,15 @@ public class ScriptEditor {
   }
 
   public void render(GLPanel panel, boolean toBgnd) {
-    EdObjectArray items = mScript.items();
-    for (EdObject obj : items) {
+    EdObjectArray items = items();
+    for (int slot = 0; slot < items.size(); slot++) {
+      EdObject obj = items.get(slot);
       panel.lineWidth(1.5f / zoomFactor());
       if (toBgnd) {
-        boolean f = obj.isSelected();
-        obj.setSelected(false);
-        obj.render(panel);
-        obj.setSelected(f);
+        obj.render(panel, false, false);
       } else
-        obj.render(panel);
+        obj.render(panel, items.getSelectedSlots().contains(slot),
+            items.getEditableSlot(sUserEventManager.getOperation()) == slot);
     }
   }
 
@@ -1777,46 +1798,87 @@ public class ScriptEditor {
     }
   }
 
-  public void setState(ScriptEditorState state) {
-    Script script = getScript();
-    EdObjectArray items = mutableCopyOf(state.getObjects());
-    script.setItems(items);
-    // script.items().setSelected(state.getSelectedSlots());
-    setClipboard(state.getClipboard());
+  ScriptEditorState getStateSnapshot() {
+    if (mStateSnapshot == null) {
+      mStateSnapshot = frozen(mState);
+    }
+    return mStateSnapshot;
+  }
+
+  ScriptEditorState getCurrentState() {
+    return mState;
+  }
+
+  void disposeOfStateSnapshot() {
+    mStateSnapshot = null;
+  }
+
+  void setState(ScriptEditorState state) {
+    if (state.isMutable())
+      throw new IllegalArgumentException();
+    disposeOfStateSnapshot();
+    mStateSnapshot = state;
+    mState = mutableCopyOf(state);
   }
 
   // ------------------------- Undo Stuff ---------------------------
 
   private static final boolean DBUNDO = false;
 
-  public void registerPush(Command op) {
-    final boolean db = DBUNDO;
-    final boolean db2 = db && false;
+  @Deprecated
+  void registerPush(Command command) {
+    recordCommand(command);
+  }
 
-    if (db)
-      pr("registerPush: " + op);
+  /**
+   * Add a command that has already been performed to the undo stack
+   */
+  void recordCommand(Command command) {
 
-    int trim = mUndoList.size() - mUndoCursor;
-    if (trim > 0) {
-      if (db2)
-        pr(" removing " + trim + " 'redoable' operations from list");
-      remove(mUndoList, mUndoCursor, trim);
+    final int MAX_COMMAND_HISTORY_SIZE = 50;
+
+    // Throw out any older 'redoable' commands that will now be stale
+    while (mCommandHistory.size() > mCommandHistoryCursor) {
+      pop(mCommandHistory);
     }
-    mUndoList.add(op);
-    mUndoCursor++;
-    editor().setChanges(1);
 
-    if (db2)
-      pr(" undoCursor " + mUndoCursor + " of total " + mUndoList.size());
-
-    // limit # undo operations to something reasonable
-    trim = mUndoCursor - 50;
-
-    if (trim > 0) {
-      remove(mUndoList, 0, trim);
-      mUndoCursor -= trim;
+    // Merge this command with its predecessor if possible
+    while (true) {
+      if (mCommandHistoryCursor == 0)
+        break;
+      Command prev = mCommandHistory.get(mCommandHistoryCursor - 1);
+      Command merged = prev.attemptMergeWith(command);
+      if (merged == null)
+        break;
+      pop(mCommandHistory);
+      mCommandHistoryCursor--;
+      command = merged;
     }
+
+    mCommandHistory.add(command);
+    mCommandHistoryCursor++;
+
+    // If this command is not reversible, throw out all commands, including
+    // this one
+    if (command.getReverse() == null) {
+      clearCommandHistory();
+    }
+
+    if (mCommandHistoryCursor > MAX_COMMAND_HISTORY_SIZE) {
+      int del = mCommandHistoryCursor - MAX_COMMAND_HISTORY_SIZE;
+      mCommandHistoryCursor -= del;
+      mCommandHistory.subList(0, del).clear();
+    }
+
+    // Dispose of any cached state snapshot; it's likely invalid since we just
+    // performed a command
+    disposeOfStateSnapshot();
     updateUndoLabels();
+  }
+
+  private void clearCommandHistory() {
+    mCommandHistory.clear();
+    mCommandHistoryCursor = 0;
   }
 
   /**
@@ -1981,6 +2043,8 @@ public class ScriptEditor {
       // Script s = new Script(sProject);
       unimp("disallow saving as script already in set");
       mScript.setFile(f);
+      // Make sure we're saving the most recent set of items (refactor this?)
+      mScript.setItems(items());
       sScriptSet.setName(sScriptSet.getCursor(), mScript.getFile());
       mScript.write();
       success = true;
@@ -2028,6 +2092,12 @@ public class ScriptEditor {
   // The script being edited by this editor. We could make the editor a subclass
   // of Script, but we'll favor composition over inheritance, at the expense of
   // some extra methods to call Script method counterparts (e.g. hasName())
-  private final Script mScript;
+  private Script mScript;
+  // The current (and mutable) editor state
+  private ScriptEditorState mState;
+  // The most recent frozen snapshot of the editor state
+  private ScriptEditorState mStateSnapshot;
+  private List<Command> mCommandHistory = new ArrayList();
+  private int mCommandHistoryCursor;
 
 }

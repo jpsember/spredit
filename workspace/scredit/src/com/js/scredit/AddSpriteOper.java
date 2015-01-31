@@ -27,7 +27,7 @@ public class AddSpriteOper extends UserOperation {
       sp.setSprite(sr);
 
       Command oper = new AddObjectsReversible(sp);
-      ScriptEditor.editor().registerPush(oper);
+      ScriptEditor.editor().recordCommand(oper);
       ScriptEditor.perform(oper);
 
       // change to move oper

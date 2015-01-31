@@ -101,12 +101,14 @@ public abstract class EdObject extends Freezable.Mutable {
     return mFlags;
   }
 
-  /**
-   * Determine if object is selected
-   */
-  public boolean isSelected() {
-    return hasFlags(FLAG_SELECTED);
-  }
+  // /**
+  // * Determine if object is selected
+  // *
+  // * @deprecated use slot list instead
+  // */
+  // public boolean isSelected() {
+  // return hasFlags(FLAG_SELECTED);
+  // }
 
   /**
    * Set object's selected state
@@ -203,7 +205,8 @@ public abstract class EdObject extends Freezable.Mutable {
   /**
    * Render object within editor.
    */
-  public abstract void render(GLPanel panel);
+  public abstract void render(GLPanel panel, boolean isSelected,
+      boolean isEditable);
 
   public EdObject applyColor(Color color) {
     return this;

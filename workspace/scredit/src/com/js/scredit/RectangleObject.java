@@ -10,7 +10,6 @@ import org.json.JSONObject;
 
 import com.js.basic.Freezable;
 import com.js.basic.JSONTools;
-import com.js.editor.Command;
 import com.js.editor.UserOperation;
 import com.js.editor.UserEvent;
 import com.js.geometry.*;
@@ -75,7 +74,6 @@ public class RectangleObject extends EdObject {
    */
   private RectangleObject constructNew(Point spt1, Point spt2) {
     RectangleObject r = new RectangleObject(this, getColor(), spt1, spt2);
-    r.setSelected(this.isSelected());
     return r;
   }
 
@@ -117,14 +115,14 @@ public class RectangleObject extends EdObject {
   }
 
   @Override
-  public void render(GLPanel panel) {
+  public void render(GLPanel panel, boolean isSelected, boolean isEditable) {
     ASSERT(mColor != null);
 
     Rect r = boundingRect();
     panel.setRenderColor(mColor);
     panel.fillRect(r);
 
-    if (isSelected()) {
+    if (isSelected) {
       panel.setRenderColor(Color.YELLOW);
       panel.lineWidth(2 / zoomFactor());
       panel.drawFrame(r);
@@ -380,7 +378,6 @@ public class RectangleObject extends EdObject {
 
     private void init(UserEvent event, int slot, int handle) {
       mEditHandle = handle;
-      mOriginalState = new ScriptEditorState();
       mStartEvent = event;
       if (mAddingNew) {
         slot = items().size();
@@ -425,12 +422,11 @@ public class RectangleObject extends EdObject {
 
       case UserEvent.CODE_UP: {
         RectangleObject r = ScriptEditor.items().get(mEditSlot);
-        if (!r.isWellDefined()) {
-          ScriptEditor.editor().setState(mOriginalState);
-        } else {
-          Command command = new CommandForGeneralChanges(mOriginalState, null,
+        if (r.isWellDefined()) {
+          CommandForGeneralChanges command = new CommandForGeneralChanges(
               "add rect", (mAddingNew ? "Add" : "Edit") + " Rectangle");
-          ScriptEditor.editor().registerPush(command);
+          command.finish();
+          ScriptEditor.editor().recordCommand(command);
         }
         event.clearOperation();
       }
@@ -448,8 +444,6 @@ public class RectangleObject extends EdObject {
     private UserEvent mStartEvent;
     // true if this is for adding a new rectangle, vs editing existing
     private boolean mAddingNew;
-    // state of editor before operation began
-    private ScriptEditorState mOriginalState;
     // slot containing edit rectangle
     private int mEditSlot;
     // Which part of the rectangle is being edited (e.g. side, corner)
