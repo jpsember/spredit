@@ -424,9 +424,8 @@ public class RectangleObject extends EdObject {
         RectangleObject r = ScriptEditor.items().get(mEditSlot);
         if (r.isWellDefined()) {
           CommandForGeneralChanges command = new CommandForGeneralChanges(
-              "add rect", (mAddingNew ? "Add" : "Edit") + " Rectangle");
+              (mAddingNew ? "Add" : "Edit") + " Rectangle");
           command.finish();
-          ScriptEditor.editor().recordCommand(command);
         }
         event.clearOperation();
       }

@@ -58,10 +58,9 @@ public class RectangleSelectOper extends UserOperation {
       slots = SlotList.union(slots, items.getSelectedSlots());
 
     items.setSelected(slots);
-    CommandForGeneralChanges c = new CommandForGeneralChanges("select",
-        "Select");
+    CommandForGeneralChanges c = new CommandForGeneralChanges("Select")
+        .setMergeKey("select");
     c.finish();
-    ScriptEditor.editor().recordCommand(c);
   }
 
   private Rect getRect() {

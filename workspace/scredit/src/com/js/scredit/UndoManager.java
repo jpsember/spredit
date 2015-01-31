@@ -117,6 +117,12 @@ public class UndoManager {
     if (db)
       pr("recordCommand " + command + ";\n" + this);
 
+    // Something funny is going on if the same command object is being performed
+    // again
+    if (mCommandHistoryCursor > 0 && peekUndo() == command)
+      throw new IllegalArgumentException(
+          "attempt to perform identical command: " + command);
+
     // Throw out any older 'redoable' commands that will now be stale
     clearRedoStack();
     if (db)

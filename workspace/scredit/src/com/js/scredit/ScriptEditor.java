@@ -69,9 +69,11 @@ public class ScriptEditor {
     // read items into script
     getScript().read();
     // copy items from script to editor state
-    unimp("refactor so we can replace existing items with non-undoable command");
+    // Issue a non-undoable command to do this; it will clear the command
+    // history as a consequence
+    CommandForGeneralChanges command = new CommandForGeneralChanges(null);
     mState.setObjects(getScript().items());
-    mUndoManager.reset();
+    command.finish();
   }
 
   /**

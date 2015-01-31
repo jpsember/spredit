@@ -22,7 +22,6 @@ public class MouseOperMoveItems extends UserOperation {
 
     case UserEvent.CODE_UP:
       mCommand.finish();
-      ScriptEditor.editor().recordCommand(mCommand);
       event.clearOperation();
       break;
 
@@ -68,7 +67,7 @@ public class MouseOperMoveItems extends UserOperation {
   private MouseOperMoveItems(UserEvent initialDownEvent) {
     mInitialDownEvent = initialDownEvent;
     mInitialEditorState = new ScriptEditorState();
-    mCommand = new CommandForGeneralChanges("move", "Move");
+    mCommand = new CommandForGeneralChanges("Move").setMergeKey("move");
   }
 
   private UserEvent mInitialDownEvent;

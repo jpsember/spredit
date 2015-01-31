@@ -9,15 +9,23 @@ public class CommandForGeneralChanges extends Command.Adapter {
    * Client should modify the state, and call finish() to mark the completion of
    * the command
    * 
-   * @param editor
-   * @param mergeKey
    * @param description
+   *          description for this command to appear in undo/redo menu items. If
+   *          null, command is considered non-reversible
    */
-  public CommandForGeneralChanges(String mergeKey, String description) {
+  public CommandForGeneralChanges(String description) {
     mEditor = ScriptEditor.editor();
     setOriginalState(mEditor.getStateSnapshot());
-    mMergeKey = mergeKey;
     setDescription(description);
+  }
+
+  /**
+   * Set a 'merge' key for this command. A necessary condition for merging
+   * adjacent commands is that their merge keys both exist and are equal
+   */
+  public CommandForGeneralChanges setMergeKey(String mergeKey) {
+    mMergeKey = mergeKey;
+    return this;
   }
 
   public void finish() {
@@ -25,7 +33,7 @@ public class CommandForGeneralChanges extends Command.Adapter {
       throw new IllegalStateException();
     mEditor.disposeOfStateSnapshot();
     mNewState = mEditor.getStateSnapshot();
-    // Push command onto editor stack
+    // Execute the command, and add to the history
     mEditor.recordCommand(this);
   }
 
@@ -47,9 +55,13 @@ public class CommandForGeneralChanges extends Command.Adapter {
     setDescription(description);
   }
 
+  private boolean reversible() {
+    return getDescription() != null;
+  }
+
   @Override
   public Command getReverse() {
-    if (mReverse == null) {
+    if (mReverse == null && reversible()) {
       mReverse = new CommandForGeneralChanges(mEditor, mNewState,
           mOriginalState, null, null);
     }
