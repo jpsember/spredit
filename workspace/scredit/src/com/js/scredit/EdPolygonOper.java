@@ -286,58 +286,61 @@ public class EdPolygonOper extends OldUserOperation {
     // }
 
     if (!poly.isWellDefined()) {
-      if (db)
-        pr(" poly not well defined, deleting");
-
-      // if we were adding this polygon, pop the add operation
-      // from the undo stack
-      Command tos = ScriptEditor.editor().registerPeek();
-
-      if (tos instanceof AddObjectsReversible) {
-        ScriptEditor.editor().registerPop();
-        ScriptEditor.items().remove(slot);
-      } else {
-        ASSERT(tos instanceof ModifyObjectsReversible);
-        ModifyObjectsReversible mr = (ModifyObjectsReversible) tos;
-        ASSERT(mr.nSlots() == 1);
-
-        // ObjArray a = ScriptEditor.items();
-
-        // undo the modify action to restore the original polygon
-        mr.getReverse().perform();
-
-        Command del = new DeleteItemReversible(slot);
-        ScriptEditor.editor().registerPop();
-        ScriptEditor.editor().recordCommand(del);
-        ScriptEditor.perform(del);
-      }
+      unimp("delete poorly-defined polygon");
+      // if (db)
+      // pr(" poly not well defined, deleting");
+      //
+      // // if we were adding this polygon, pop the add operation
+      // // from the undo stack
+      // Command tos = ScriptEditor.editor().registerPeek();
+      //
+      // if (tos instanceof AddObjectsReversible) {
+      // ScriptEditor.editor().registerPop();
+      // ScriptEditor.items().remove(slot);
+      // } else {
+      // ASSERT(tos instanceof ModifyObjectsReversible);
+      // ModifyObjectsReversible mr = (ModifyObjectsReversible) tos;
+      // ASSERT(mr.nSlots() == 1);
+      //
+      // // ObjArray a = ScriptEditor.items();
+      //
+      // // undo the modify action to restore the original polygon
+      // mr.getReverse().perform();
+      //
+      // Command del = new DeleteItemReversible(slot);
+      // ScriptEditor.editor().registerPop();
+      // ScriptEditor.editor().recordCommand(del);
+      // ScriptEditor.perform(del);
+      // }
     } else {
       if (db)
         pr(" modified poly is well defined");
+      unimp("merge with add polygon etc");
 
-      Command tos = ScriptEditor.editor().registerPeek();
-
-      if (tos instanceof AddObjectsReversible) {
-        if (false) {
-          // replace the object being added with the newer polygon
-          AddObjectsReversible op = (AddObjectsReversible) tos;
-          if (db)
-            pr(" updating " + op);
-          warning("this can be simplified as we did before");
-          // op.setObject(ScriptEditor.item(slot));
-        }
-      } else {
-        ModifyObjectsReversible mr = (ModifyObjectsReversible) tos;
-        if (db)
-          pr(" updating " + mr);
-        mr.updateModifiedObjects();
-        // ASSERT(mr.nSlots() == 1);
-        // // replace the object being added with the newer polygon
-        // warn("not sure this is required");
-        // if (false)
-        // mr.updateSelectedObjects(null);
-        // mr.updateModifiedObjects();
-      }
+      // Command tos = ScriptEditor.editor().registerPeek();
+      //
+      // if (tos instanceof AddObjectsReversible) {
+      // if (false) {
+      // // replace the object being added with the newer polygon
+      // AddObjectsReversible op = (AddObjectsReversible) tos;
+      // if (db)
+      // pr(" updating " + op);
+      // warning("this can be simplified as we did before");
+      // // op.setObject(ScriptEditor.item(slot));
+      // }
+      // } else
+      // {
+      // ModifyObjectsReversible mr = (ModifyObjectsReversible) tos;
+      // if (db)
+      // pr(" updating " + mr);
+      // mr.updateModifiedObjects();
+      // // ASSERT(mr.nSlots() == 1);
+      // // // replace the object being added with the newer polygon
+      // // warn("not sure this is required");
+      // // if (false)
+      // // mr.updateSelectedObjects(null);
+      // // mr.updateModifiedObjects();
+      // }
     }
     activeEditor = null;
 

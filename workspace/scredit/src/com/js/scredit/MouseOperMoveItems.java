@@ -7,16 +7,12 @@ import static com.js.basic.Tools.*;
 
 public class MouseOperMoveItems extends UserOperation {
 
-  private static final boolean DB = true;
-
   public static MouseOperMoveItems build(UserEvent initialDownEvent) {
     return new MouseOperMoveItems(initialDownEvent);
   }
 
   @Override
   public void processUserEvent(UserEvent event) {
-    if (DB)
-      event.printProcessingMessage("MouseOperMoveItems");
 
     switch (event.getCode()) {
 
@@ -73,8 +69,6 @@ public class MouseOperMoveItems extends UserOperation {
     mInitialDownEvent = initialDownEvent;
     mInitialEditorState = new ScriptEditorState();
     mCommand = new CommandForGeneralChanges("move", "Move");
-    if (DB)
-      pr("built MouseOperMoveItems; command " + mCommand);
   }
 
   private UserEvent mInitialDownEvent;

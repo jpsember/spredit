@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 
 import javax.swing.*;
@@ -73,7 +71,7 @@ public class ScriptEditor {
     // copy items from script to editor state
     unimp("refactor so we can replace existing items with non-undoable command");
     mState.setObjects(getScript().items());
-    clearCommandHistory();
+    mUndoManager.reset();
   }
 
   /**
@@ -494,9 +492,7 @@ public class ScriptEditor {
     sUndoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new UserOperation() {
       @Override
       public boolean shouldBeEnabled() {
-        pr("UndoOperation, should be enabled, undo cursor="
-            + editor().mUndoCursor);
-        return editor().mUndoCursor > 0;
+        return editor().undoManager().undoPossible();
       }
 
       @Override
@@ -509,7 +505,7 @@ public class ScriptEditor {
     sRedoMenuItem = m.addItem("Redo", KeyEvent.VK_Y, CTRL, new UserOperation() {
       @Override
       public boolean shouldBeEnabled() {
-        return editor().getRedoOper() != null;
+        return editor().mUndoManager.redoPossible();
       }
 
       @Override
@@ -1430,7 +1426,8 @@ public class ScriptEditor {
   }
 
   private static boolean flushAll() {
-    editor().resetUndo();
+    // TODO: we used to reset the current undo manager here; is it still
+    // required?
     int currLayer = sScriptSet.getCursor();
     boolean success = true;
     for (int i = 0; i < sScriptSet.size(); i++) {
@@ -1665,11 +1662,8 @@ public class ScriptEditor {
     return sProject;
   }
 
-  public static void perform(Command op) {
-    final boolean db = DBUNDO;
-    if (db)
-      pr("perform reversible:\n" + op);
-
+  static void perform(Command op) {
+    // TODO: should this be part of the UndoManager?
     op.perform();
     repaint();
   }
@@ -1687,35 +1681,13 @@ public class ScriptEditor {
     return sScriptSet.size() > 1 || editor().hasName() || !items().isEmpty();
   }
 
-  // /**
-  // * Make an object editable if it is the only selected object (and current
-  // * operation allows editabler highlighting). We perform this operation with
-  // * each refresh, since this is simpler than trying to maintain the editable
-  // * state while the editor objects undergo various editing operations. Also,
-  // * update the last editable object type to reflect the editable object (if
-  // one
-  // * exists)
-  // */
-  // private static void updateEditableObjectStatus() {
-  // boolean allowEditableObject = sUserEventManager.getOperation()
-  // .allowEditableObject();
-  // EdObject editableObject = null;
-  //
-  // EdObjectArray items = items();
-  // SlotList list = items.getSelectedSlots();
-  // if (list.size() == 1 && allowEditableObject) {
-  // int newEditable = list.get(0);
-  // editableObject = items.get(newEditable);
-  // }
-  // }
-
   // ------------------- Instance methods -----------------------------
 
   public ScriptEditor() {
     assertProjectOpen();
     mScript = new Script(project(), null);
     mState = new ScriptEditorState();
-    resetUndo();
+    mUndoManager = new UndoManager();
   }
 
   public File getFile() {
@@ -1772,11 +1744,6 @@ public class ScriptEditor {
     }
   }
 
-  private void resetUndo() {
-    mUndoCursor = 0;
-    mUndoList.clear();
-  }
-
   public boolean modified() {
     return mChangesSinceSaved != 0;
   }
@@ -1825,106 +1792,20 @@ public class ScriptEditor {
 
   // ------------------------- Undo Stuff ---------------------------
 
-  private static final boolean DBUNDO = true;
+  UndoManager undoManager() {
+    return mUndoManager;
+  }
 
   /**
    * Add a command that has already been performed to the undo stack
    */
   void recordCommand(Command command) {
-    final boolean db = DBUNDO;
-    if (db)
-      pr("recordCommand " + command);
-
-    final int MAX_COMMAND_HISTORY_SIZE = 50;
-
-    // Throw out any older 'redoable' commands that will now be stale
-    while (mCommandHistory.size() > mCommandHistoryCursor) {
-      pop(mCommandHistory);
-    }
-
-    // Merge this command with its predecessor if possible
-    while (true) {
-      if (mCommandHistoryCursor == 0)
-        break;
-      Command prev = mCommandHistory.get(mCommandHistoryCursor - 1);
-      Command merged = prev.attemptMergeWith(command);
-      if (merged == null)
-        break;
-      pop(mCommandHistory);
-      mCommandHistoryCursor--;
-      command = merged;
-      if (db)
-        pr(" merged with previous, now " + command);
-    }
-
-    mCommandHistory.add(command);
-    mCommandHistoryCursor++;
-
-    // If this command is not reversible, throw out all commands, including
-    // this one
-    if (command.getReverse() == null) {
-      if (db)
-        pr(" command is not reversible, clearing history");
-      clearCommandHistory();
-    }
-
-    if (mCommandHistoryCursor > MAX_COMMAND_HISTORY_SIZE) {
-      int del = mCommandHistoryCursor - MAX_COMMAND_HISTORY_SIZE;
-      if (db)
-        pr(" trimming history by deleting " + del + " from head of queue");
-      mCommandHistoryCursor -= del;
-      mCommandHistory.subList(0, del).clear();
-    }
+    mUndoManager.perform(command);
 
     // Dispose of any cached state snapshot; it's likely invalid since we just
     // performed a command
     disposeOfStateSnapshot();
     updateUndoLabels();
-  }
-
-  private void clearCommandHistory() {
-    mCommandHistory.clear();
-    mCommandHistoryCursor = 0;
-  }
-
-  /**
-   * Peek at topmost reversible on stack
-   * 
-   * @return topmost reversible, or null if stack is empty
-   */
-  public Command registerPeek() {
-    Command r = null;
-    if (mUndoCursor > 0)
-      r = mUndoList.get(mUndoCursor - 1);
-    return r;
-  }
-
-  /**
-   * Pop topmost reversible from stack
-   * 
-   * @return topmost reversible
-   */
-  public Command registerPop() {
-    final boolean db = DBUNDO;
-
-    Command rev = registerPeek();
-    if (db)
-      pr("registerPop: " + rev + " undoCursor=" + mUndoCursor);
-
-    mUndoCursor--;
-    int trim = mUndoList.size() - mUndoCursor;
-    if (db)
-      pr(" trim=" + trim + ", undoCursor=" + mUndoCursor + ", undoList.size="
-          + mUndoList.size());
-
-    if (trim > 0) {
-      if (db)
-        pr(" removing " + trim + " 'redoable' operations from list");
-      remove(mUndoList, mUndoCursor, trim);
-    }
-    setChanges(-1);
-    updateUndoLabels();
-    return rev;
   }
 
   private String commandDescription(Command r) {
@@ -1937,61 +1818,36 @@ public class ScriptEditor {
   private void updateUndoLabels() {
     {
       String lbl = "Undo";
-      Command r = registerPeek();
-      if (r != null)
+      if (mUndoManager.undoPossible()) {
+        Command r = mUndoManager.peekUndo();
         lbl = "Undo " + commandDescription(r);
+      }
       sUndoMenuItem.setText(lbl);
     }
     {
       String lbl = "Redo";
-      Command r = editor().getRedoOper();
-      if (r != null) {
+      if (mUndoManager.redoPossible()) {
+        Command r = mUndoManager.peekRedo();
         lbl = "Redo " + commandDescription(r);
       }
       sRedoMenuItem.setText(lbl);
     }
   }
 
-  private Command getRedoOper() {
-    Command oper = null;
-    if (mUndoCursor < mUndoList.size()) {
-      oper = mUndoList.get(mUndoCursor);
-    }
-    return oper;
-  }
-
   private void doRedo() {
-    final boolean db = DBUNDO;
-
     sUserEventManager.clearOperation();
-    Command oper = editor().getRedoOper();
-    if (oper != null) {
-      if (db)
-        pr("redo: " + oper);
-      mUndoCursor++;
-      setChanges(1);
-      oper.perform();
-      updateUndoLabels();
-    }
+    Command oper = mUndoManager.redo();
+    setChanges(1);
+    oper.perform();
+    updateUndoLabels();
   }
 
   private void doUndo() {
-    final boolean db = DBUNDO;
-    if (db && false)
-      pr("doUndo, undoCursor " + mUndoCursor + " of total " + mUndoList.size());
-
     sUserEventManager.clearOperation();
-
-    if (mUndoCursor > 0) {
-      // unselectAll();
-      Command oper = mUndoList.get(mUndoCursor - 1);
-      mUndoCursor--;
-      setChanges(-1);
-      if (db)
-        pr("undo: " + oper);
-      oper.getReverse().perform();
-      updateUndoLabels();
-    }
+    Command command = mUndoManager.undo();
+    setChanges(-1);
+    command.getReverse().perform();
+    updateUndoLabels();
   }
 
   @Override
@@ -2093,8 +1949,7 @@ public class ScriptEditor {
   // --- Instance fields
 
   private int mChangesSinceSaved;
-  private ArrayList<Command> mUndoList = new ArrayList();
-  private int mUndoCursor;
+  private UndoManager mUndoManager;
   // The script being edited by this editor. We could make the editor a subclass
   // of Script, but we'll favor composition over inheritance, at the expense of
   // some extra methods to call Script method counterparts (e.g. hasName())
@@ -2103,7 +1958,5 @@ public class ScriptEditor {
   private ScriptEditorState mState;
   // The most recent frozen snapshot of the editor state
   private ScriptEditorState mStateSnapshot;
-  private List<Command> mCommandHistory = new ArrayList();
-  private int mCommandHistoryCursor;
 
 }
