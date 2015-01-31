@@ -41,7 +41,7 @@ public class EditorPanelGL extends GLPanel implements UserEventSource {
 
   @Override
   public void render() {
-    unimp("set font");
+    // unimp("set font");
     // setFont(ourFont);
     setZoom(ScriptEditor.zoomFactor());
     setOrigin(ScriptEditor.focus().toPoint());

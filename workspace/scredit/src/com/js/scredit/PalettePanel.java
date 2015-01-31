@@ -418,7 +418,7 @@ public class PalettePanel extends JPanel {
 
   @Override
   public void paintComponent(Graphics g1) {
-    unimp("paintComponent");
+    // unimp("paintComponent");
     // super.paintComponent(g1);
     // Graphics2D g = (Graphics2D) g1;
     //

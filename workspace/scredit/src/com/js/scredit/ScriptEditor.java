@@ -911,7 +911,7 @@ public class ScriptEditor {
       }
     });
 
-    unimp("Palette menu");
+    // unimp("Palette menu");
     // m.addMenu("Palette", projectMustBeOpenHandler);
     // m.addItem("Color Objects", KeyEvent.VK_BACK_QUOTE, 0, new ItemHandler() {
     // private Reversible r;
@@ -1618,11 +1618,11 @@ public class ScriptEditor {
         sUserEventManager.setEnabled(true);
         sRecentScriptsMenuItem.setRecentFiles(sProject.recentScripts());
         sRecentScriptSetsMenuItem.setRecentFiles(sProject.recentScriptSets());
-        unimp("update recent atlas list");
+        // unimp("update recent atlas list");
         // sRecentAtlases.setAlias(mProject.recentAtlases());
         sRecentProjects.setCurrentFile(sProject.file());
 
-        unimp("have combo box adjust for recent atlases");
+        // unimp("have combo box adjust for recent atlases");
         /*
          * mProject.recentAtlases().addListener(new RecentFiles.Listener() {
          * 

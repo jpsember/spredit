@@ -10,7 +10,6 @@ import javax.swing.SwingUtilities;
 import com.js.editor.UserEvent;
 import com.js.editor.UserEventSource;
 import com.js.geometry.*;
-import static com.js.basic.Tools.*;
 
 /**
  * Listens to mouse events within a AWT view, and generates corresponding
@@ -67,22 +66,18 @@ public class MouseEventGenerator {
 
     @Override
     public void mouseMoved(MouseEvent ev) {
-      unimp("mouseMoved");
     }
 
     @Override
     public void mouseClicked(MouseEvent arg0) {
-      unimp("mouseClicked");
     }
 
     @Override
     public void mouseEntered(MouseEvent arg0) {
-      unimp("mouseEntered");
     }
 
     @Override
     public void mouseExited(MouseEvent arg0) {
-      unimp("mouseExited");
     }
   }
 
