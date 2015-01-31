@@ -7,28 +7,26 @@ import static com.js.basic.Tools.*;
 
 public class MouseOperMoveItems extends UserOperation {
 
+  private static final boolean DB = true;
+
   public static MouseOperMoveItems build(UserEvent initialDownEvent) {
     return new MouseOperMoveItems(initialDownEvent);
   }
 
   @Override
   public void processUserEvent(UserEvent event) {
+    if (DB)
+      event.printProcessingMessage("MouseOperMoveItems");
 
     switch (event.getCode()) {
-
-    case UserEvent.CODE_DOWN:
-      mCommand = new CommandForGeneralChanges("move", null);
-      break;
 
     case UserEvent.CODE_DRAG:
       updateMove(event);
       break;
 
     case UserEvent.CODE_UP:
-      CommandForGeneralChanges command = new CommandForGeneralChanges("move",
-          "Move");
-      command.finish();
-      ScriptEditor.editor().recordCommand(command);
+      mCommand.finish();
+      ScriptEditor.editor().recordCommand(mCommand);
       event.clearOperation();
       break;
 
@@ -74,6 +72,9 @@ public class MouseOperMoveItems extends UserOperation {
   private MouseOperMoveItems(UserEvent initialDownEvent) {
     mInitialDownEvent = initialDownEvent;
     mInitialEditorState = new ScriptEditorState();
+    mCommand = new CommandForGeneralChanges("move", "Move");
+    if (DB)
+      pr("built MouseOperMoveItems; command " + mCommand);
   }
 
   private UserEvent mInitialDownEvent;

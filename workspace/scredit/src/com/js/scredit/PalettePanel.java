@@ -185,7 +185,7 @@ public class PalettePanel extends JPanel {
         Command r = new ColorRev(c);
 
         if (r.valid()) {
-          ScriptEditor.editor().registerPush(r);
+          ScriptEditor.editor().recordCommand(r);
           ScriptEditor.perform(r);
         }
       }

@@ -50,7 +50,7 @@ public class ScaleOper extends OldUserOperation {
 
       if (!reg) {
         reg = true;
-        ScriptEditor.editor().registerPush(oper);
+        ScriptEditor.editor().recordCommand(oper);
       }
 
     } while (false);

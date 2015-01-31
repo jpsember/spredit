@@ -165,17 +165,15 @@ public class DefaultMouseOper extends UserOperation {
       if (!mPickSetSelected.isEmpty()) {
         oper = MouseOperMoveItems.build(mInitialDownEvent);
         event.setOperation(oper);
-        oper.processUserEvent(mInitialDownEvent);
-        oper.processUserEvent(event);
       } else if (!mPickSet.isEmpty()) {
         unimp("consider doing selection changes as commands");
         ScriptEditor.items().setSelected(new SlotList(mPickSet.last()));
         oper = MouseOperMoveItems.build(mInitialDownEvent);
         event.setOperation(oper);
-        oper.processUserEvent(mInitialDownEvent);
       } else {
         ScriptEditor.items().unselectAll();
-        event.setOperation(RectangleSelectOper.build(mInitialDownEvent));
+        oper = RectangleSelectOper.build(mInitialDownEvent);
+        event.setOperation(oper);
       }
     } else {
       event.setOperation(RectangleSelectOper.build(mInitialDownEvent));

@@ -95,9 +95,10 @@ public class CommandForGeneralChanges extends Command.Adapter {
 
   @Override
   public String toString() {
-    if (mCommandDescription != null)
-      return mCommandDescription;
-    return "Last Command";
+    String description = getDescription();
+    if (description == null)
+      description = "Last Command";
+    return description;
   }
 
   private void setOriginalState(ScriptEditorState s) {
@@ -107,7 +108,6 @@ public class CommandForGeneralChanges extends Command.Adapter {
   }
 
   private ScriptEditor mEditor;
-  private String mCommandDescription;
   private ScriptEditorState mOriginalState;
   private ScriptEditorState mNewState;
   private String mMergeKey;

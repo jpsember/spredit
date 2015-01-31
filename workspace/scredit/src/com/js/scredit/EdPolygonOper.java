@@ -237,7 +237,7 @@ public class EdPolygonOper extends OldUserOperation {
 
     }
 
-    ScriptEditor.editor().registerPush(rev);
+    ScriptEditor.editor().recordCommand(rev);
     ScriptEditor.perform(rev);
 
   }
@@ -308,7 +308,7 @@ public class EdPolygonOper extends OldUserOperation {
 
         Command del = new DeleteItemReversible(slot);
         ScriptEditor.editor().registerPop();
-        ScriptEditor.editor().registerPush(del);
+        ScriptEditor.editor().recordCommand(del);
         ScriptEditor.perform(del);
       }
     } else {

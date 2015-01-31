@@ -14,9 +14,9 @@ public class RotateOper extends UserOperation {
   private SlotList mSelectedItems;
   private UserEvent mInitialEvent;
   // rotation factor at mouse down
-  private float mouseDownRotation;
+  /* private */float mouseDownRotation;
   // polar angle at mousedown
-  private float mouseDownAngle;
+  /* private */float mouseDownAngle;
   private Circle circ;
   private float rotation;
   private float displayRotationOffset;

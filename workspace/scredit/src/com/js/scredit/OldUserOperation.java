@@ -5,7 +5,7 @@ import com.js.editor.UserOperation;
 import com.js.geometry.IPoint;
 import com.js.geometry.Point;
 
-@Deprecated
+// @Deprecated  // re-enable this later; disabled to avoid warning pollution
 public abstract class OldUserOperation extends UserOperation {
 
   /**

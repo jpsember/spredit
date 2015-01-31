@@ -311,7 +311,7 @@ public class ScriptEditor {
         }
       };
       if (r.nSelected() > 0) {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
 
         repaint();
@@ -494,6 +494,8 @@ public class ScriptEditor {
     sUndoMenuItem = m.addItem("Undo", KeyEvent.VK_Z, CTRL, new UserOperation() {
       @Override
       public boolean shouldBeEnabled() {
+        pr("UndoOperation, should be enabled, undo cursor="
+            + editor().mUndoCursor);
         return editor().mUndoCursor > 0;
       }
 
@@ -527,7 +529,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
 
@@ -543,7 +545,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
 
@@ -559,7 +561,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
 
@@ -575,7 +577,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
 
@@ -628,7 +630,7 @@ public class ScriptEditor {
 
           @Override
           public void start() {
-            editor().registerPush(r);
+            editor().recordCommand(r);
             perform(r);
           }
         });
@@ -645,7 +647,7 @@ public class ScriptEditor {
 
           @Override
           public void start() {
-            editor().registerPush(r);
+            editor().recordCommand(r);
             perform(r);
           }
         });
@@ -662,7 +664,7 @@ public class ScriptEditor {
 
           @Override
           public void start() {
-            editor().registerPush(r);
+            editor().recordCommand(r);
             perform(r);
           }
         });
@@ -679,7 +681,7 @@ public class ScriptEditor {
 
           @Override
           public void start() {
-            editor().registerPush(r);
+            editor().recordCommand(r);
             perform(r);
           }
         });
@@ -696,7 +698,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
     });
@@ -710,7 +712,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
     });
@@ -732,7 +734,7 @@ public class ScriptEditor {
 
           @Override
           public void start() {
-            editor().registerPush(r);
+            editor().recordCommand(r);
             perform(r);
           }
         });
@@ -747,7 +749,7 @@ public class ScriptEditor {
 
           @Override
           public void start() {
-            editor().registerPush(r);
+            editor().recordCommand(r);
             perform(r);
           }
         });
@@ -775,7 +777,7 @@ public class ScriptEditor {
     //
     // @Override
     // public void start() {
-    // editor().registerPush(r);
+    // editor().recordCommand(r);
     // perform(r);
     // repaint();
     // }
@@ -803,7 +805,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
         repaint();
       }
@@ -858,7 +860,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        editor().registerPush(r);
+        editor().recordCommand(r);
         perform(r);
       }
     });
@@ -924,7 +926,7 @@ public class ScriptEditor {
     // }
     //
     // public void go() {
-    // editor().registerPush(r);
+    // editor().recordCommand(r);
     // perform(r);
     // repaint();
     // }
@@ -1148,7 +1150,7 @@ public class ScriptEditor {
   //
   // @Override
   // public void go() {
-  // editor().registerPush(r);
+  // editor().recordCommand(r);
   // perform(r);
   // repaint();
   // }
@@ -1408,7 +1410,7 @@ public class ScriptEditor {
     };
 
     if (r.nSelected() > 0) {
-      editor().registerPush(r);
+      editor().recordCommand(r);
       perform(r);
       repaint();
     } else {
@@ -1823,17 +1825,15 @@ public class ScriptEditor {
 
   // ------------------------- Undo Stuff ---------------------------
 
-  private static final boolean DBUNDO = false;
-
-  @Deprecated
-  void registerPush(Command command) {
-    recordCommand(command);
-  }
+  private static final boolean DBUNDO = true;
 
   /**
    * Add a command that has already been performed to the undo stack
    */
   void recordCommand(Command command) {
+    final boolean db = DBUNDO;
+    if (db)
+      pr("recordCommand " + command);
 
     final int MAX_COMMAND_HISTORY_SIZE = 50;
 
@@ -1853,6 +1853,8 @@ public class ScriptEditor {
       pop(mCommandHistory);
       mCommandHistoryCursor--;
       command = merged;
+      if (db)
+        pr(" merged with previous, now " + command);
     }
 
     mCommandHistory.add(command);
@@ -1861,11 +1863,15 @@ public class ScriptEditor {
     // If this command is not reversible, throw out all commands, including
     // this one
     if (command.getReverse() == null) {
+      if (db)
+        pr(" command is not reversible, clearing history");
       clearCommandHistory();
     }
 
     if (mCommandHistoryCursor > MAX_COMMAND_HISTORY_SIZE) {
       int del = mCommandHistoryCursor - MAX_COMMAND_HISTORY_SIZE;
+      if (db)
+        pr(" trimming history by deleting " + del + " from head of queue");
       mCommandHistoryCursor -= del;
       mCommandHistory.subList(0, del).clear();
     }
