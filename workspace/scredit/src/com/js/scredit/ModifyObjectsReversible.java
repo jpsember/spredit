@@ -8,7 +8,7 @@ import com.js.editor.Command;
  * General purpose reversible function that saves the original items in an
  * internal buffer for restoring by the reverse method
  * 
- * deprecated try to put this in the editor project
+ * TODO: deprecated
  */
 public class ModifyObjectsReversible extends Command.Adapter {
   private static final boolean db = false;

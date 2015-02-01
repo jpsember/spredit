@@ -349,6 +349,28 @@ public class RectangleObject extends EdObject {
     return new Rect(mBottomLeftCorner, mTopRightCorner);
   }
 
+  @Override
+  public void applyTransform(Matrix m) {
+
+    // transform a pair of opposite corners, and determine corresponding
+    // transform to apply so rectangle remains axis-aligned
+
+    Point t0 = m.apply(mBottomLeftCorner);
+    Point t2 = m.apply(mTopRightCorner);
+    Point tMid = MyMath.midPoint(t0, t2);
+
+    float xScale = m.horizontalScaleFactor();
+    float yScale = m.verticalScaleFactor();
+
+    float width = width();
+    float height = height();
+
+    mBottomLeftCorner = new Point(tMid.x - width * .5f * xScale, tMid.y
+        - height * .5f * yScale);
+    mTopRightCorner = new Point(mBottomLeftCorner.x + width * xScale,
+        mBottomLeftCorner.y + height * yScale);
+  }
+
   public boolean isWellDefined() {
     return mTopRightCorner.x > mBottomLeftCorner.x
         && mTopRightCorner.y > mBottomLeftCorner.y;

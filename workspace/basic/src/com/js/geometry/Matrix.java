@@ -90,9 +90,13 @@ public class Matrix {
   }
 
   public static Matrix getScale(float scaleFactor) {
+    return getScale(scaleFactor, scaleFactor);
+  }
+
+  public static Matrix getScale(float xScale, float yScale) {
     Matrix m = new Matrix();
-    m.a = scaleFactor;
-    m.d = scaleFactor;
+    m.a = xScale;
+    m.d = yScale;
     return m;
   }
 
@@ -178,4 +182,11 @@ public class Matrix {
     return m;
   }
 
+  public float horizontalScaleFactor() {
+    return MyMath.sqrtf(a * a + c * c);
+  }
+
+  public float verticalScaleFactor() {
+    return MyMath.sqrtf(b * b + d * d);
+  }
 }

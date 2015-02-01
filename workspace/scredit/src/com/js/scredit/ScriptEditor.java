@@ -223,6 +223,10 @@ public class ScriptEditor {
     return !inProj;
   }
 
+  public static float pickRadius() {
+    return 10 / sEditorPanel.getZoom();
+  }
+
   /**
    * Template for operation that modifies selected items only. Performs undo by
    * restoring original items.
@@ -791,21 +795,24 @@ public class ScriptEditor {
       @Override
       public void start() {
         sUserEventManager.setOperation(oper);
+        repaint();
       }
     });
     m.addItem("Reset Scale", KeyEvent.VK_E, CTRL | SHIFT, new UserOperation() {
-      private Command r;
+      // private Command r;
 
       public boolean shouldBeEnabled() {
-        r = ScaleOper.getResetOper();
-        return r.valid();
+        unimp("reset scale");
+        return false;
+        // r = ScaleOper.getResetOper();
+        // return r.valid();
       }
 
       @Override
       public void start() {
-        editor().recordCommand(r);
-        perform(r);
-        repaint();
+        // editor().recordCommand(r);
+        // perform(r);
+        // repaint();
       }
     });
 

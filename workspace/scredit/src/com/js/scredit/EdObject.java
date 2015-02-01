@@ -5,6 +5,7 @@ import static com.js.basic.Tools.*;
 import java.awt.Color;
 
 import com.js.basic.Freezable;
+import com.js.geometry.Matrix;
 import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 import com.js.geometry.Rect;
@@ -246,6 +247,13 @@ public abstract class EdObject extends Freezable.Mutable {
    * @return
    */
   public abstract Rect boundingRect();
+
+  /**
+   * Apply a transformation to this object
+   */
+  public void applyTransform(Matrix m) {
+    throw new UnsupportedOperationException();
+  }
 
   private int mFlags;
 }
