@@ -313,24 +313,6 @@ public class RectangleObject extends EdObject {
   }
 
   @Override
-  public void setRotation(float angle) {
-  }
-
-  @Override
-  public float rotation() {
-    return 0;
-  }
-
-  @Override
-  public void setScale(float scale) {
-  }
-
-  @Override
-  public float scale() {
-    return 1;
-  }
-
-  @Override
   public Rect boundingRect() {
     return new Rect(mBottomLeftCorner, mTopRightCorner);
   }

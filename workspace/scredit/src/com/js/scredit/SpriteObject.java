@@ -367,28 +367,6 @@ public class SpriteObject extends EdObject {
   }
 
   @Override
-  public void setRotation(float angle) {
-    mutate();
-    tfm.setRotation(angle);
-  }
-
-  @Override
-  public float rotation() {
-    return tfm.rotation();
-  }
-
-  @Override
-  public void setScale(float scale) {
-    mutate();
-    tfm.setScale(scale);
-  }
-
-  @Override
-  public float scale() {
-    return tfm.scale();
-  }
-
-  @Override
   public Atlas getAtlas() {
     return atlas;
   }

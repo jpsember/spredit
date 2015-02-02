@@ -294,48 +294,6 @@ public class GroupObject extends EdObject {
     }
   }
 
-  private float rotation;
-
-  @Override
-  public float rotation() {
-    return rotation;
-  }
-
-  @Override
-  public float scale() {
-    if (scale == 0)
-      scale = 1;
-    return scale;
-  }
-
-  @Override
-  public void setRotation(float angle) {
-    for (int i = 0; i < size(); i++) {
-      obj(i).setRotation(angle);
-    }
-    bounds = null;
-  }
-
-  @Override
-  public void rotAndScale(EdObject origObject, float scaleFactor, Point origin,
-      float rotAngle) {
-    GroupObject origGroup = (GroupObject) origObject;
-
-    for (int i = 0; i < size(); i++) {
-      obj(i).rotAndScale(origGroup.obj(i), scaleFactor, origin, rotAngle);
-    }
-    bounds = null;
-  }
-
-  @Override
-  public void setScale(float s) {
-    for (int i = 0; i < size(); i++)
-      obj(i).setScale(s);
-    bounds = null;
-
-  }
-
-  private float scale;
   private Rect bounds;
   private int expectedSize;
 

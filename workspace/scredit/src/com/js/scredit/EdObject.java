@@ -6,7 +6,6 @@ import java.awt.Color;
 
 import com.js.basic.Freezable;
 import com.js.geometry.Matrix;
-import com.js.geometry.MyMath;
 import com.js.geometry.Point;
 import com.js.geometry.Rect;
 import com.js.myopengl.GLPanel;
@@ -45,47 +44,6 @@ public abstract class EdObject extends Freezable.Mutable {
 
   @Deprecated
   void setSelected(boolean f) {
-  }
-
-  /**
-   * Rotate and/or scale an object
-   * 
-   * @param origObject
-   *          object before rotate/scale operation began
-   * @param scaleFactor
-   *          scale factor to apply
-   * @param origin
-   *          origin of rotation
-   * @param rotAngle
-   *          rotation angle to apply
-   */
-  public void rotAndScale(EdObject origObject, float scaleFactor, Point origin,
-      float rotAngle) {
-    final boolean db = false;
-    if (db)
-      pr("rotAndScale " + this + "\n scaleFactor=" + scaleFactor + "\n origin="
-          + origin + "\n rotAngle=" + da(rotAngle));
-
-    Point oldLoc = origObject.location();
-    float oldRot = origObject.rotation();
-    float oldScale = origObject.scale();
-
-    if (db)
-      pr(" oldLoc=" + oldLoc + " oldRot=" + da(oldRot));
-
-    float rad = MyMath.distanceBetween(origin, oldLoc);
-    float posAngle = MyMath.polarAngleOfSegment(origin, oldLoc);
-
-    Point newLoc = MyMath.pointOnCircle(origin, posAngle + rotAngle, rad
-        * scaleFactor);
-    setLocation(newLoc);
-
-    float newRot = MyMath.normalizeAngle(oldRot + rotAngle);
-    if (db)
-      pr(" setLocation to new value " + newLoc + ", rotation to " + da(newRot));
-    setRotation(newRot);
-    setScale(oldScale * scaleFactor);
-
   }
 
   /**
@@ -132,6 +90,7 @@ public abstract class EdObject extends Freezable.Mutable {
     return this;
   }
 
+  @Deprecated
   public abstract void setLocation(Point pt);
 
   public EdObject flip(boolean horz, Point newLocation) {
@@ -139,14 +98,6 @@ public abstract class EdObject extends Freezable.Mutable {
     newObj.setLocation(newLocation);
     return newObj;
   }
-
-  public abstract void setRotation(float angle);
-
-  public abstract float rotation();
-
-  public abstract void setScale(float scale);
-
-  public abstract float scale();
 
   public abstract Point location();
 
