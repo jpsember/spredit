@@ -32,6 +32,9 @@ public class MouseOperMoveItems extends UserOperation {
     Point translate = Point.difference(event.getWorldLocation(),
         mInitialDownEvent.getWorldLocation());
 
+    // Construct a transformation matrix to represent the movement
+    Matrix matrix = Matrix.getTranslate(translate);
+
     String msg = null;
     EdObjectArray items = mutableCopyOf(ScriptEditor.items());
     for (int slot : items.getSelectedSlots()) {
@@ -41,7 +44,8 @@ public class MouseOperMoveItems extends UserOperation {
       Point newLoc = Point.sum(object.location(), translate);
       newLoc = Grid.snapToGrid(newLoc, true);
 
-      object.setLocation(newLoc);
+      object.applyTransform(matrix);
+
       items.set(slot, object);
       if (msg == null) {
         msg = object.getInfoMsg();
