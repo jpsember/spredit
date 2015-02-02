@@ -18,18 +18,9 @@ public class ScaleOper extends UserOperation {
 
   private static final int NUM_HANDLES = 8;
 
-  public ScaleOper() {
-  }
-
-  private void setState(int state) {
-    if (state == mState)
-      throw new IllegalArgumentException();
-    mState = state;
-  }
-
   @Override
   public boolean shouldBeEnabled() {
-    return calcBounds() != null;
+    return calculateSelectedItemsBounds() != null;
   }
 
   @Override
@@ -43,7 +34,7 @@ public class ScaleOper extends UserOperation {
       throw new IllegalStateException();
 
     mStateSnapshot = ScriptEditor.editor().getStateSnapshot();
-    Rect r = calcBounds();
+    Rect r = calculateSelectedItemsBounds();
     if (r == null)
       throw new IllegalStateException();
 
@@ -76,7 +67,9 @@ public class ScaleOper extends UserOperation {
       int minHandle = -1;
       Point minHandleLocation = null;
       for (int i = 0; i < NUM_HANDLES; i++) {
-        Point handleLoc = paddedHandleLoc(mStartDragRect, i);
+        Point handleLoc = calcHandleLocation(mStartDragRect, i);
+        handleLoc = applyPaddingToHandle(handleLoc, i, true);
+
         float dist = MyMath
             .distanceBetween(event.getWorldLocation(), handleLoc);
         if (minHandle < 0 || dist < minDist) {
@@ -95,10 +88,24 @@ public class ScaleOper extends UserOperation {
     }
       break;
 
-    case UserEvent.CODE_DRAG:
+    case UserEvent.CODE_DRAG: {
       if (mState != STATE_DRAGGING)
         break;
-      performScale(mActiveHandle, event.getWorldLocation());
+      Point touchLocation = filteredHandle(mActiveHandle,
+          event.getWorldLocation());
+      setScaledRect(calculateScaledRect(mActiveHandle, touchLocation));
+
+      // Act as if there's a 'groove' at the original (unscaled) rectangle
+      // location: If scaled rectangle is very close to original, set it
+      // exactly equal to it. We don't want the groove to be too large,
+      // because this prevents small changes and is frustrating
+      float diff = Math.max(Math.abs(mScaledRect.width - mOriginalRect.width),
+          Math.abs(mScaledRect.height - mOriginalRect.height)) / 2;
+      if (diff < ScriptEditor.pickRadius() * .05f) {
+        setScaledRect(mOriginalRect);
+      }
+      scaleObjects();
+    }
       break;
 
     case UserEvent.CODE_UP: {
@@ -129,37 +136,39 @@ public class ScaleOper extends UserOperation {
     // Calculate handles corresponding to scaled rect
     ArrayList<Point> handles = new ArrayList();
     for (int i = 0; i < NUM_HANDLES; i++)
-      handles.add(paddedHandleLoc(mScaledRect, i));
+      handles.add(calcHandleLocation(mScaledRect, i));
     for (int i = 0; i < sLinesBetweenHandles.length; i += 2)
       panel.drawLine(handles.get(sLinesBetweenHandles[i]),
           handles.get(sLinesBetweenHandles[i + 1]));
     float p = ScriptEditor.pickRadius() * .3f;
     for (int i = 0; i < NUM_HANDLES; i++) {
-      Point center = applyHandleExternalPadding(handles.get(i), i, true);
+      Point center = applyPaddingToHandle(handles.get(i), i, true);
       panel.drawFrame(new Rect(center.x - p, center.y - p, 2 * p, 2 * p));
     }
   }
+
+  private static final int[] sLinesBetweenHandles = { 0, 2, 2, 4, 4, 6, 6, 0, };
 
   @Override
   public boolean allowEditableObject() {
     return false;
   }
 
-  private static final int[] sLinesBetweenHandles = { 0, 2, 2, 4, 4, 6, 6, 0, };
-
-  private Point paddedHandleLoc(Rect boundingRect, int handleIndex) {
-    Point pt = handleLoc(boundingRect, handleIndex);
-    return applyHandleExternalPadding(pt, handleIndex, true);
+  private void setState(int state) {
+    if (state == mState)
+      throw new IllegalArgumentException();
+    mState = state;
   }
 
   /**
-   * Calculate handle location
+   * Calculate handle location. A 'handle' is represented by an icon that the
+   * user can grab to perform a scale operation.
    * 
-   * A 'handle' is represented by an icon that the user can grab to perform a
-   * scale operation
+   * Returns location of handle on the actual bounding rectangle (i.e. without
+   * any padding)
    */
-  private Point handleLoc(Rect boundingRect, int ind) {
-    switch (ind) {
+  private Point calcHandleLocation(Rect boundingRect, int handleNumber) {
+    switch (handleNumber) {
     default:
       throw new IllegalArgumentException();
     case 0:
@@ -182,10 +191,10 @@ public class ScaleOper extends UserOperation {
   }
 
   /**
-   * Adjust the location of a handle to move it between its actual location (on
-   * the bounding rect boundary) and its displayed location (some small distance
-   * outside the rect). This adjustment allows the handles to appear
-   * well-separated even if bounding rect is small (or degenerate).
+   * Modify a handle location to convert between its position on the bounding
+   * rect and its 'padded' position which is some small distance outside the
+   * bounding rect. This adjustment allows the handles to appear well-separated
+   * even if bounding rect is small (or degenerate).
    * 
    * @param location
    *          location of handle (actual vs displayed)
@@ -193,11 +202,11 @@ public class ScaleOper extends UserOperation {
    * @param addFlag
    *          true to adjust actual->displayed; false for displayed->actual
    */
-  private Point applyHandleExternalPadding(Point location, int handleIndex,
+  private Point applyPaddingToHandle(Point location, int handleIndex,
       boolean addFlag) {
     Point adjustedLocation = new Point(location);
     float sign = addFlag ? 1 : -1;
-    float p = ScriptEditor.pickRadius() * .5f * sign;
+    float p = ScriptEditor.pickRadius() * .8f * sign;
     if (handleIndex <= 2)
       adjustedLocation.y -= p;
     else if (handleIndex >= 4 && handleIndex <= 6)
@@ -220,7 +229,7 @@ public class ScaleOper extends UserOperation {
    */
   private Point filteredHandle(int handle, Point touchLocation) {
     touchLocation = MyMath.add(touchLocation, mInitialHandleOffset);
-    touchLocation = applyHandleExternalPadding(touchLocation, handle, false);
+    touchLocation = applyPaddingToHandle(touchLocation, handle, false);
 
     float x0 = touchLocation.x;
     float x1 = x0;
@@ -246,7 +255,7 @@ public class ScaleOper extends UserOperation {
     // the handle and the midpoint
     Point origin = mStartDragRect.midPoint();
     Point filtered = new Point();
-    Point handleBase = handleLoc(mStartDragRect, handle);
+    Point handleBase = calcHandleLocation(mStartDragRect, handle);
     MyMath.ptDistanceToLine(touchLocation, handleBase, origin, filtered);
     return filtered;
   }
@@ -264,22 +273,6 @@ public class ScaleOper extends UserOperation {
     if (handle != 3 && handle != 7)
       h = Math.abs(origin.y - handleLocation.y);
     return new Rect(origin.x - w, origin.y - h, w * 2, h * 2);
-  }
-
-  private void performScale(int handle, Point touchLocation) {
-    touchLocation = filteredHandle(handle, touchLocation);
-    setScaledRect(calculateScaledRect(handle, touchLocation));
-
-    // Act as if there's a 'groove' at the original (unscaled) rectangle
-    // location: If scaled rectangle is very close to original, set it
-    // exactly equal to it. We don't want the groove to be too large,
-    // because this prevents small changes and is frustrating
-    float diff = Math.max(Math.abs(mScaledRect.width - mOriginalRect.width),
-        Math.abs(mScaledRect.height - mOriginalRect.height)) / 2;
-    if (diff < ScriptEditor.pickRadius() * .05f) {
-      setScaledRect(mOriginalRect);
-    }
-    scaleObjects();
   }
 
   private void setScaledRect(Rect r) {
@@ -316,7 +309,7 @@ public class ScaleOper extends UserOperation {
     }
   }
 
-  private Rect calcBounds() {
+  private Rect calculateSelectedItemsBounds() {
     EdObjectArray sel = ScriptEditor.items().getSelectedObjects();
     Rect bounds = null;
     for (EdObject obj : sel) {
