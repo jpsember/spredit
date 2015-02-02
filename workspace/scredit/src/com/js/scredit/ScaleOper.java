@@ -79,6 +79,10 @@ public class ScaleOper extends UserOperation {
         }
       }
       if (minDist > ScriptEditor.pickRadius()) {
+        // User pressed outside of any handle; cancel the operation and
+        // pass the event to the default handler
+        event.clearOperation();
+        event.getManager().processUserEvent(event);
         break;
       }
       mActiveHandle = minHandle;
