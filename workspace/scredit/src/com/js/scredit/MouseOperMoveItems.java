@@ -41,9 +41,6 @@ public class MouseOperMoveItems extends UserOperation {
       EdObject orig = mCommand.getOriginalState().getObjects().get(slot);
       EdObject object = mutableCopyOf(orig);
 
-      Point newLoc = Point.sum(object.location(), translate);
-      newLoc = Grid.snapToGrid(newLoc, true);
-
       object.applyTransform(matrix);
 
       items.set(slot, object);
