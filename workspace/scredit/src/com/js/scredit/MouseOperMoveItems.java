@@ -32,6 +32,7 @@ public class MouseOperMoveItems extends UserOperation {
     Point translate = Point.difference(event.getWorldLocation(),
         mInitialDownEvent.getWorldLocation());
 
+    String msg = null;
     EdObjectArray items = mutableCopyOf(ScriptEditor.items());
     for (int slot : items.getSelectedSlots()) {
       EdObject orig = mCommand.getOriginalState().getObjects().get(slot);
@@ -42,35 +43,19 @@ public class MouseOperMoveItems extends UserOperation {
 
       object.setLocation(newLoc);
       items.set(slot, object);
-    }
-    ScriptEditor.setItems(items);
-
-    String msg = null;
-
-    SlotList slots = mInitialEditorState.getSelectedSlots();
-    for (int slot : slots) {
-      EdObject object = mInitialEditorState.getObjects().get(slot);
-
-      Point newLoc = Point.sum(object.location(), translate);
-      newLoc = Grid.snapToGrid(newLoc, true);
-
-      EdObject modObject = ScriptEditor.items().get(slot);
-      modObject.setLocation(newLoc);
-
       if (msg == null) {
         msg = object.getInfoMsg();
       }
     }
+    ScriptEditor.setItems(items);
     ScriptEditor.setInfo(msg);
   }
 
   private MouseOperMoveItems(UserEvent initialDownEvent) {
     mInitialDownEvent = initialDownEvent;
-    mInitialEditorState = new ScriptEditorState();
     mCommand = new CommandForGeneralChanges("Move").setMergeKey("move");
   }
 
   private UserEvent mInitialDownEvent;
-  private ScriptEditorState mInitialEditorState;
   private CommandForGeneralChanges mCommand;
 }
