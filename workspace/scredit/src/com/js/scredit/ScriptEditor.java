@@ -597,9 +597,7 @@ public class ScriptEditor {
 
       @Override
       public void start() {
-        EdObjectArray a = items();
-        for (EdObject obj : a)
-          obj.setSelected(true);
+        items().selectAll();
         repaint();
       }
     });

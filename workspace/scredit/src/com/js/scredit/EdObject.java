@@ -14,12 +14,8 @@ import com.js.myopengl.GLPanel;
 import tex.*;
 
 public abstract class EdObject extends Freezable.Mutable {
-  private static final int FLAG_SELECTED = (1 << 31);
-  private static final int FLAG_EDITABLE = (1 << 30);
 
   public EdObject(EdObject source) {
-    if (source != null)
-      mFlags = source.mFlags;
   }
 
   public Color getColor() {
@@ -47,89 +43,8 @@ public abstract class EdObject extends Freezable.Mutable {
     return true;
   }
 
-  /**
-   * Add or clear flags
-   * 
-   * @param flags
-   *          flags to modify
-   * @param value
-   *          true to set, false to clear
-   */
-  private void setFlags(int flags, boolean value) {
-    if (!value)
-      clearFlags(flags);
-    else
-      addFlags(flags);
-  }
-
-  /**
-   * Turn specific flags on
-   * 
-   * @param f
-   *          flags to turn on
-   */
-  public void addFlags(int f) {
-    setFlags(mFlags | f);
-  }
-
-  /**
-   * Determine if a set of flags are set
-   * 
-   * @param f
-   *          flags to test
-   * @return true if every one of these flags is set
-   */
-  public boolean hasFlags(int f) {
-    return (mFlags & f) == f;
-  }
-
-  /**
-   * Turn specific flags off
-   * 
-   * @param f
-   *          flags to turn off
-   */
-  public void clearFlags(int f) {
-    setFlags(mFlags & ~f);
-  }
-
-  /**
-   * Get current flags
-   * 
-   * @return flags
-   */
-  public int flags() {
-    return mFlags;
-  }
-
-  // /**
-  // * Determine if object is selected
-  // *
-  // * @deprecated use slot list instead
-  // */
-  // public boolean isSelected() {
-  // return hasFlags(FLAG_SELECTED);
-  // }
-
-  /**
-   * Set object's selected state
-   */
+  @Deprecated
   void setSelected(boolean f) {
-    int flags = FLAG_SELECTED;
-    if (!f)
-      flags |= FLAG_EDITABLE;
-    setFlags(flags, f);
-  }
-
-  public boolean isEditable() {
-    return hasFlags(FLAG_EDITABLE);
-  }
-
-  void setEditable(boolean f) {
-    int flags = FLAG_EDITABLE;
-    if (f)
-      flags |= FLAG_SELECTED;
-    setFlags(flags, f);
   }
 
   /**
@@ -235,17 +150,6 @@ public abstract class EdObject extends Freezable.Mutable {
 
   public abstract Point location();
 
-  /**
-   * Replace existing flags with new ones
-   */
-  public void setFlags(int f) {
-    mutate();
-    mFlags = f;
-  }
-
-  /**
-   * @return
-   */
   public abstract Rect boundingRect();
 
   /**
@@ -254,6 +158,4 @@ public abstract class EdObject extends Freezable.Mutable {
   public void applyTransform(Matrix m) {
     throw new UnsupportedOperationException();
   }
-
-  private int mFlags;
 }

@@ -185,30 +185,13 @@ public class DefaultMouseOper extends UserOperation {
    * operation for a particular location. If so, return that operation
    */
   private UserOperation findOperationForEditableObject() {
-    int editableSlot = getEditableSlot();
+    int editableSlot = ScriptEditor.items().getEditableSlot(this);
     if (editableSlot < 0)
       return null;
     EdObject obj = ScriptEditor.items().get(editableSlot);
     UserOperation operation = obj.getFactory().isEditingSelectedObject(
         editableSlot, obj, mInitialDownEvent);
     return operation;
-  }
-
-  /**
-   * Determine which slot, if any, holds the (at most one) editable object
-   * 
-   * @return slot if found, or -1
-   */
-  private int getEditableSlot() {
-    EdObjectArray items = ScriptEditor.items();
-    SlotList selected = items.getSelectedSlots();
-    if (selected.size() != 1)
-      return -1;
-    int slot = selected.get(0);
-    EdObject src = items.get(slot);
-    if (!src.isEditable())
-      return -1;
-    return slot;
   }
 
   private UserEvent mInitialDownEvent;
