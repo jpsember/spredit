@@ -14,8 +14,12 @@ public class CommandForGeneralChanges extends Command.Adapter {
    *          null, command is considered non-reversible
    */
   public CommandForGeneralChanges(String description) {
-    mEditor = ScriptEditor.editor();
-    setOriginalState(mEditor.getStateSnapshot());
+    this(description, editor().getStateSnapshot());
+  }
+
+  public CommandForGeneralChanges(String description,
+      ScriptEditorState editorState) {
+    setOriginalState(editorState);
     setDescription(description);
   }
 
@@ -31,10 +35,11 @@ public class CommandForGeneralChanges extends Command.Adapter {
   public void finish() {
     if (finished())
       throw new IllegalStateException();
-    mEditor.disposeOfStateSnapshot();
-    mNewState = mEditor.getStateSnapshot();
+    ScriptEditor editor = editor();
+    editor.disposeOfStateSnapshot();
+    mNewState = editor.getStateSnapshot();
     // Execute the command, and add to the history
-    mEditor.recordCommand(this);
+    editor.recordCommand(this);
   }
 
   public ScriptEditorState getOriginalState() {
@@ -48,8 +53,6 @@ public class CommandForGeneralChanges extends Command.Adapter {
   private CommandForGeneralChanges(ScriptEditor editor,
       ScriptEditorState originalState, ScriptEditorState newState,
       String mergeKey, String description) {
-    mEditor = editor;
-    setOriginalState(originalState);
     mNewState = newState;
     mMergeKey = mergeKey;
     setDescription(description);
@@ -62,15 +65,19 @@ public class CommandForGeneralChanges extends Command.Adapter {
   @Override
   public Command getReverse() {
     if (mReverse == null && reversible()) {
-      mReverse = new CommandForGeneralChanges(mEditor, mNewState,
+      mReverse = new CommandForGeneralChanges(editor(), mNewState,
           mOriginalState, null, null);
     }
     return mReverse;
   }
 
+  private static ScriptEditor editor() {
+    return ScriptEditor.editor();
+  }
+
   @Override
   public void perform() {
-    mEditor.setState(mNewState);
+    editor().setState(mNewState);
   }
 
   @Override
@@ -98,7 +105,7 @@ public class CommandForGeneralChanges extends Command.Adapter {
         mergedDescription = follower.getDescription();
 
       // Merging is possible, so construct merged command
-      merged = new CommandForGeneralChanges(mEditor, mOriginalState,
+      merged = new CommandForGeneralChanges(editor(), mOriginalState,
           f.mNewState, mMergeKey, mergedDescription);
 
     } while (false);
@@ -119,7 +126,6 @@ public class CommandForGeneralChanges extends Command.Adapter {
     mOriginalState = s;
   }
 
-  private ScriptEditor mEditor;
   private ScriptEditorState mOriginalState;
   private ScriptEditorState mNewState;
   private String mMergeKey;

@@ -235,8 +235,7 @@ public class RectangleObject extends EdObject {
     }
 
     /**
-     * Write Rectangle to ScriptsFile. Converts it to a polygon, and writes it
-     * as that.
+     * Write Rectangle to ScriptsFile
      */
     public void write(ScriptsFile sf, EdObject obj) throws IOException {
 
@@ -246,20 +245,7 @@ public class RectangleObject extends EdObject {
       for (int i = 0; i < 4; i++)
         a.add(so.getCorner(i));
 
-      PolygonObject p = new PolygonObject(obj, so.getColor(), a);
-
-      p.getFactory().write(sf, p);
-      // DataOutput dw = sf.outputStream();
-      //
-      // dw.writeByte(getCode());
-      // dw.writeShort(so.color);
-      //
-      // for (int i = 0; i < 2; i++) {
-      // Point pt = so.getCorner(i * 2);
-      // dw.writeFloat(pt.x);
-      // dw.writeFloat(pt.y);
-      // }
-
+      throw new UnsupportedOperationException();
     }
 
     @Override

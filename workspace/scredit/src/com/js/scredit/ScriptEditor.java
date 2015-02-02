@@ -71,7 +71,8 @@ public class ScriptEditor {
     // copy items from script to editor state
     // Issue a non-undoable command to do this; it will clear the command
     // history as a consequence
-    CommandForGeneralChanges command = new CommandForGeneralChanges(null);
+    CommandForGeneralChanges command = new CommandForGeneralChanges(
+        (String) null);
     mState.setObjects(getScript().items());
     command.finish();
   }
@@ -785,16 +786,13 @@ public class ScriptEditor {
     // }
     // });
     m.addItem("Scale", KeyEvent.VK_E, CTRL, new UserOperation() {
-      private ScaleOper oper;
-
       public boolean shouldBeEnabled() {
-        oper = new ScaleOper();
-        return oper.shouldBeEnabled();
+        return sScaleOperation.shouldBeEnabled();
       }
 
       @Override
       public void start() {
-        sUserEventManager.setOperation(oper);
+        sUserEventManager.setOperation(sScaleOperation);
         repaint();
       }
     });
@@ -876,16 +874,6 @@ public class ScriptEditor {
     // }
     // });
 
-    m.addSeparator();
-    m.addItem("Polygon Vertices", KeyEvent.VK_P, CTRL | SHIFT,
-        new UserOperation() {
-          @Override
-          public void start() {
-            PolygonObject.showVertices ^= true;
-            repaint();
-          }
-        });
-
     // -----------------------------------
     m.addMenu("Objects", projectMustBeOpenHandler);
     m.addItem("Add Sprite", KeyEvent.VK_S, 0, new AddSpriteOper());
@@ -897,21 +885,6 @@ public class ScriptEditor {
     });
 
     m.addSeparator();
-    m.addItem("Add Polygon", KeyEvent.VK_P, 0, new UserOperation() {
-      @Override
-      public void start() {
-        sUserEventManager.setOperation(new EdPolygonOper(items().size(), 0,
-            false));
-      }
-    });
-    m.addItem("Delete Vertex", KeyEvent.VK_DELETE, 0,
-        PolygonObject.DELETE_VERTEX);
-    m.addItem("Previous Vertex", KeyEvent.VK_COMMA, 0,
-        PolygonObject.PREV_VERTEX);
-    m.addItem("Next Vertex", KeyEvent.VK_PERIOD, 0, PolygonObject.NEXT_VERTEX);
-    m.addItem("Toggle Vertex Direction", KeyEvent.VK_SLASH, 0,
-        PolygonObject.TOGGLE_VERTEX_DIR);
-
     // ---------------------------------
     m.addItem("Add Rectangle", KeyEvent.VK_R, 0, new UserOperation() {
       public void start() {
@@ -1556,8 +1529,6 @@ public class ScriptEditor {
       IPoint focus = IPoint.opt(map, "FOCUS");
       if (focus != null)
         setFocus(focus);
-      if (map.optBoolean("POLYVERTS"))
-        PolygonObject.showVertices = true;
     }
 
     @Override
@@ -1567,7 +1538,6 @@ public class ScriptEditor {
       map.put("FADED", sInfoPanel.isFaded());
       map.put("ZOOM", sZoomFactor);
       sFocus.put(map, "FOCUS");
-      map.put("POLYVERTS", PolygonObject.showVertices);
     }
 
   };
@@ -1954,6 +1924,7 @@ public class ScriptEditor {
   private static MyFileFilter SCRIPT_FILEFILTER = new MyFileFilter(
       "Script files", "scr");
   private static UserEventManager sUserEventManager;
+  private static UserOperation sScaleOperation = new ScaleOper();
 
   // --- Instance fields
 

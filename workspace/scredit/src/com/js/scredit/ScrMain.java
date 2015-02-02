@@ -29,7 +29,6 @@ public class ScrMain implements IApplication {
       // add handlers for various object types
       {
         Script.addObjectFactory(SpriteObject.FACTORY);
-        Script.addObjectFactory(PolygonObject.FACTORY);
         Script.addObjectFactory(RectangleObject.FACTORY);
         Script.addObjectFactory(GroupObject.FACTORY);
       }
