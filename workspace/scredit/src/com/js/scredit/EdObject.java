@@ -90,8 +90,10 @@ public abstract class EdObject extends Freezable.Mutable {
     return this;
   }
 
+  @Deprecated
   public abstract void setLocation(Point pt);
 
+  @Deprecated
   public abstract Point location();
 
   public EdObject flip(boolean horz, Point newLocation) {

@@ -296,18 +296,6 @@ public class SpriteEditor {
     MyMenuBar m = new MyMenuBar(AppTools.frame(), sUserEventManager);
 
     m.addAppMenu();
-    //
-    // if (AppTools.isMac()) {
-    // MacUtils.setQuitHandler();
-    // } else {
-    // m.addMenu("ScrEdit");
-    // m.addItem("Quit", KeyEvent.VK_Q, CTRL, new ActionHandler() {
-    // public void go() {
-    // if (AppTools.app().exitProgram())
-    // System.exit(0);
-    // }
-    // });
-    // }
 
     // -----------------------------------
     m.addMenu("View", projectMustBeOpenHandler);
